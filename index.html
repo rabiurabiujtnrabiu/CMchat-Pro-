@@ -3,118 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMchat Pro - Login</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    
+    <title>Login - CMchat Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
-        :root { --wa-green: #00a884; }
-        body { font-family: sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: white; width: 90%; max-width: 380px; padding: 40px 20px; border-radius: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .logo { font-size: 50px; color: var(--wa-green); margin-bottom: 15px; }
-        .btn { width: 100%; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 25px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
-        .btn:hover { background: #f9f9f9; }
-        #loading-msg { display: none; color: var(--wa-green); margin-top: 20px; font-weight: 500; }
+        :root { --p: #1A237E; --g: #FFD600; --bg: #0a0e27; }
+        
+        body, html {
+            margin: 0; padding: 0; height: 100%; 
+            font-family: 'Segoe UI', sans-serif; background: var(--bg);
+            color: white; overflow: hidden;
+        }
+
+        /* Animated Background */
+        .bg-gradient {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, #0a0e27, #1a237e, #0a0e27);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            z-index: -1;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            display: flex; flex-direction: column; height: 100vh;
+            justify-content: space-between; padding: 40px 20px; box-sizing: border-box;
+        }
+
+        /* Welcome Section */
+        .intro-slider { text-align: center; margin-top: 20px; }
+        .intro-slider h1 { font-size: 35px; margin: 0; letter-spacing: 2px; font-weight: 800; }
+        .intro-slider h1 span { color: var(--g); }
+        .feature-text { height: 60px; margin-top: 15px; font-size: 16px; color: #cbd5e0; line-height: 1.5; }
+
+        /* Professional Login Card */
+        .login-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            padding: 35px 25px; border-radius: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+
+        .input-group { position: relative; margin-bottom: 20px; }
+        .input-group i { position: absolute; left: 15px; top: 18px; color: var(--g); font-size: 18px; }
+        .input-group input {
+            width: 100%; background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 16px 15px 16px 50px; border-radius: 18px;
+            color: white; outline: none; transition: 0.3s; box-sizing: border-box; font-size: 16px;
+        }
+        .input-group input:focus { border-color: var(--g); background: rgba(255,255,255,0.12); }
+
+        /* Login Button */
+        .login-btn {
+            width: 100%; padding: 18px; border: none; border-radius: 18px;
+            background: var(--g); color: var(--p); font-size: 18px;
+            font-weight: 800; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            box-shadow: 0 10px 20px rgba(255, 214, 0, 0.2);
+        }
+        .login-btn:active { transform: scale(0.96); }
+
+        .footer-links { text-align: center; margin-top: 25px; font-size: 14px; color: #aaa; }
+        .footer-links a { color: var(--g); text-decoration: none; font-weight: bold; }
+
+        #statusLabel { text-align: center; font-size: 14px; margin-top: 15px; min-height: 20px; font-weight: 600; }
+
+        /* Decorative Background Shapes */
+        .orb {
+            position: absolute; width: 250px; height: 250px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,214,0,0.15) 0%, rgba(255,214,0,0) 70%);
+            z-index: -1; filter: blur(40px);
+        }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <div class="logo"><i class="fab fa-whatsapp"></i></div>
-        <h2>Welcome to CMchat Pro</h2>
-        <p>Login to continue securely.</p>
-        
-        <button class="btn" id="loginBtn" onclick="handleLogin()">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
-            Continue with Google
-        </button>
+    <div class="bg-gradient"></div>
+    <div class="orb" style="top: -50px; right: -50px;"></div>
+    <div class="orb" style="bottom: -50px; left: -50px; background: radial-gradient(circle, rgba(26,35,126,0.4) 0%, rgba(0,0,0,0) 70%);"></div>
 
-        <div id="loading-msg">
-            <i class="fas fa-spinner fa-spin"></i> Processing login, please wait...
+    <div class="container animate__animated animate__fadeIn">
+        
+        <div class="intro-slider">
+            <h1 class="animate__animated animate__zoomIn">CMchat <span>Pro</span></h1>
+            <div id="featureText" class="feature-text">
+                Connecting you to the future of communication and trade.
+            </div>
+        </div>
+
+        <div class="login-card">
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="email" placeholder="Email Address">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="Password">
+            </div>
+            
+            <button class="login-btn" onclick="handleLogin()">
+                <span>SECURE LOGIN</span> <i class="fas fa-shield-alt"></i>
+            </button>
+
+            <div id="statusLabel"></div>
+
+            <div class="footer-links">
+                New to the platform? <a href="Register.html">Create Account</a>
+            </div>
+        </div>
+
+        <div style="text-align: center; font-size: 11px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 2px;">
+            Secured by Cloudflare & Firebase &copy; 2026
         </div>
     </div>
 
-    <script>
-        // 1. Firebase Configuration
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // Firebase Config dinka (Matching your dashboard)
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
             authDomain: "cmchat-pro.firebaseapp.com",
             databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
             projectId: "cmchat-pro"
         };
-        firebase.initializeApp(firebaseConfig);
 
-        const auth = firebase.auth();
-        const db = firebase.database();
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-        // 2. Tabbatar da Login Persistence (Wannan zai sa Session ya zauna a wayar kowa)
-        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-            .then(() => {
-                console.log("Persistence set to LOCAL");
-            })
-            .catch((error) => {
-                console.error("Persistence error:", error.message);
-            });
+        // Professional Feature Switcher
+        const texts = [
+            "Seamless real-time messaging experience.",
+            "Expand your business globally with CM Market.",
+            "Join CM School and master new digital skills.",
+            "Secure and fast transactions with CM Wallet."
+        ];
+        let i = 0;
+        setInterval(() => {
+            const el = document.getElementById('featureText');
+            el.style.opacity = '0';
+            setTimeout(() => {
+                i = (i + 1) % texts.length;
+                el.innerText = texts[i];
+                el.style.opacity = '1';
+                el.classList.add('animate__animated', 'animate__fadeIn');
+            }, 500);
+        }, 4000);
 
-        // 3. Duba idan dama can mutum na login
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // Idan ya riga yayi login, wuce dashi Dashboard nan take
-                window.location.href = "Dashboard.html";
+        window.handleLogin = () => {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+            const status = document.getElementById('statusLabel');
+
+            if(!e || !p) {
+                status.style.color = "#FF5252";
+                status.innerText = "Error: Email and Password are required!";
+                return;
             }
-        });
 
-        async function handleLogin() {
-            const loginBtn = document.getElementById('loginBtn');
-            const loadingMsg = document.getElementById('loading-msg');
-            
-            loginBtn.style.display = 'none';
-            loadingMsg.style.display = 'block';
-            
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' });
+            status.style.color = "#FFD600";
+            status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Securely authenticating...';
 
-            try {
-                // Amfani da Popup maimakon Redirect don kiyaye matsalar browser reload
-                const result = await auth.signInWithPopup(provider);
-                if (result.user) {
-                    saveUserAndRedirect(result.user);
-                }
-            } catch (error) {
-                console.error("Auth error:", error.message);
-                alert("Login Error: " + error.message);
-                resetUI();
-            }
-        }
-
-        function saveUserAndRedirect(user) {
-            const userRef = db.ref('users/' + user.uid);
-            userRef.update({
-                username: user.displayName,
-                email: user.email,
-                profilePic: user.photoURL,
-                uid: user.uid,
-                status: "Online",
-                lastActivity: Date.now()
-            }).then(() => {
-                // Bada dan lokaci kadan (1 second) kafin canza shafi
-                setTimeout(() => {
-                    window.location.href = "Dashboard.html";
-                }, 1000);
-            }).catch((error) => {
-                console.error("Database save error:", error);
-                window.location.href = "Dashboard.html";
-            });
-        }
-
-        function resetUI() {
-            document.getElementById('loginBtn').style.display = 'flex';
-            document.getElementById('loading-msg').style.display = 'none';
-        }
+            signInWithEmailAndPassword(auth, e, p)
+                .then(() => {
+                    status.style.color = "#00E676";
+                    status.innerText = "Verified! Redirecting to dashboard...";
+                    // Redirecting to index.html (Your dashboard file)
+                    setTimeout(() => window.location.href = "index.html", 1200);
+                })
+                .catch((error) => {
+                    status.style.color = "#FF5252";
+                    status.innerText = "Authentication Failed: Check your credentials.";
+                    console.error(error.message);
+                });
+        };
     </script>
 </body>
 </html>

@@ -3,175 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMchat School - Premier</title>
+    <title>CM Academy Pro - Learning System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #1A237E;
-            --accent: #FFD600;
-            --danger: #d32f2f;
-            --success: #388e3c;
-            --bg: #f4f7f6;
+            --primary: #1A237E; /* Deep Blue */
+            --accent: #FFD600; /* Gold */
+            --danger: #FF5252;
+            --success: #00E676;
+            --info: #00B0FF;
+            --bg: #F8F9FA;
+            --card-bg: #ffffff;
         }
 
         body {
             margin: 0;
             background: var(--bg);
-            font-family: sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             flex-direction: column;
             height: 100vh;
+            color: #333;
         }
 
-        /* Header Style */
-        .school-header {
+        /* 1. Header Section */
+        header {
             background: var(--primary);
-            padding: 15px 20px;
+            padding: 18px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
-        .live-tag {
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header-left i { font-size: 18px; cursor: pointer; }
+        .header-left b { font-size: 20px; letter-spacing: 0.5px; }
+
+        .live-badge {
             background: var(--danger);
-            padding: 4px 10px;
-            border-radius: 5px;
-            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
             font-weight: bold;
-            animation: blink 1.5s infinite;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: pulse-red 2s infinite;
         }
 
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 82, 82, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 82, 82, 0); }
         }
 
-        /* Video Area */
-        .video-container {
-            flex: 1;
+        /* 2. Video Player Section */
+        .main-content { flex: 1; overflow-y: auto; padding-bottom: 20px; }
+
+        .video-box {
+            margin: 15px;
+            height: 230px;
             background: #000;
-            margin: 10px;
-            border-radius: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            border-radius: 24px;
             position: relative;
-            overflow: hidden;
-            border: 2px solid var(--primary);
-        }
-
-        .video-container::after {
-            content: "Waiting for Video...";
-            color: #555;
-        }
-
-        /* Grid Numbers */
-        .grid-panel {
-            background: white;
-            padding: 10px;
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            gap: 5px;
-            border-top: 1px solid #ddd;
-        }
-
-        .num-box {
-            aspect-ratio: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 10px;
-            font-weight: bold;
-            border-radius: 4px;
-            color: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border: 4px solid var(--card-bg);
+            overflow: hidden;
         }
 
-        .bg-green { background: var(--success); }
-        .bg-red { background: var(--danger); }
-
-        /* Control Buttons */
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            padding: 10px;
-            background: #eee;
+        .video-box::before {
+            content: "\f03d";
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            font-size: 40px;
+            color: #333;
         }
 
-        .btn-action {
-            padding: 10px 0;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
+        .malami-tag {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            padding: 6px 14px;
+            border-radius: 12px;
             font-size: 12px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        /* Circular Tools */
-        .tool-bar {
+        /* 3. Students Attendance Grid */
+        .section-header {
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .attendance-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            padding: 0 15px 20px;
+        }
+
+        .student-card {
+            background: var(--card-bg);
+            padding: 12px 5px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.04);
+            transition: 0.3s;
+        }
+
+        .student-card .status-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .bg-in { background: linear-gradient(135deg, var(--success), #00C853); }
+        .bg-out { background: linear-gradient(135deg, var(--danger), #D32F2F); }
+
+        .student-card span { font-size: 10px; color: #888; font-weight: 600; }
+
+        /* 4. Action Buttons */
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 0 15px 20px;
+        }
+
+        .btn-pro {
+            padding: 15px;
+            border: none;
+            border-radius: 18px;
+            color: white;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* 5. Bottom Navigation Bar */
+        .bottom-nav {
+            background: var(--card-bg);
+            padding: 15px 10px 25px;
             display: flex;
             justify-content: space-around;
-            padding: 15px;
-            background: white;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
+            border-radius: 35px 35px 0 0;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.08);
         }
 
-        .circle-tool {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        .tool-btn {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            border: none;
             color: white;
             font-size: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            border: none;
-            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
         }
 
-        .circle-tool:active { transform: scale(0.9); }
+        .tool-btn:active { transform: scale(0.9); }
     </style>
 </head>
 <body>
 
-    <div class="school-header">
-        <div><i class="fas fa-crown" style="color:var(--accent)"></i> CMchat School</div>
-        <div class="live-tag">LIVE VIDEO</div>
-    </div>
+    <header>
+        <div class="header-left">
+            <i class="fas fa-chevron-left" onclick="window.history.back()"></i>
+            <b>CM Academy Pro</b>
+        </div>
+        <div class="live-badge">
+            <i class="fas fa-broadcast-tower"></i> LIVE VIDEO
+        </div>
+    </header>
 
-    <div class="video-container">
+    <div class="main-content">
+        <div class="video-box">
+            <div class="malami-tag">
+                <i class="fas fa-user-tie"></i> Malami: Ibrahim Na kwa
+            </div>
         </div>
 
-    <div class="grid-panel">
-        <div class="num-box bg-green">1</div>
-        <div class="num-box bg-green">2</div>
-        <div class="num-box bg-red">3</div>
-        <div class="num-box bg-green">4</div>
-        <div class="num-box bg-red">5</div>
-        <div class="num-box bg-red">6</div>
-        <div class="num-box bg-red">7</div>
-        <div class="num-box bg-green">8</div>
-        <div class="num-box bg-green">9</div>
-        <div class="num-box bg-green">10</div>
+        <div class="section-header">
+            <span>DALIBAN DA KE CIKI</span>
+            <span style="color: var(--success);"><i class="fas fa-users"></i> 6 Active</span>
         </div>
 
-    <div class="controls">
-        <button class="btn-action" style="background:#333">Black</button>
-        <button class="btn-action" style="background:var(--danger)">Candle ↓</button>
-        <button class="btn-action" style="background:var(--success)">Candle ↑</button>
-        <button class="btn-action" style="background:#448AFF">Paste</button>
+        <div class="attendance-grid">
+            <div class="student-card">
+                <div class="status-dot bg-in">1</div>
+                <span>Active</span>
+            </div>
+            <div class="student-card">
+                <div class="status-dot bg-in">2</div>
+                <span>Active</span>
+            </div>
+            <div class="student-card">
+                <div class="status-dot bg-out">3</div>
+                <span>Left</span>
+            </div>
+            <div class="student-card">
+                <div class="status-dot bg-in">4</div>
+                <span>Active</span>
+            </div>
+            <div class="student-card">
+                <div class="status-dot bg-out">5</div>
+                <span>Left</span>
+            </div>
+        </div>
+
+        <div class="action-row">
+            <button class="btn-pro" style="background: #5C6BC0;">
+                <i class="fas fa-file-download"></i> Download Note
+            </button>
+            <button class="btn-pro" style="background: #26A69A;">
+                <i class="fas fa-comments"></i> Group Chat
+            </button>
+            <button class="btn-pro" style="background: var(--danger); grid-column: span 2;">
+                <i class="fas fa-hand-paper"></i> Raise Your Hand (Tambaya)
+            </button>
+        </div>
     </div>
 
-    <div class="tool-bar">
-        <button class="circle-tool" style="background:#448AFF"><i class="fas fa-video"></i></button>
-        <button class="circle-tool" style="background:var(--success)"><i class="fas fa-microphone"></i></button>
-        <button class="circle-tool" style="background:#FF9800"><i class="fas fa-question"></i></button>
-        <button class="circle-tool" style="background:#757575"><i class="fas fa-eraser"></i></button>
+    <div class="bottom-nav">
+        <button class="tool-btn" style="background: #42A5F5;"><i class="fas fa-video"></i></button>
+        <button class="tool-btn" style="background: var(--success);"><i class="fas fa-microphone"></i></button>
+        <button class="tool-btn" style="background: var(--accent); color: #333;"><i class="fas fa-chalkboard"></i></button>
+        <button class="tool-btn" style="background: #78909C;"><i class="fas fa-cog"></i></button>
     </div>
 
 </body>

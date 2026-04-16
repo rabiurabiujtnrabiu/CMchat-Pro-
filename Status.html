@@ -3,83 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp Professional Status</title>
+    <title>Status Premier - CMchat Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --p: #075E54; --s: #128C7E; --bg: #fff; }
+        :root { --p: #075E54; --s: #25D366; --bg: #ffffff; --deep-p: #1A237E; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f0f2f5; overflow-x: hidden; }
 
-        /* Ads */
-        .ad-banner { background: white; text-align: center; padding: 10px; border-bottom: 1px solid #ddd; font-size: 11px; font-weight: bold; }
+        /* 1. Header & Sidebar Styles */
+        header { background: var(--deep-p); color: white; padding: 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; }
+        
+        .sidebar { height: 100%; width: 0; position: fixed; z-index: 6000; top: 0; left: 0; background: white; overflow-x: hidden; transition: 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
+        .sidebar-header { background: var(--deep-p); color: white; padding: 25px 20px; font-size: 20px; font-weight: bold; }
+        .sidebar-item { padding: 18px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #f1f1f1; cursor: pointer; color: #333; }
+        .sidebar-item i { color: var(--deep-p); font-size: 20px; }
+        .overlay { display: none; position: fixed; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 5500; top: 0; left: 0; }
 
-        header { background: var(--p); color: white; padding: 15px; display: flex; align-items: center; gap: 15px; position: sticky; top: 0; z-index: 1000; }
-
-        /* List Styling */
-        .status-list { padding: 10px 0; background: white; min-height: 100vh; }
-        .status-item { display: flex; align-items: center; padding: 12px 15px; border-bottom: 0.5px solid #eee; cursor: pointer; transition: 0.2s; }
-        .status-item:active { background: #f5f5f5; }
-
-        .ring { width: 55px; height: 55px; border-radius: 50%; padding: 2px; border: 2px solid var(--s); display: flex; align-items: center; justify-content: center; margin-right: 15px; }
+        /* 2. Status List Styles */
+        .status-list { background: white; min-height: 100vh; padding-top: 5px; }
+        .status-item { display: flex; align-items: center; padding: 12px 15px; border-bottom: 0.5px solid #eee; cursor: pointer; }
+        .ring { width: 56px; height: 56px; border-radius: 50%; padding: 2px; border: 2.5px solid var(--s); display: flex; align-items: center; justify-content: center; margin-right: 15px; }
         .thumb { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #ddd; }
-        
-        .info { flex: 1; }
-        .info b { display: block; font-size: 16px; color: #000; }
-        .info span { font-size: 13px; color: #666; }
+        .info b { display: block; font-size: 16px; color: #000; font-weight: 600; }
+        .info span { font-size: 14px; color: #666; }
 
-        /* Fullscreen Viewer */
-        .viewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 5000; flex-direction: column; }
+        /* 3. Floating Action Buttons (Pencil & Camera) */
+        .fab-container { position: fixed; bottom: 25px; right: 20px; display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 999; }
+        .btn-pencil { width: 48px; height: 48px; background: #e9edef; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #54656f; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); border: none; cursor: pointer; }
+        .btn-camera { width: 62px; height: 62px; background: var(--s); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: none; cursor: pointer; }
+
+        /* 4. Viewer Styles */
+        .viewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 7000; flex-direction: column; }
         .progress-bar { display: flex; gap: 4px; padding: 10px; position: absolute; top: 0; width: 100%; box-sizing: border-box; }
-        .bar { height: 2px; background: rgba(255,255,255,0.3); flex: 1; overflow: hidden; }
+        .bar { height: 2.5px; background: rgba(255,255,255,0.3); flex: 1; border-radius: 5px; overflow: hidden; }
         .fill { height: 100%; background: white; width: 0%; }
-        
-        .v-header { padding: 30px 15px 15px; color: white; display: flex; align-items: center; gap: 10px; z-index: 10; }
-        .v-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
-        
-        .v-content { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+        .v-header { padding: 35px 15px 15px; color: white; display: flex; align-items: center; gap: 12px; background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent); }
+        .v-avatar { width: 40px; height: 40px; border-radius: 50%; border: 1px solid white; }
+        .v-content { flex: 1; display: flex; align-items: center; justify-content: center; }
         .v-content img, .v-content video { width: 100%; max-height: 85vh; object-fit: contain; }
-        
-        .v-caption { color: white; text-align: center; padding: 20px; font-size: 16px; background: rgba(0,0,0,0.5); width: 100%; }
-
-        /* Buttons */
-        .fab { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: var(--s); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; }
+        .v-caption { color: white; text-align: center; padding: 25px; background: rgba(0,0,0,0.5); position: absolute; bottom: 0; width: 100%; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-    <div class="ad-banner">-- Sponsored Advertisement --</div>
+    <div id="mySidebar" class="sidebar">
+        <div class="sidebar-header">Status Settings</div>
+        <div class="sidebar-item" onclick="deleteMyStatus()">
+            <i class="fas fa-trash-alt"></i><span>Delete My Status</span>
+        </div>
+        <div class="sidebar-item" onclick="closeNav()">
+            <i class="fas fa-lock"></i><span>Status Privacy</span>
+        </div>
+        <div class="sidebar-item" onclick="window.history.back()">
+            <i class="fas fa-sign-out-alt"></i><span>Back to Dashboard</span>
+        </div>
+    </div>
+    <div id="overlay" class="overlay" onclick="closeNav()"></div>
 
     <header>
-        <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
-        <b style="font-size: 19px;">Status Premier</b>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
+            <b style="font-size: 19px;">Status Premier</b>
+        </div>
+        <i class="fas fa-ellipsis-v" onclick="openNav()" style="padding: 5px; cursor: pointer;"></i>
     </header>
 
     <div class="status-list" id="listArea">
         </div>
 
-    <div class="fab" onclick="document.getElementById('fileIn').click()">
-        <i class="fas fa-camera"></i>
-        <input type="file" id="fileIn" hidden accept="image/*,video/*" onchange="uploadFile(this)">
+    <div class="fab-container">
+        <button class="btn-pencil" onclick="uploadTextStatus()">
+            <i class="fas fa-pencil-alt"></i>
+        </button>
+        <button class="btn-camera" onclick="document.getElementById('fileIn').click()">
+            <i class="fas fa-camera"></i>
+            <input type="file" id="fileIn" hidden accept="image/*,video/*" onchange="uploadFile(this)">
+        </button>
     </div>
 
     <div class="viewer" id="statusViewer">
-        <div class="progress-bar"><div class="bar"><div class="fill" id="pFill"></div></div></div>
+        <div class="progress-bar"><div class="bar"><div id="pFill" class="fill"></div></div></div>
         <div class="v-header">
             <i class="fas fa-arrow-left" onclick="closeViewer()"></i>
-            <img src="" class="v-avatar" id="vAvatar">
-            <div>
-                <b id="vName">Name</b><br>
-                <small id="vTime">Just now</small>
-            </div>
+            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="v-avatar">
+            <div><b id="vName">Name</b><br><small id="vTime">Time</small></div>
         </div>
         <div class="v-content" id="vMedia"></div>
-        <div class="v-caption" id="vCap">Caption text here...</div>
+        <div class="v-caption" id="vCap"></div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // Copy your Firebase Config here
+        // 1. Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBv...", 
             databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
@@ -87,81 +103,83 @@
         };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const myName = localStorage.getItem('username') || "Professional User";
+        const myName = localStorage.getItem('username') || "User";
 
-        function uploadFile(input) {
+        // 2. Sidebar Functions
+        window.openNav = () => { document.getElementById("mySidebar").style.width = "280px"; document.getElementById("overlay").style.display = "block"; };
+        window.closeNav = () => { document.getElementById("mySidebar").style.width = "0"; document.getElementById("overlay").style.display = "none"; };
+
+        // 3. Upload Functions
+        window.uploadFile = (input) => {
             const file = input.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
-                const type = file.type.startsWith('image') ? 'img' : 'vid';
                 const cap = prompt("Add a caption:");
-                db.ref('status_pro').push({
-                    user: myName,
-                    content: e.target.result,
-                    type: type,
-                    caption: cap || "",
-                    time: Date.now()
-                });
+                saveStatus(e.target.result, file.type.startsWith('image') ? 'img' : 'vid', cap || "");
             };
             reader.readAsDataURL(file);
+        };
+
+        window.uploadTextStatus = () => {
+            const text = prompt("Write your status:");
+            if (text) saveStatus(text, 'text', '');
+        };
+
+        function saveStatus(content, type, caption) {
+            db.ref('status_pro').push({ user: myName, content: content, type: type, caption: caption, time: Date.now() })
+            .then(() => alert("Status Updated!"));
         }
 
+        // 4. Load Statuses
         db.ref('status_pro').on('value', snap => {
             const list = document.getElementById('listArea');
             list.innerHTML = "";
-            snap.forEach(child => {
-                const d = child.val();
-                if(Date.now() - d.time < 86400000) {
-                    const html = `
-                    <div class="status-item" onclick='showStatus(${JSON.stringify(d)})'>
-                        <div class="ring">
-                            ${d.type === 'img' ? `<img src="${d.content}" class="thumb">` : `<video src="${d.content}" class="thumb"></video>`}
-                        </div>
-                        <div class="info">
-                            <b>${d.user}</b>
-                            <span>${new Date(d.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
-                        </div>
-                    </div>`;
-                    list.innerHTML = html + list.innerHTML;
-                }
+            let statuses = [];
+            snap.forEach(child => { if(Date.now() - child.val().time < 86400000) statuses.unshift(child.val()); });
+            
+            statuses.forEach(d => {
+                list.innerHTML += `
+                <div class="status-item" onclick='showStatus(${JSON.stringify(d)})'>
+                    <div class="ring">
+                        ${d.type === 'text' ? '<div class="thumb" style="background:var(--deep-p); color:white; display:flex; align-items:center; justify-content:center; font-size:9px;">TEXT</div>' : `<img src="${d.content}" class="thumb">`}
+                    </div>
+                    <div class="info">
+                        <b>${d.user}</b>
+                        <span>${new Date(d.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                    </div>
+                </div>`;
             });
         });
 
-        let timer;
-        function showStatus(data) {
-            const v = document.getElementById('statusViewer');
-            v.style.display = 'flex';
-            document.getElementById('vName').innerText = data.user;
-            document.getElementById('vTime').innerText = new Date(data.time).toLocaleTimeString();
-            document.getElementById('vCap').innerText = data.caption;
-            
-            const mediaBox = document.getElementById('vMedia');
-            if(data.type === 'img') {
-                mediaBox.innerHTML = `<img src="${data.content}">`;
-            } else {
-                mediaBox.innerHTML = `<video src="${data.content}" autoplay></video>`;
+        // 5. Delete Status Function
+        window.deleteMyStatus = async () => {
+            if(confirm("Delete your status?")) {
+                const snapshot = await db.ref('status_pro').orderByChild('user').equalTo(myName).once('value');
+                if(snapshot.exists()) { snapshot.forEach(c => c.ref.remove()); alert("Deleted!"); closeNav(); }
+                else alert("No status found.");
             }
+        };
 
-            // Progress bar animation
-            let width = 0;
-            const fill = document.getElementById('pFill');
-            clearInterval(timer);
+        // 6. Viewer Logic
+        let timer;
+        window.showStatus = (data) => {
+            document.getElementById('statusViewer').style.display = 'flex';
+            document.getElementById('vName').innerText = data.user;
+            document.getElementById('vCap').innerText = data.caption;
+            const media = document.getElementById('vMedia');
+            if(data.type === 'text') media.innerHTML = `<h2 style="color:white; padding:20px; text-align:center;">${data.content}</h2>`;
+            else if(data.type === 'img') media.innerHTML = `<img src="${data.content}">`;
+            else media.innerHTML = `<video src="${data.content}" autoplay playsinline></video>`;
+
+            let w = 0; clearInterval(timer);
             timer = setInterval(() => {
-                if(width >= 100) {
-                    closeViewer();
-                } else {
-                    width++;
-                    fill.style.width = width + '%';
-                }
-            }, 50); // 5 seconds total
-        }
+                if(w >= 100) closeViewer();
+                else { w += 0.5; document.getElementById('pFill').style.width = w + '%'; }
+            }, 25);
+        };
 
-        function closeViewer() {
-            document.getElementById('statusViewer').style.display = 'none';
-            document.getElementById('vMedia').innerHTML = "";
-            clearInterval(timer);
-        }
+        window.closeViewer = () => { document.getElementById('statusViewer').style.display = 'none'; clearInterval(timer); };
     </script>
 </body>
 </html>
