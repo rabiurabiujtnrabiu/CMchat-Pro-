@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMchat Pro - Group Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --p: #075E54; --s: #128C7E; --bg: #E5DDD5; --white: #ffffff; --my-msg: #DCF8C6; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); height: 725px; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* Header */
+        header { background: var(--p); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; z-index: 10; flex-shrink: 0; }
+        .group-details { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .group-details img { width: 40px; height: 40px; border-radius: 50%; background: #eee; }
+
+        /* Sidebar Settings */
+        .sidebar { position: fixed; right: -300px; top: 0; width: 290px; height: 100%; background: #f0f2f5; z-index: 100; transition: 0.3s; box-shadow: -2px 0 10px rgba(0,0,0,0.2); overflow-y: auto; }
+        .sidebar.active { right: 0; }
+        .side-head { background: var(--p); color: white; padding: 20px; display: flex; align-items: center; gap: 15px; }
+        
+        .side-section { background: white; margin-bottom: 10px; padding: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .side-section h4 { margin: 0 0 10px 0; color: var(--s); font-size: 14px; }
+        .side-item { display: flex; align-items: center; gap: 15px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer; color: #333; }
+        
+        /* Chat View */
+        .chat-view { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .bubble { max-width: 75%; padding: 8px 12px; border-radius: 8px; font-size: 14.5px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); position: relative; }
+        .sent { background: var(--my-msg); align-self: flex-end; }
+        .received { background: white; align-self: flex-start; }
+        .stamp { font-size: 9px; color: #888; text-align: right; margin-top: 4px; }
+
+        /* Input Bar */
+        .input-bar { background: #f0f0f0; padding: 10px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .field-container { flex: 1; background: white; border-radius: 25px; padding: 8px 15px; display: flex; align-items: center; }
+        #msgInp { border: none; outline: none; flex: 1; font-size: 15px; }
+        .action-btn { width: 45px; height: 45px; background: var(--s); border: none; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        /* Modal Contact */
+        #contactModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:200; }
+        .modal-content { background:white; width:85%; max-width:400px; margin:15% auto; border-radius:15px; padding:20px; max-height:60vh; overflow-y:auto; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="group-details" onclick="toggleSettings()">
+            <i class="fas fa-arrow-left" onclick="event.stopPropagation(); window.location.href='Dashboard.html'"></i>
+            <img src="https://via.placeholder.com/40" alt="Group Icon">
+            <div>
+                <div style="font-weight: bold;">Community Group</div>
+                <small id="mCount">0 members</small>
+            </div>
+        </div>
+        <i class="fas fa-ellipsis-v" onclick="toggleSettings()" style="cursor:pointer; padding:5px;"></i>
+    </header>
+
+    <div id="sideMenu" class="sidebar">
+        <div class="side-head">
+            <i class="fas fa-times" onclick="toggleSettings()" style="cursor:pointer;"></i>
+            <span>Group Info</span>
+        </div>
+
+        <div id="admTools" class="side-section" style="display:none; text-align: center;">
+            <h4>Admin Controls</h4>
+            <button onclick="showContactList()" style="width:100%; background:var(--s); color:white; border:none; padding:10px; border-radius:20px; cursor:pointer; margin-bottom:10px;">
+                <i class="fas fa-user-plus"></i> Add Friends from Contacts
+            </button>
+            <button onclick="wipeChat()" style="width:100%; background:#ffebee; color:#d32f2f; border:none; padding:10px; border-radius:20px; cursor:pointer;">
+                <i class="fas fa-trash"></i> Clear All Messages
+            </button>
+        </div>
+
+        <div class="side-section">
+            <h4 id="partTitle">0 Participants</h4>
+            <div id="pList"></div>
+        </div>
+    </div>
+
+    <div id="contactModal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="margin:0;">Select Contacts</h3>
+                <i class="fas fa-times" onclick="closeContactList()" style="cursor:pointer; font-size:20px;"></i>
+            </div>
+            <div id="allUsersList"></div>
+        </div>
+    </div>
+
+    <div class="chat-view" id="chatContainer"></div>
+
+    <div class="input-bar">
+        <div class="field-container">
+            <i class="far fa-smile" style="color:#888; margin-right:10px;"></i>
+            <input type="text" id="msgInp" placeholder="Type a message..." oninput="toggleIcons()">
+            <i class="fas fa-paperclip" style="color:#888;"></i>
+        </div>
+        <button id="actionBtn" class="action-btn" onclick="handleAction()">
+            <i id="actionIcon" class="fas fa-microphone"></i>
+        </button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            authDomain: "cmchat-pro.firebaseapp.com",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        
+        // Sunan mutum daga LocalStorage
+        const user = localStorage.getItem('username') || "User_" + Math.floor(Math.random()*1000);
+        const isAdmin = user === "Abubakar"; 
+
+        if(isAdmin) document.getElementById('admTools').style.display = 'block';
+
+        function toggleSettings() { document.getElementById('sideMenu').classList.toggle('active'); }
+
+        function toggleIcons() {
+            const inp = document.getElementById('msgInp').value.trim();
+            document.getElementById('actionIcon').className = inp === "" ? "fas fa-microphone" : "fas fa-paper-plane";
+        }
+
+        // Tura Sako
+        function handleAction() {
+            const inp = document.getElementById('msgInp');
+            if (inp.value.trim() !== "") {
+                db.ref('group_pro_chat').push({ 
+                    sender: user, 
+                    body: inp.value, 
+                    stamp: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) 
+                });
+                inp.value = ""; toggleIcons();
+            } else {
+                alert("Voice feature is not yet enabled");
+            }
+        }
+
+        // Dauko Sakonni
+        db.ref('group_pro_chat').on('value', (s) => {
+            const c = document.getElementById('chatContainer');
+            c.innerHTML = "";
+            s.forEach((child) => {
+                const d = child.val();
+                const isMe = d.sender === user;
+                c.innerHTML += `
+                    <div class="bubble ${isMe ? 'sent' : 'received'}">
+                        <div style="font-size:10px; font-weight:bold; color:${isMe ? 'green' : '#128C7E'};">
+                            ${isMe ? 'You' : d.sender}
+                        </div>
+                        <div style="margin-top:2px;">${d.body}</div>
+                        <div class="stamp">${d.stamp}</div>
+                    </div>`;
+            });
+            c.scrollTop = c.scrollHeight;
+        });
+
+        // Dauko Members
+        db.ref('group_list').on('value', (s) => {
+            const l = document.getElementById('pList');
+            l.innerHTML = "";
+            let count = 0;
+            s.forEach((child) => {
+                count++;
+                l.innerHTML += `<div class="side-item"><i class="fas fa-user-circle" style="color:#888;"></i> ${child.key}</div>`;
+            });
+            document.getElementById('mCount').innerText = count + " members";
+            document.getElementById('partTitle').innerText = count + " Participants";
+        });
+
+        // Add Friends From Contacts Logic
+        function showContactList() {
+            document.getElementById('contactModal').style.display = 'block';
+            const listDiv = document.getElementById('allUsersList');
+            listDiv.innerHTML = "<p style='text-align:center;'>Searching...</p>";
+
+            db.ref('users').once('value', (snapshot) => {
+                listDiv.innerHTML = "";
+                snapshot.forEach((child) => {
+                    const u = child.val().username;
+                    if (u !== user) {
+                        listDiv.innerHTML += `
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #eee;">
+                                <span><i class="fas fa-user"></i> ${u}</span>
+                                <button onclick="addToGroup('${u}')" style="background:var(--s); color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer;">Add</button>
+                            </div>`;
+                    }
+                });
+            });
+        }
+
+        function addToGroup(name) {
+            db.ref('group_list').child(name).set({ joined: true });
+            alert(name + " added!");
+        }
+
+        function closeContactList() { document.getElementById('contactModal').style.display = 'none'; }
+        function wipeChat() { if(confirm("Wipe all group messages?")) db.ref('group_pro_chat').remove(); }
+    </script>
+</body>
+</html>

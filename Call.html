@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ha">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMchat Pro - Call System</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --wa-teal: #128C7E; --danger: #d32f2f; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #0b141a; color: white; overflow: hidden; }
+        .call-container { position: relative; height: 100vh; width: 100vw; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #remoteVideo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; background: #000; }
+        #localVideo { position: absolute; top: 20px; right: 20px; width: 100px; height: 150px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); object-fit: cover; z-index: 10; background: #222; }
+        .user-overlay { position: absolute; top: 15%; text-align: center; z-index: 5; width: 100%; }
+        .user-overlay img { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--wa-teal); margin-bottom: 10px; }
+        .status-tag { font-size: 14px; color: #aaa; text-transform: uppercase; }
+        .controls { position: absolute; bottom: 50px; display: flex; gap: 20px; z-index: 20; }
+        .btn { width: 60px; height: 60px; border-radius: 50%; border: none; font-size: 22px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; }
+        .btn-mute { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); }
+        .btn-hangup { background: var(--danger); font-size: 26px; }
+        #incomingModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; }
+    </style>
+</head>
+<body>
+
+    <div class="call-container">
+        <video id="remoteVideo" autoplay playsinline></video>
+        <video id="localVideo" autoplay muted playsinline></video>
+
+        <div class="user-overlay">
+            <img src="https://via.placeholder.com/100" id="userAvatar">
+            <h2 id="targetName">User Name</h2>
+            <div class="status-tag" id="callStatus">Connecting...</div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-mute" onclick="toggleMic()"><i class="fas fa-microphone" id="micIcon"></i></button>
+            <button class="btn btn-hangup" onclick="endCall()"><i class="fas fa-phone-slash"></i></button>
+            <button class="btn btn-mute" onclick="toggleCam()"><i class="fas fa-video" id="camIcon"></i></button>
+        </div>
+    </div>
+
+    <div id="incomingModal">
+        <h1 id="callerNameDisp">Incoming...</h1>
+        <div style="display:flex; gap:40px; margin-top:30px;">
+            <button class="btn btn-hangup" onclick="rejectCall()"><i class="fas fa-times"></i></button>
+            <button class="btn" style="background: #25d366;" onclick="acceptCall()"><i class="fas fa-phone"></i></button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com", projectId: "cmchat-pro" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const myUsername = localStorage.getItem('username') || "User-" + Math.floor(Math.random() * 100);
+        const peer = new Peer(myUsername);
+        let localStream, currentCall;
+
+        peer.on('open', (id) => {
+            const params = new URLSearchParams(window.location.search);
+            const target = params.get('call');
+            if (target) startCall(target);
+        });
+
+        // Sauron Kira (WebRTC Listener)
+        peer.on('call', call => {
+            currentCall = call;
+            navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(stream => {
+                localStream = stream;
+                document.getElementById('localVideo').srcObject = stream;
+                call.answer(stream);
+                call.on('stream', remoteStream => {
+                    document.getElementById('remoteVideo').srcObject = remoteStream;
+                    document.getElementById('callStatus').innerText = "Connected";
+                });
+            });
+        });
+
+        async function startCall(target) {
+            document.getElementById('targetName').innerText = target;
+            localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+            document.getElementById('localVideo').srcObject = localStream;
+            const call = peer.call(target, localStream);
+            currentCall = call;
+            call.on('stream', remoteStream => {
+                document.getElementById('remoteVideo').srcObject = remoteStream;
+                document.getElementById('callStatus').innerText = "Connected";
+            });
+        }
+
+        function endCall() {
+            if (localStream) localStream.getTracks().forEach(t => t.stop());
+            if (currentCall) currentCall.close();
+            window.history.back();
+        }
+
+        function toggleMic() {
+            const track = localStream.getAudioTracks()[0];
+            track.enabled = !track.enabled;
+            document.getElementById('micIcon').className = track.enabled ? "fas fa-microphone" : "fas fa-microphone-slash";
+        }
+
+        function toggleCam() {
+            const track = localStream.getVideoTracks()[0];
+            track.enabled = !track.enabled;
+            document.getElementById('camIcon').className = track.enabled ? "fas fa-video" : "fas fa-video-slash";
+        }
+    </script>
+</body>
+</html>

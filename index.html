@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMchat Pro - Login</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --wa-green: #00a884; }
+        body { font-family: sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: white; width: 90%; max-width: 380px; padding: 40px 20px; border-radius: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .logo { font-size: 50px; color: var(--wa-green); margin-bottom: 15px; }
+        .btn { width: 100%; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 25px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
+        .btn:hover { background: #f9f9f9; }
+        #loading-msg { display: none; color: var(--wa-green); margin-top: 20px; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="logo"><i class="fab fa-whatsapp"></i></div>
+        <h2>Welcome to CMchat Pro</h2>
+        <p>Login to continue securely.</p>
+        
+        <button class="btn" id="loginBtn" onclick="handleLogin()">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+            Continue with Google
+        </button>
+
+        <div id="loading-msg">
+            <i class="fas fa-spinner fa-spin"></i> Processing login, please wait...
+        </div>
+    </div>
+
+    <script>
+        // 1. Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            authDomain: "cmchat-pro.firebaseapp.com",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // 2. Tabbatar da Login Persistence (Wannan zai sa Session ya zauna a wayar kowa)
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+            .then(() => {
+                console.log("Persistence set to LOCAL");
+            })
+            .catch((error) => {
+                console.error("Persistence error:", error.message);
+            });
+
+        // 3. Duba idan dama can mutum na login
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Idan ya riga yayi login, wuce dashi Dashboard nan take
+                window.location.href = "Dashboard.html";
+            }
+        });
+
+        async function handleLogin() {
+            const loginBtn = document.getElementById('loginBtn');
+            const loadingMsg = document.getElementById('loading-msg');
+            
+            loginBtn.style.display = 'none';
+            loadingMsg.style.display = 'block';
+            
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+
+            try {
+                // Amfani da Popup maimakon Redirect don kiyaye matsalar browser reload
+                const result = await auth.signInWithPopup(provider);
+                if (result.user) {
+                    saveUserAndRedirect(result.user);
+                }
+            } catch (error) {
+                console.error("Auth error:", error.message);
+                alert("Login Error: " + error.message);
+                resetUI();
+            }
+        }
+
+        function saveUserAndRedirect(user) {
+            const userRef = db.ref('users/' + user.uid);
+            userRef.update({
+                username: user.displayName,
+                email: user.email,
+                profilePic: user.photoURL,
+                uid: user.uid,
+                status: "Online",
+                lastActivity: Date.now()
+            }).then(() => {
+                // Bada dan lokaci kadan (1 second) kafin canza shafi
+                setTimeout(() => {
+                    window.location.href = "Dashboard.html";
+                }, 1000);
+            }).catch((error) => {
+                console.error("Database save error:", error);
+                window.location.href = "Dashboard.html";
+            });
+        }
+
+        function resetUI() {
+            document.getElementById('loginBtn').style.display = 'flex';
+            document.getElementById('loading-msg').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

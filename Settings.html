@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ha">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings & Earn - CMchat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --p: #1A237E; --g: #FFD600; --bg: #f4f7f6; --txt: #333; }
+        body.dark-mode { --bg: #121212; --txt: #eee; }
+        body { margin: 0 auto; max-width: autopx; background: var(--bg); color: var(--txt); font-family: sans-serif; }
+        
+        .header { background: var(--p); color: white; padding: 15px; display: flex; align-items: center; gap: 15px; }
+        .card { background: white; margin: 10px; padding: 20px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        body.dark-mode .card { background: #1e1e1e; }
+
+        .profile-img { width: 80px; height: 80px; border-radius: 50%; background: #eee; margin: 0 auto 10px; border: 3px solid var(--p); display: flex; align-items: center; justify-content: center; }
+        
+        /* Ads Section */
+        .ads-box { border: 2px dashed var(--g); background: #FFF9C4; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        body.dark-mode .ads-box { background: #332b00; border-color: gold; }
+
+        /* Full Screen Ad */
+        #adOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:9999; color:white; text-align:center; padding-top:100px; }
+        
+        .input-group { margin-top: 15px; text-align: left; }
+        .input-group label { font-size: 11px; color: #888; }
+        .input-group input, select { width: 100%; border: none; border-bottom: 1px solid #ddd; padding: 8px 0; background: transparent; color: inherit; outline: none; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <i class="fas fa-arrow-left" onclick="history.back()"></i>
+    <b>Profile & Settings</b>
+</div>
+
+<div class="card" style="text-align: center;">
+    <div class="profile-img"><i class="fas fa-user" style="font-size: 40px; color: var(--p);"></i></div>
+    <div class="input-group">
+        <label>Sunanka</label>
+        <input type="text" value="Abubakar Sadiq">
+    </div>
+    <div class="input-group">
+        <label>Jiha (State)</label>
+        <select>
+            <option>Kano</option>
+            <option>Kaduna</option>
+            <option>Lagos</option>
+        </select>
+    </div>
+</div>
+
+<div class="card">
+    <div class="ads-box" onclick="tryStartAd()">
+        <i class="fas fa-play-circle" style="font-size: 30px; color: #FBC02D;"></i>
+        <div>
+            <b style="font-size: 14px;">Watch Ad & Earn 5 Coins</b><br>
+            <small id="adLimitTxt">Limit na yau: 10/10</small>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="padding: 10px;">
+    <div style="display:flex; justify-content:space-between; padding: 10px;" onclick="toggleDarkMode()">
+        <span><i class="fas fa-moon"></i> Dark Mode</span>
+        <i class="fas fa-toggle-on" id="darkIcon"></i>
+    </div>
+</div>
+
+<div id="adOverlay">
+    <div id="adTimer" style="font-size: 30px; border: 3px solid gold; border-radius: 50%; width: 60px; height: 60px; line-height: 60px; margin: 0 auto;">10</div>
+    <h2 style="margin-top: 40px; color: gold;">TALLA (AD)</h2>
+    <p>Kada ka fita har sai lokaci ya cika don samun Coins dinka.</p>
+</div>
+
+<script>
+    let dailyLimit = localStorage.getItem('adLimit') || 10;
+    document.getElementById('adLimitTxt').innerText = "Limit na yau: " + dailyLimit + "/10";
+
+    function tryStartAd() {
+        if (dailyLimit <= 0) {
+            alert("Ka riga ka kalli dukkan tallace-tallacen yau. Dawo gobe!");
+            return;
+        }
+        startAd();
+    }
+
+    function startAd() {
+        const overlay = document.getElementById('adOverlay');
+        const timerTxt = document.getElementById('adTimer');
+        let time = 10;
+        overlay.style.display = 'block';
+
+        const interval = setInterval(() => {
+            time--;
+            timerTxt.innerText = time;
+            if (time <= 0) {
+                clearInterval(interval);
+                overlay.style.display = 'none';
+                finishAd();
+            }
+        }, 1000);
+    }
+
+    function finishAd() {
+        dailyLimit--;
+        localStorage.setItem('adLimit', dailyLimit);
+        document.getElementById('adLimitTxt').innerText = "Limit na yau: " + dailyLimit + "/10";
+        
+        let coins = parseInt(localStorage.getItem('userCoins')) || 450;
+        coins += 5;
+        localStorage.setItem('userCoins', coins);
+        alert("Taya murna! An tura maka 5 Coins.");
+    }
+
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        document.getElementById('darkIcon').className = isDark ? "fas fa-toggle-on" : "fas fa-toggle-off";
+    }
+</script>
+
+</body>
+</html>

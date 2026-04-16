@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Professional Status</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --p: #075E54; --s: #128C7E; --bg: #fff; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f0f2f5; overflow-x: hidden; }
+
+        /* Ads */
+        .ad-banner { background: white; text-align: center; padding: 10px; border-bottom: 1px solid #ddd; font-size: 11px; font-weight: bold; }
+
+        header { background: var(--p); color: white; padding: 15px; display: flex; align-items: center; gap: 15px; position: sticky; top: 0; z-index: 1000; }
+
+        /* List Styling */
+        .status-list { padding: 10px 0; background: white; min-height: 100vh; }
+        .status-item { display: flex; align-items: center; padding: 12px 15px; border-bottom: 0.5px solid #eee; cursor: pointer; transition: 0.2s; }
+        .status-item:active { background: #f5f5f5; }
+
+        .ring { width: 55px; height: 55px; border-radius: 50%; padding: 2px; border: 2px solid var(--s); display: flex; align-items: center; justify-content: center; margin-right: 15px; }
+        .thumb { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #ddd; }
+        
+        .info { flex: 1; }
+        .info b { display: block; font-size: 16px; color: #000; }
+        .info span { font-size: 13px; color: #666; }
+
+        /* Fullscreen Viewer */
+        .viewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 5000; flex-direction: column; }
+        .progress-bar { display: flex; gap: 4px; padding: 10px; position: absolute; top: 0; width: 100%; box-sizing: border-box; }
+        .bar { height: 2px; background: rgba(255,255,255,0.3); flex: 1; overflow: hidden; }
+        .fill { height: 100%; background: white; width: 0%; }
+        
+        .v-header { padding: 30px 15px 15px; color: white; display: flex; align-items: center; gap: 10px; z-index: 10; }
+        .v-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
+        
+        .v-content { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+        .v-content img, .v-content video { width: 100%; max-height: 85vh; object-fit: contain; }
+        
+        .v-caption { color: white; text-align: center; padding: 20px; font-size: 16px; background: rgba(0,0,0,0.5); width: 100%; }
+
+        /* Buttons */
+        .fab { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: var(--s); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="ad-banner">-- Sponsored Advertisement --</div>
+
+    <header>
+        <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
+        <b style="font-size: 19px;">Status Premier</b>
+    </header>
+
+    <div class="status-list" id="listArea">
+        </div>
+
+    <div class="fab" onclick="document.getElementById('fileIn').click()">
+        <i class="fas fa-camera"></i>
+        <input type="file" id="fileIn" hidden accept="image/*,video/*" onchange="uploadFile(this)">
+    </div>
+
+    <div class="viewer" id="statusViewer">
+        <div class="progress-bar"><div class="bar"><div class="fill" id="pFill"></div></div></div>
+        <div class="v-header">
+            <i class="fas fa-arrow-left" onclick="closeViewer()"></i>
+            <img src="" class="v-avatar" id="vAvatar">
+            <div>
+                <b id="vName">Name</b><br>
+                <small id="vTime">Just now</small>
+            </div>
+        </div>
+        <div class="v-content" id="vMedia"></div>
+        <div class="v-caption" id="vCap">Caption text here...</div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // Copy your Firebase Config here
+        const firebaseConfig = {
+            apiKey: "AIzaSyBv...", 
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const myName = localStorage.getItem('username') || "Professional User";
+
+        function uploadFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const type = file.type.startsWith('image') ? 'img' : 'vid';
+                const cap = prompt("Add a caption:");
+                db.ref('status_pro').push({
+                    user: myName,
+                    content: e.target.result,
+                    type: type,
+                    caption: cap || "",
+                    time: Date.now()
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        db.ref('status_pro').on('value', snap => {
+            const list = document.getElementById('listArea');
+            list.innerHTML = "";
+            snap.forEach(child => {
+                const d = child.val();
+                if(Date.now() - d.time < 86400000) {
+                    const html = `
+                    <div class="status-item" onclick='showStatus(${JSON.stringify(d)})'>
+                        <div class="ring">
+                            ${d.type === 'img' ? `<img src="${d.content}" class="thumb">` : `<video src="${d.content}" class="thumb"></video>`}
+                        </div>
+                        <div class="info">
+                            <b>${d.user}</b>
+                            <span>${new Date(d.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                        </div>
+                    </div>`;
+                    list.innerHTML = html + list.innerHTML;
+                }
+            });
+        });
+
+        let timer;
+        function showStatus(data) {
+            const v = document.getElementById('statusViewer');
+            v.style.display = 'flex';
+            document.getElementById('vName').innerText = data.user;
+            document.getElementById('vTime').innerText = new Date(data.time).toLocaleTimeString();
+            document.getElementById('vCap').innerText = data.caption;
+            
+            const mediaBox = document.getElementById('vMedia');
+            if(data.type === 'img') {
+                mediaBox.innerHTML = `<img src="${data.content}">`;
+            } else {
+                mediaBox.innerHTML = `<video src="${data.content}" autoplay></video>`;
+            }
+
+            // Progress bar animation
+            let width = 0;
+            const fill = document.getElementById('pFill');
+            clearInterval(timer);
+            timer = setInterval(() => {
+                if(width >= 100) {
+                    closeViewer();
+                } else {
+                    width++;
+                    fill.style.width = width + '%';
+                }
+            }, 50); // 5 seconds total
+        }
+
+        function closeViewer() {
+            document.getElementById('statusViewer').style.display = 'none';
+            document.getElementById('vMedia').innerHTML = "";
+            clearInterval(timer);
+        }
+    </script>
+</body>
+</html>

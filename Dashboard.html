@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMchat Pro - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --p: #1A237E; --g: #FFD600; --bg: #f4f7f6; --card: #ffffff; --txt: #333; }
+        
+        body {
+            margin: 0; background: var(--bg); font-family: 'Segoe UI', sans-serif; 
+            color: var(--txt); overflow-x: hidden;
+        }
+
+        /* Header */
+        .header { 
+            background: var(--p); color: white; padding: 15px 20px; 
+            display: flex; justify-content: center; align-items: center; 
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .header b { font-size: 20px; letter-spacing: 1px; }
+        .header b span { color: var(--g); }
+
+        /* Wallet */
+        .balance-card { 
+            background: var(--card); margin: 20px 15px; padding: 20px; 
+            border-radius: 20px; display: flex; justify-content: space-between; 
+            align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+        .balance-card small { color: #888; display: block; margin-bottom: 5px; }
+        .balance-card .amount { font-size: 24px; font-weight: bold; color: var(--p); }
+        .balance-card .coins { text-align: right; font-weight: bold; }
+
+        /* Grid Menu */
+        .menu-grid { 
+            display: grid; grid-template-columns: 1fr 1fr; 
+            gap: 15px; padding: 0 15px 20px 15px; 
+        }
+        .menu-item { 
+            background: var(--card); padding: 25px 10px; border-radius: 20px; 
+            text-align: center; text-decoration: none; color: var(--p); 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.02); transition: 0.3s;
+        }
+        .menu-item i { font-size: 32px; margin-bottom: 12px; display: block; }
+        .menu-item span { font-weight: 600; font-size: 15px; }
+
+        /* Modal Settings */
+        #friendModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2000; }
+        .modal-body { background:white; width:90%; max-width:400px; margin:10% auto; border-radius:20px; padding:20px; max-height: 80vh; overflow-y: auto; }
+        .tab-btn { flex:1; padding:10px; border:none; background:#f0f0f0; cursor:pointer; font-weight:bold; font-size: 13px; }
+        .active-tab { background:var(--p); color:white; }
+        .user-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #eee; }
+        .action-btn { border:none; padding:8px 15px; border-radius:15px; cursor:pointer; font-size:12px; font-weight:bold; }
+        .send-btn { background:var(--p); color:white; }
+        .sent-btn { background:#ccc; color:white; cursor: default; }
+        .accept-btn { background:#2ecc71; color:white; }
+        
+        .ad-banner { background: var(--p); color: white; padding: 12px; border-radius: 12px; margin: 0 15px 20px; display: flex; align-items: center; gap: 10px; }
+        .ad-badge { background: var(--g); color: black; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="header"><b>CMchat <span>Pro</span></b></div>
+
+    <div class="balance-card">
+        <div><small>Wallet Balance</small><div class="amount">₦1,250.00</div></div>
+        <div class="coins"><small>Earned Coins</small><div style="color: var(--p);"><i class="fas fa-coins" style="color:var(--g)"></i> 0</div></div>
+    </div>
+
+    <div class="menu-grid">
+        <a href="Chatting.html" class="menu-item"><i class="fas fa-comments"></i><span>Chats</span></a>
+        <a href="Group.html" class="menu-item"><i class="fas fa-users"></i><span>Group</span></a>
+        <a href="School.html" class="menu-item"><i class="fas fa-graduation-cap" style="color:var(--g)"></i><span>School</span></a>
+        <a href="Status.html" class="menu-item"><i class="fas fa-circle-notch"></i><span>Status</span></a>
+        <a href="Wallet.html" class="menu-item"><i class="fas fa-wallet"></i><span>Wallet</span></a>
+        <a href="Settings.html" class="menu-item"><i class="fas fa-cog"></i><span>Settings</span></a>
+    </div>
+
+    <div class="ad-banner">
+        <span class="ad-badge">AD</span>
+        <span style="font-size: 14px;">Welcome to CMchat Pro Dashboard!</span>
+    </div>
+
+    <div style="position: fixed; bottom: 30px; right: 20px; z-index: 999;">
+        <button onclick="openFriendModal()" style="width:65px; height:65px; border-radius:50%; background:var(--g); border:none; box-shadow:0 5px 15px rgba(0,0,0,0.3); font-size:26px; color:var(--p);">
+            <i class="fas fa-user-plus"></i>
+        </button>
+    </div>
+
+    <div id="friendModal">
+        <div class="modal-body">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin:0; color:var(--p)">Community</h3>
+                <i class="fas fa-times" onclick="closeFriendModal()" style="cursor:pointer; font-size:20px;"></i>
+            </div>
+            <div style="display:flex; gap:5px; margin-bottom:15px;">
+                <button id="btnFind" class="tab-btn active-tab" onclick="switchTab('find')">Find</button>
+                <button id="btnFriends" class="tab-btn" onclick="switchTab('friends')">Friends</button>
+                <button id="btnReq" class="tab-btn" onclick="switchTab('req')">Requests <span id="reqCount"></span></button>
+            </div>
+            <div id="tabContent"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set, update, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            authDomain: "cmchat-pro.firebaseapp.com",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+        let currentUID = null;
+        let currentUsername = "";
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) { 
+                currentUID = user.uid; 
+                onValue(ref(db, `users/${user.uid}`), s => { if(s.exists()) currentUsername = s.val().username; });
+                loadRequestsCount();
+            } else {
+                window.location.href = "Login.html";
+            }
+        });
+
+        window.openFriendModal = () => { document.getElementById('friendModal').style.display='block'; switchTab('find'); };
+        window.closeFriendModal = () => document.getElementById('friendModal').style.display='none';
+
+        window.switchTab = (tab) => {
+            const content = document.getElementById('tabContent');
+            document.getElementById('btnFind').classList.toggle('active-tab', tab === 'find');
+            document.getElementById('btnFriends').classList.toggle('active-tab', tab === 'friends');
+            document.getElementById('btnReq').classList.toggle('active-tab', tab === 'req');
+            if(tab === 'find') loadAllUsers();
+            else if(tab === 'friends') loadMyFriends();
+            else loadRequests();
+        };
+
+        async function loadAllUsers() {
+            const content = document.getElementById('tabContent');
+            content.innerHTML = "<p style='text-align:center;'>Loading users...</p>";
+            
+            const snapshot = await get(ref(db, 'users'));
+            const friendsSnapshot = await get(ref(db, `friends/${currentUID}`));
+            const sentSnapshot = await get(ref(db, `sent_requests/${currentUID}`));
+
+            content.innerHTML = "";
+            snapshot.forEach(child => {
+                const u = child.val();
+                if(u.uid !== currentUID) {
+                    let isFriend = friendsSnapshot.exists() && friendsSnapshot.hasChild(u.uid);
+                    let isSent = sentSnapshot.exists() && sentSnapshot.hasChild(u.uid);
+
+                    if (!isFriend) {
+                        content.innerHTML += `<div class="user-row">
+                            <span><b>${u.username}</b></span>
+                            ${isSent ? 
+                                `<button class="action-btn sent-btn">Sent</button>` : 
+                                `<button class="action-btn send-btn" onclick="sendRequest('${u.uid}', '${u.username}')">Add Friend</button>`
+                            }
+                        </div>`;
+                    }
+                }
+            });
+        }
+
+        window.sendRequest = (toUID, toName) => {
+            const updates = {};
+            updates[`friend_requests/${toUID}/${currentUID}`] = { from: currentUsername, time: Date.now() };
+            updates[`sent_requests/${currentUID}/${toUID}`] = true;
+
+            update(ref(db), updates).then(() => {
+                alert("Friend request sent!");
+                loadAllUsers();
+            });
+        };
+
+        function loadMyFriends() {
+            const content = document.getElementById('tabContent');
+            onValue(ref(db, `friends/${currentUID}`), (snapshot) => {
+                content.innerHTML = snapshot.exists() ? "" : "<p style='text-align:center; color:#999; margin-top:20px;'>No friends added yet.</p>";
+                snapshot.forEach(child => {
+                    const f = child.val();
+                    content.innerHTML += `
+                        <div class="user-row" onclick="openPrivateChat('${child.key}', '${f.username}')" style="cursor:pointer;">
+                            <span><i class="fas fa-user-circle" style="color:var(--p)"></i> ${f.username}</span>
+                            <i class="fas fa-comment-dots" style="color:#2ecc71"></i>
+                        </div>`;
+                });
+            });
+        }
+
+        window.openPrivateChat = (uid, name) => {
+            localStorage.setItem('chattingWithUID', uid);
+            localStorage.setItem('chattingWithName', name);
+            window.location.href = 'Chatting.html';
+        };
+
+        function loadRequests() {
+            const content = document.getElementById('tabContent');
+            onValue(ref(db, `friend_requests/${currentUID}`), (snapshot) => {
+                content.innerHTML = snapshot.exists() ? "" : "<p style='text-align:center; color:#999; margin-top:20px;'>No pending requests.</p>";
+                snapshot.forEach(child => {
+                    const req = child.val();
+                    content.innerHTML += `<div class="user-row">
+                        <span>${req.from}</span>
+                        <button class="action-btn accept-btn" onclick="acceptFriend('${child.key}', '${req.from}')">Accept</button>
+                    </div>`;
+                });
+            });
+        }
+
+        window.acceptFriend = (friendUID, friendName) => {
+            const updates = {};
+            updates[`friends/${currentUID}/${friendUID}`] = { username: friendName };
+            updates[`friends/${friendUID}/${currentUID}`] = { username: currentUsername };
+            updates[`friend_requests/${currentUID}/${friendUID}`] = null;
+            updates[`sent_requests/${friendUID}/${currentUID}`] = null;
+
+            update(ref(db), updates).then(() => {
+                alert("Success! You can now chat.");
+                switchTab('friends');
+            });
+        };
+
+        function loadRequestsCount() {
+            onValue(ref(db, `friend_requests/${currentUID}`), s => {
+                const count = s.exists() ? Object.keys(s.val()).length : 0;
+                document.getElementById('reqCount').innerText = count > 0 ? `(${count})` : "";
+            });
+        }
+    </script>
+</body>
+</html>

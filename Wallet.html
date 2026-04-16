@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ha">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet & VTU - CMchat Pro</title>
+    <style>
+        :root { --primary: #075e54; --secondary: #128c7e; --accent: #25d366; --gold: #ffd700; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f6; color: #333; }
+        
+        /* Header & Balance Section */
+        .wallet-header { background: var(--primary); color: white; padding: 30px 20px; text-align: center; border-radius: 0 0 30px 30px; }
+        .balance-card { background: white; color: #333; width: 85%; margin: -40px auto 20px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        .balance-amount { font-size: 28px; font-weight: bold; color: var(--primary); margin: 5px 0; }
+        .coins-badge { display: inline-block; background: #fff9c4; color: #f57f17; padding: 5px 15px; border-radius: 15px; font-weight: bold; font-size: 14px; border: 1px solid #fbc02d; }
+
+        /* VTU Services Grid */
+        .vtu-container { padding: 20px; }
+        .section-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; color: #555; }
+        .vtu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .vtu-item { background: white; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.3s; border: 1px solid #eee; text-decoration: none; color: inherit; }
+        .vtu-item:active { transform: scale(0.95); }
+        .vtu-icon { font-size: 30px; margin-bottom: 10px; display: block; }
+        .vtu-label { font-size: 14px; font-weight: 500; }
+        .bonus-tag { font-size: 10px; color: var(--accent); display: block; margin-top: 5px; font-weight: bold; }
+
+        /* Referral Box */
+        .referral-box { background: #e3f2fd; padding: 15px; border-radius: 15px; margin: 10px 0; border: 1px solid #bbdefb; }
+        .btn-copy { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; cursor: pointer; transition: 0.2s; }
+        .btn-copy:active { background: var(--secondary); }
+
+        /* Banner Ad Area */
+        .ad-space { width: 100%; height: 60px; background: #e0e0e0; margin: 20px 0; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #888; border: 1px dashed #bbb; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="wallet-header">
+        <h2 style="margin:0;">CMchat Wallet</h2>
+        <p style="font-size:12px; opacity:0.8;">Lura: Duk recharge kana da Spend Bonus!</p>
+    </div>
+
+    <div class="balance-card">
+        <div style="font-size: 12px; color: #777;">Kudin da kake da shi</div>
+        <div class="balance-amount">₦<span id="naira-balance">0.00</span></div>
+        <div class="coins-badge">💰 <span id="coin-count">0</span> Coins</div>
+    </div>
+
+    <div class="vtu-container" style="padding-top:0;">
+        <div class="ad-space">
+            [TALLAR BANNER TANA NAN]
+        </div>
+
+        <div class="section-title">Sabis-Sabis (VTU)</div>
+        <div class="vtu-grid">
+            <a href="BuyData.html" class="vtu-item">
+                <span class="vtu-icon">📶</span>
+                <span class="vtu-label">Data</span>
+                <span class="bonus-tag">+10 Coins Bonus</span>
+            </a>
+            <a href="BuyAirtime.html" class="vtu-item">
+                <span class="vtu-icon">📱</span>
+                <span class="vtu-label">Airtime</span>
+                <span class="bonus-tag">+2 Coins Bonus</span>
+            </a>
+            <a href="CableTV.html" class="vtu-item">
+                <span class="vtu-icon">📺</span>
+                <span class="vtu-label">TV Subscription</span>
+                <span class="bonus-tag">+20 Coins Bonus</span>
+            </a>
+            <a href="Electricity.html" class="vtu-item">
+                <span class="vtu-icon">💡</span>
+                <span class="vtu-label">Electricity</span>
+                <span class="bonus-tag">+25 Coins Bonus</span>
+            </a>
+        </div>
+
+        <div class="section-title" style="margin-top:25px;">Gayyaci Abokai</div>
+        <div class="referral-box">
+            <p style="font-size: 13px; margin-top: 0;">Gayyaci mutum 1 ka sami <b>50 Coins</b> nan take!</p>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <code id="ref-link-text" style="font-size: 11px; color: #444; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;">cmchat-pro.github.io/ref=User</code>
+                <button class="btn-copy" onclick="copyRef()">Copy Link</button>
+            </div>
+        </div>
+
+        <div class="ad-space">
+            [TALLAR BANNER TANA NAN]
+        </div>
+    </div>
+
+    <script>
+        // Lokacin da aka bude shafin
+        window.onload = function() {
+            // Dauko adadin coins da naira daga wayar user (ko Database)
+            let coins = localStorage.getItem("user_coins") || 0;
+            let balance = localStorage.getItem("user_balance") || "0.00";
+            let userID = localStorage.getItem("userID") || "CM" + Math.floor(Math.random() * 9999);
+            
+            // Saka bayanan a fuskar shafin
+            document.getElementById('coin-count').innerText = coins;
+            document.getElementById('naira-balance').innerText = balance;
+            document.getElementById('ref-link-text').innerText = "cmchat-pro.github.io/ref=" + userID;
+        }
+
+        // Aikin Copy Link
+        function copyRef() {
+            let userID = localStorage.getItem("userID") || "User";
+            let refLink = "https://cmchat-pro.github.io/register.html?ref=" + userID;
+            
+            navigator.clipboard.writeText(refLink).then(() => {
+                alert("An kwafi link din gayyata!\n\n" + refLink);
+            }).catch(err => {
+                // Idan browser ta hana a kwafa kai tsaye
+                alert("Link dinka: " + refLink);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMchat Pro - Messenger</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --p: #075E54; --s: #128C7E; --bg: #E5DDD5; --white: #ffffff; --my-msg: #DCF8C6; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; flex-direction: column; height: 100vh; }
+        
+        .chat-header { background: var(--p); color: white; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .user-info i { cursor: pointer; font-size: 18px; }
+        .user-info img { width: 38px; height: 38px; border-radius: 50%; background: #eee; }
+        .status-text { font-size: 11px; color: #cfd8dc; }
+
+        .chat-container { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .message { max-width: 75%; padding: 8px 12px; border-radius: 8px; font-size: 14.5px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.1); line-height: 1.4; }
+        .received { background: var(--white); align-self: flex-start; border-top-left-radius: 0; }
+        .sent { background: var(--my-msg); align-self: flex-end; border-top-right-radius: 0; }
+        .time { font-size: 10px; color: #777; text-align: right; margin-top: 4px; }
+        .sender-name { font-size: 11px; font-weight: bold; color: var(--s); margin-bottom: 2px; }
+
+        .input-area { background: #f0f0f0; padding: 10px; display: flex; align-items: center; gap: 8px; }
+        .input-box { flex: 1; background: white; border-radius: 25px; padding: 8px 15px; display: flex; align-items: center; }
+        #messageInput { border: none; outline: none; flex: 1; font-size: 16px; background: transparent; }
+        #sendBtn { width: 45px; height: 45px; background: var(--s); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    </style>
+</head>
+<body>
+
+    <header class="chat-header">
+        <div class="user-info">
+            <i class="fas fa-arrow-left" onclick="window.location.href='Dashboard.html'"></i>
+            <img src="https://via.placeholder.com/40" alt="Logo">
+            <div>
+                <div id="chatWith" style="font-weight: 600;">Loading...</div>
+                <div class="status-text">online</div>
+            </div>
+        </div>
+        <div class="header-icons">
+            <i class="fas fa-video" style="margin-right: 15px;"></i>
+            <i class="fas fa-phone-alt"></i>
+        </div>
+    </header>
+
+    <div class="chat-container" id="chatBox"></div>
+
+    <div class="input-area">
+        <div class="input-box">
+            <i class="far fa-smile" style="color: #888; margin-right: 10px;"></i>
+            <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off">
+            <i class="fas fa-paperclip" style="color: #888; margin-left: 10px;"></i>
+        </div>
+        <button id="sendBtn"><i id="btnIcon" class="fas fa-microphone"></i></button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            authDomain: "cmchat-pro.firebaseapp.com",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        const chatBox = document.getElementById('chatBox');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const btnIcon = document.getElementById('btnIcon');
+
+        let myUID = "";
+        let friendUID = localStorage.getItem('chattingWithUID'); // Za mu ajiye UID din aboki a nan
+        let friendName = localStorage.getItem('chattingWithName') || "Chat";
+
+        document.getElementById('chatWith').innerText = friendName;
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                myUID = user.uid;
+                if (friendUID) {
+                    startChat();
+                } else {
+                    alert("Please select a friend from Dashboard first!");
+                    window.location.href = "Dashboard.html";
+                }
+            } else {
+                window.location.href = "Login.html";
+            }
+        });
+
+        // Chat Room ID (Hada UID na mutum biyu don dakin ya zama na su kadai)
+        function getChatID() {
+            return myUID < friendUID ? myUID + "_" + friendUID : friendUID + "_" + myUID;
+        }
+
+        function startChat() {
+            const chatID = getChatID();
+            database.ref('private_chats/' + chatID).on('value', (snapshot) => {
+                chatBox.innerHTML = "";
+                snapshot.forEach((child) => {
+                    const data = child.val();
+                    const isMe = data.sender === myUID;
+                    chatBox.innerHTML += `
+                        <div class="message ${isMe ? 'sent' : 'received'}">
+                            ${data.msg}
+                            <div class="time">${data.time}</div>
+                        </div>`;
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
+
+        messageInput.addEventListener('input', () => {
+            btnIcon.className = messageInput.value.trim() !== "" ? "fas fa-paper-plane" : "fas fa-microphone";
+        });
+
+        sendBtn.addEventListener('click', () => {
+            const text = messageInput.value.trim();
+            if (text !== "" && myUID && friendUID) {
+                const chatID = getChatID();
+                database.ref('private_chats/' + chatID).push({
+                    sender: myUID,
+                    msg: text,
+                    time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                });
+                messageInput.value = "";
+                btnIcon.className = "fas fa-microphone";
+            }
+        });
+    </script>
+</body>
+</html>

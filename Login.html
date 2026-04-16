@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMchat Pro - Sign In</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: white; width: 90%; max-width: 380px; padding: 40px 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        .logo { font-size: 28px; font-weight: bold; color: #00a884; margin-bottom: 30px; }
+        .google-btn { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 25px; font-size: 16px; font-weight: 500; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">CMchat Pro</div>
+        <button class="google-btn" onclick="signIn()">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+            Continue with Google
+        </button>
+    </div>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            authDomain: "cmchat-pro.firebaseapp.com",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        firebase.initializeApp(firebaseConfig);
+        function signIn() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider).then((result) => {
+                const user = result.user;
+                firebase.database().ref('users/' + user.uid).set({
+                    username: user.displayName,
+                    profilePic: user.photoURL,
+                    uid: user.uid,
+                    status: "Online"
+                }).then(() => { window.location.href = "Dashboard.html"; });
+            }).catch((err) => { alert(err.message); });
+        }
+    </script>
+</body>
+</html>
