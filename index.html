@@ -35,13 +35,12 @@
             justify-content: space-between; padding: 40px 20px; box-sizing: border-box;
         }
 
-        /* Welcome Section */
         .intro-slider { text-align: center; margin-top: 20px; }
         .intro-slider h1 { font-size: 35px; margin: 0; letter-spacing: 2px; font-weight: 800; }
         .intro-slider h1 span { color: var(--g); }
         .feature-text { height: 60px; margin-top: 15px; font-size: 16px; color: #cbd5e0; line-height: 1.5; }
 
-        /* Professional Login Card */
+        /* Login Card */
         .login-card {
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(15px);
@@ -60,42 +59,41 @@
         }
         .input-group input:focus { border-color: var(--g); background: rgba(255,255,255,0.12); }
 
-        /* Login Button */
         .login-btn {
             width: 100%; padding: 18px; border: none; border-radius: 18px;
             background: var(--g); color: var(--p); font-size: 18px;
             font-weight: 800; cursor: pointer; transition: 0.3s;
             display: flex; align-items: center; justify-content: center; gap: 12px;
-            box-shadow: 0 10px 20px rgba(255, 214, 0, 0.2);
         }
-        .login-btn:active { transform: scale(0.96); }
+
+        /* Forgot Password Link */
+        .forgot-link { text-align: right; margin-top: -10px; margin-bottom: 20px; }
+        .forgot-link a { color: var(--g); font-size: 13px; text-decoration: none; opacity: 0.8; font-weight: 600; }
 
         .footer-links { text-align: center; margin-top: 25px; font-size: 14px; color: #aaa; }
         .footer-links a { color: var(--g); text-decoration: none; font-weight: bold; }
 
-        #statusLabel { text-align: center; font-size: 14px; margin-top: 15px; min-height: 20px; font-weight: 600; }
-
-        /* Decorative Background Shapes */
-        .orb {
-            position: absolute; width: 250px; height: 250px; border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,214,0,0.15) 0%, rgba(255,214,0,0) 70%);
-            z-index: -1; filter: blur(40px);
+        /* Modal Style */
+        #resetModal { 
+            display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+            background:rgba(0,0,0,0.9); z-index:9999; backdrop-filter: blur(10px); 
         }
+        .modal-content {
+            background: #0d1117; width: 85%; max-width: 400px; margin: 30% auto; 
+            padding: 30px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); text-align: center;
+        }
+
+        #statusLabel, #resetStatus { text-align: center; font-size: 14px; margin-top: 15px; min-height: 20px; font-weight: 600; }
     </style>
 </head>
 <body>
 
     <div class="bg-gradient"></div>
-    <div class="orb" style="top: -50px; right: -50px;"></div>
-    <div class="orb" style="bottom: -50px; left: -50px; background: radial-gradient(circle, rgba(26,35,126,0.4) 0%, rgba(0,0,0,0) 70%);"></div>
 
     <div class="container animate__animated animate__fadeIn">
-        
         <div class="intro-slider">
-            <h1 class="animate__animated animate__zoomIn">CMchat <span>Pro</span></h1>
-            <div id="featureText" class="feature-text">
-                Connecting you to the future of communication and trade.
-            </div>
+            <h1>CMchat <span>Pro</span></h1>
+            <div id="featureText" class="feature-text">Connecting you to the future of communication.</div>
         </div>
 
         <div class="login-card">
@@ -106,6 +104,10 @@
             <div class="input-group">
                 <i class="fas fa-lock"></i>
                 <input type="password" id="password" placeholder="Password">
+            </div>
+
+            <div class="forgot-link">
+                <a href="#" onclick="showResetModal()">Forgot Password?</a>
             </div>
             
             <button class="login-btn" onclick="handleLogin()">
@@ -119,16 +121,29 @@
             </div>
         </div>
 
-        <div style="text-align: center; font-size: 11px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 2px;">
-            Secured by Cloudflare & Firebase &copy; 2026
+        <div style="text-align: center; font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 2px;">
+            SECURED BY CLOUDFLARE & FIREBASE &copy; 2026
+        </div>
+    </div>
+
+    <div id="resetModal">
+        <div class="modal-content animate__animated animate__zoomIn">
+            <h3 style="color: var(--g);">Reset Password</h3>
+            <p style="font-size: 14px; color: #ccc; margin-bottom: 20px;">Enter your email to receive a reset link.</p>
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="resetEmail" placeholder="Registered Email">
+            </div>
+            <button class="login-btn" onclick="sendPasswordReset()" style="padding:14px">SEND LINK</button>
+            <p onclick="hideResetModal()" style="color:white; margin-top:15px; cursor:pointer; font-size:14px; opacity:0.6;">Cancel</p>
+            <div id="resetStatus"></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // Firebase Config dinka (Matching your dashboard)
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
             authDomain: "cmchat-pro.firebaseapp.com",
@@ -139,50 +154,60 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // Professional Feature Switcher
-        const texts = [
-            "Seamless real-time messaging experience.",
-            "Expand your business globally with CM Market.",
-            "Join CM School and master new digital skills.",
-            "Secure and fast transactions with CM Wallet."
-        ];
-        let i = 0;
+        // Feature Text Switcher
+        const texts = ["Secure real-time messaging.", "Trade easily on CM Market.", "Learn at CM Academy.", "Secure CM Wallet."];
+        let idx = 0;
         setInterval(() => {
             const el = document.getElementById('featureText');
             el.style.opacity = '0';
             setTimeout(() => {
-                i = (i + 1) % texts.length;
-                el.innerText = texts[i];
+                idx = (idx + 1) % texts.length;
+                el.innerText = texts[idx];
                 el.style.opacity = '1';
-                el.classList.add('animate__animated', 'animate__fadeIn');
             }, 500);
         }, 4000);
 
+        // Login Logic
         window.handleLogin = () => {
             const e = document.getElementById('email').value;
             const p = document.getElementById('password').value;
             const status = document.getElementById('statusLabel');
 
-            if(!e || !p) {
-                status.style.color = "#FF5252";
-                status.innerText = "Error: Email and Password are required!";
-                return;
-            }
+            if(!e || !p) { status.style.color = "#FF5252"; status.innerText = "Fields are required!"; return; }
 
-            status.style.color = "#FFD600";
-            status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Securely authenticating...';
+            status.style.color = var(--g);
+            status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
 
             signInWithEmailAndPassword(auth, e, p)
                 .then(() => {
                     status.style.color = "#00E676";
-                    status.innerText = "Verified! Redirecting to dashboard...";
-                    // Redirecting to index.html (Your dashboard file)
+                    status.innerText = "Success! Redirecting...";
                     setTimeout(() => window.location.href = "index.html", 1200);
                 })
-                .catch((error) => {
+                .catch(() => {
                     status.style.color = "#FF5252";
-                    status.innerText = "Authentication Failed: Check your credentials.";
-                    console.error(error.message);
+                    status.innerText = "Invalid Email or Password.";
+                });
+        };
+
+        // Reset Password Logic
+        window.showResetModal = () => document.getElementById('resetModal').style.display = 'block';
+        window.hideResetModal = () => document.getElementById('resetModal').style.display = 'none';
+        
+        window.sendPasswordReset = () => {
+            const email = document.getElementById('resetEmail').value;
+            const status = document.getElementById('resetStatus');
+            if(!email) { status.innerText = "Enter email!"; return; }
+
+            sendPasswordResetEmail(auth, email)
+                .then(() => {
+                    status.style.color = "#00E676";
+                    status.innerText = "Reset link sent to your email!";
+                    setTimeout(hideResetModal, 3000);
+                })
+                .catch(() => {
+                    status.style.color = "#FF5252";
+                    status.innerText = "User not found.";
                 });
         };
     </script>
