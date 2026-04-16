@@ -3,157 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Account - CMchat Pro</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <title>Register | CMchat Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
     <style>
-        :root { --p: #1A237E; --g: #FFD600; --bg: #0a0e27; }
-        
-        body, html {
-            margin: 0; padding: 0; min-height: 100vh;
-            font-family: 'Segoe UI', sans-serif; background: var(--bg);
-            color: white; overflow-x: hidden;
-            display: flex; align-items: center; justify-content: center;
+        :root {
+            --primary: #1A237E;
+            --accent: #FFD600;
+            --white: #ffffff;
+            --bg: #F8F9FD;
         }
 
-        /* Background Animation */
-        .bg-gradient {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at top right, #1a237e, #0a0e27);
-            z-index: -1;
+        body {
+            margin: 0; font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh;
         }
-
-        .container { width: 100%; max-width: 400px; padding: 20px; box-sizing: border-box; }
 
         .reg-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(15px);
-            padding: 35px 25px; border-radius: 35px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            background: var(--white); width: 90%; max-width: 400px; padding: 35px 25px;
+            border-radius: 35px; box-shadow: 0 20px 40px rgba(0,0,0,0.05);
             text-align: center;
         }
 
-        .logo { font-size: 30px; font-weight: 800; margin-bottom: 10px; }
-        .logo span { color: var(--g); }
-        .subtitle { color: #cbd5e0; font-size: 14px; margin-bottom: 30px; opacity: 0.8; }
+        .logo-area b { font-size: 28px; color: var(--primary); }
+        .logo-area span { color: var(--accent); }
 
-        .input-group { position: relative; margin-bottom: 20px; text-align: left; }
-        .input-group i { position: absolute; left: 15px; top: 18px; color: var(--g); font-size: 18px; }
-        .input-group input {
-            width: 100%; background: rgba(255,255,255,0.07);
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 16px 15px 16px 50px; border-radius: 18px;
-            color: white; outline: none; transition: 0.3s; box-sizing: border-box; font-size: 16px;
+        .input-box {
+            position: relative; margin-top: 20px; text-align: left;
         }
-        .input-group input:focus { border-color: var(--g); background: rgba(255,255,255,0.12); }
+        .input-box i { position: absolute; left: 18px; top: 18px; color: #999; }
+        .input-box input {
+            width: 100%; padding: 18px 18px 18px 50px; border-radius: 18px;
+            border: 2px solid #F0F2F5; background: #F9FAFB; font-weight: 600;
+            box-sizing: border-box; transition: 0.3s;
+        }
+        .input-box input:focus { border-color: var(--primary); outline: none; background: #fff; }
 
-        .reg-btn {
+        .btn-reg {
             width: 100%; padding: 18px; border: none; border-radius: 18px;
-            background: var(--g); color: var(--p); font-size: 17px;
-            font-weight: 800; cursor: pointer; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            box-shadow: 0 10px 20px rgba(255, 214, 0, 0.2);
+            background: var(--primary); color: white; font-weight: 800;
+            margin-top: 25px; cursor: pointer; font-size: 16px;
+            box-shadow: 0 10px 20px rgba(26,35,126,0.2);
         }
-        .reg-btn:active { transform: scale(0.96); }
 
-        .footer-links { text-align: center; margin-top: 25px; font-size: 14px; color: #aaa; }
-        .footer-links a { color: var(--g); text-decoration: none; font-weight: bold; }
+        /* --- Double Security UI --- */
+        .security-options {
+            margin-top: 20px; display: flex; gap: 10px; justify-content: center;
+        }
+        .sec-tag {
+            font-size: 11px; padding: 5px 12px; border-radius: 20px;
+            background: #E8EAF6; color: var(--primary); font-weight: 700;
+        }
 
-        #statusLabel { margin-top: 15px; font-size: 14px; min-height: 20px; font-weight: 600; }
-        
-        /* Floating Icon */
-        .float-icon { position: absolute; font-size: 100px; color: rgba(255,214,0,0.03); z-index: -1; animation: float 6s infinite ease-in-out; }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        /* --- Modern Google Button --- */
+        .google-divider {
+            display: flex; align-items: center; margin: 25px 0; color: #999; font-size: 13px;
+        }
+        .google-divider::before, .google-divider::after {
+            content: ""; flex: 1; height: 1px; background: #EEE; margin: 0 10px;
+        }
+
+        #googleBtn { display: flex; justify-content: center; }
     </style>
 </head>
 <body>
 
-    <div class="bg-gradient"></div>
-    <i class="fas fa-user-plus float-icon" style="top: 10%; right: 10%;"></i>
-
-    <div class="container animate__animated animate__fadeInUp">
-        <div class="reg-card">
-            <div class="logo">CMchat <span>Pro</span></div>
-            <div class="subtitle">Join the future of elite communication</div>
-
-            <div class="input-group">
-                <i class="fas fa-user"></i>
-                <input type="text" id="username" placeholder="Full Name">
-            </div>
-
-            <div class="input-group">
-                <i class="fas fa-envelope"></i>
-                <input type="email" id="email" placeholder="Email Address">
-            </div>
-
-            <div class="input-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="password" placeholder="Create Password">
-            </div>
-            
-            <button class="reg-btn" onclick="handleRegister()">
-                <span>CREATE ACCOUNT</span> <i class="fas fa-arrow-right"></i>
-            </button>
-
-            <div id="statusLabel"></div>
-
-            <div class="footer-links">
-                Already have an account? <a href="Login.html">Sign In</a>
-            </div>
+    <div class="reg-card animate__animated animate__fadeInUp">
+        <div class="logo-area">
+            <b>CMchat <span>Pro</span></b>
+            <p style="color:#666; font-size:14px; margin-top:10px;">Create your elite account</p>
         </div>
+
+        <div class="input-box">
+            <i class="fas fa-user"></i>
+            <input type="text" id="regName" placeholder="Full Name">
+        </div>
+
+        <div class="input-box">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="regEmail" placeholder="Email Address">
+        </div>
+
+        <div class="input-box">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="regPass" placeholder="Password">
+        </div>
+
+        <div class="security-options">
+            <span class="sec-tag"><i class="fas fa-shield-check"></i> Encrypted</span>
+            <span class="sec-tag"><i class="fas fa-fingerprint"></i> Biometric Ready</span>
+        </div>
+
+        <button class="btn-reg" onclick="handleRegister()">CREATE ACCOUNT</button>
+
+        <div class="google-divider">OR CONTINUE WITH</div>
+
+        <div id="googleBtn"></div>
+        
+        <p style="margin-top:25px; font-size:14px; color:#666;">
+            Already have an account? <a href="Login.html" style="color:var(--primary); font-weight:700; text-decoration:none;">Login</a>
+        </p>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <script>
-        // Firebase Config dinka
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
-            authDomain: "cmchat-pro.firebaseapp.com",
             databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
             projectId: "cmchat-pro"
         };
         firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
 
+        // --- Modern Google Login Integration ---
+        window.onload = function () {
+            google.accounts.id.initialize({
+                client_id: "874591203456-example.apps.googleusercontent.com", // Saka naka a nan
+                callback: handleGoogleResponse
+            });
+            google.accounts.id.renderButton(
+                document.getElementById("googleBtn"),
+                { theme: "outline", size: "large", width: "350", shape: "pill" } 
+            );
+        };
+
+        function handleGoogleResponse(response) {
+            const credential = response.credential;
+            const googleAuth = firebase.auth.GoogleAuthProvider.credential(credential);
+            
+            auth.signInWithCredential(googleAuth).then(result => {
+                const user = result.user;
+                saveUserData(user.uid, user.displayName, user.email);
+            }).catch(error => alert(error.message));
+        }
+
+        // --- Normal Registration ---
         function handleRegister() {
-            const user = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            const status = document.getElementById('statusLabel');
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const pass = document.getElementById('regPass').value;
 
-            if(!user || !email || !pass) {
-                status.style.color = "#FF5252";
-                status.innerText = "Please fill in all fields!";
-                return;
-            }
+            if(!name || !email || !pass) return alert("Please fill all fields");
 
-            status.style.color = "#FFD600";
-            status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing registration...';
+            auth.createUserWithEmailAndPassword(email, pass).then(result => {
+                saveUserData(result.user.uid, name, email);
+            }).catch(error => alert(error.message));
+        }
 
-            firebase.auth().createUserWithEmailAndPassword(email, pass)
-                .then((result) => {
-                    const uid = result.user.uid;
-                    // Adana sunan mutum a Database
-                    firebase.database().ref('users/' + uid).set({
-                        username: user,
-                        email: email,
-                        uid: uid,
-                        balance: "0.00",
-                        status: "Active",
-                        joined: Date.now()
-                    }).then(() => {
-                        status.style.color = "#00E676";
-                        status.innerText = "Success! Redirecting to login...";
-                        // Redirecting to Login.html after 2 seconds
-                        setTimeout(() => { window.location.href = "Login.html"; }, 2000);
-                    });
-                })
-                .catch((error) => {
-                    status.style.color = "#FF5252";
-                    status.innerText = error.message;
-                });
+        function saveUserData(uid, name, email) {
+            db.ref('users/' + uid).set({
+                username: name,
+                email: email,
+                uid: uid,
+                wallet: 0,
+                securitySet: false // Zai zama true idan ya saita PIN
+            }).then(() => {
+                localStorage.setItem('username', name);
+                // Redirect zuwa saita PIN (Double Security)
+                location.href = 'Security-Pin.html';
+            });
         }
     </script>
 </body>

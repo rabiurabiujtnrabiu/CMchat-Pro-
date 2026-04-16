@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Marketplace - CMchat Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root { --p: #1A237E; --g: #FFD600; --bg: #0a0e27; --card: rgba(255,255,255,0.08); }
+        
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f7f6; color: #333; overflow-x: hidden; }
+
+        /* Modern Header */
+        header { 
+            background: var(--p); padding: 15px 20px; display: flex; align-items: center; 
+            justify-content: space-between; position: sticky; top: 0; z-index: 1000; color: white;
+        }
+        .search-container {
+            background: rgba(255,255,255,0.15); padding: 10px 15px; border-radius: 12px;
+            display: flex; align-items: center; gap: 10px; width: 70%;
+        }
+        .search-container input { background: transparent; border: none; color: white; outline: none; width: 100%; }
+
+        /* Featured Ads Slider (Modern UI) */
+        .promo-slider { padding: 15px; }
+        .promo-card {
+            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
+            border-radius: 25px; height: 160px; position: relative; overflow: hidden;
+            display: flex; align-items: center; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .promo-text { padding: 25px; z-index: 2; width: 60%; }
+        .promo-text h2 { margin: 0; font-size: 22px; color: var(--g); }
+        .promo-text p { margin: 5px 0; font-size: 13px; opacity: 0.8; }
+        .promo-img { position: absolute; right: -10px; bottom: -10px; width: 140px; opacity: 0.9; transform: rotate(-10deg); }
+
+        /* Category Tabs */
+        .categories { display: flex; gap: 12px; overflow-x: auto; padding: 10px 20px; scrollbar-width: none; }
+        .cat-chip { 
+            background: white; padding: 10px 22px; border-radius: 50px; 
+            font-size: 13px; font-weight: 700; white-space: nowrap; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; color: var(--p);
+        }
+        .cat-chip.active { background: var(--p); color: white; }
+
+        /* Product Grid */
+        .market-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
+        .product-item { 
+            background: white; border-radius: 20px; overflow: hidden; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative;
+            animation: fadeIn 0.5s; display: flex; flex-direction: column;
+        }
+        .product-img { width: 100%; height: 160px; object-fit: cover; }
+        .product-details { padding: 12px; flex: 1; display: flex; flex-direction: column; }
+        .price-tag { color: var(--p); font-size: 18px; font-weight: 800; }
+        .product-name { font-size: 14px; margin: 4px 0 12px; color: #555; font-weight: 500; height: 34px; overflow: hidden; }
+        
+        .whatsapp-btn {
+            background: #25D366; color: white; border: none; padding: 10px;
+            border-radius: 12px; font-weight: bold; font-size: 13px;
+            display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+        }
+
+        /* Float Action Button */
+        .add-listing { 
+            position: fixed; bottom: 30px; right: 20px; 
+            background: var(--p); color: white; width: 60px; height: 60px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-size: 24px; box-shadow: 0 8px 25px rgba(26, 35, 126, 0.4); z-index: 999;
+        }
+
+        /* Post Modal */
+        #listingModal { 
+            display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+            background:rgba(0,0,0,0.85); z-index:5000; align-items:center; justify-content:center; 
+            backdrop-filter: blur(5px);
+        }
+        .modal-body { background: white; width: 90%; max-width: 420px; border-radius: 30px; padding: 25px; box-sizing: border-box; }
+        .form-control { margin-bottom: 15px; }
+        .form-control label { display:block; margin-bottom:6px; font-size:12px; font-weight:bold; color: var(--p); text-transform: uppercase; }
+        .form-control input { width:100%; padding:14px; border-radius:12px; border:1px solid #ddd; outline:none; box-sizing:border-box; }
+        .btn-submit { width:100%; padding:16px; background:var(--p); color:white; border:none; border-radius:15px; font-weight:bold; font-size:16px; cursor:pointer; box-shadow: 0 5px 15px rgba(26, 35, 126, 0.2); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <i class="fas fa-chevron-left" onclick="window.history.back()"></i>
+        <div class="search-container">
+            <i class="fas fa-search" style="opacity:0.5;"></i>
+            <input type="text" placeholder="Search for items...">
+        </div>
+        <i class="fas fa-filter"></i>
+    </header>
+
+    <div class="promo-slider">
+        <div class="promo-card">
+            <div class="promo-text">
+                <h2>Elite Market</h2>
+                <p>Buy & Sell with trusted CMchat Pro members.</p>
+                <div style="margin-top:10px; font-size:11px; font-weight:bold; background:var(--g); color:var(--p); display:inline-block; padding:5px 12px; border-radius:50px;">PROIFIED</div>
+            </div>
+            <img src="https://www.pngall.com/wp-content/uploads/5/Smartphone-PNG-Isolated-Image.png" class="promo-img">
+        </div>
+    </div>
+
+    <div class="categories">
+        <div class="cat-chip active">All Items</div>
+        <div class="cat-chip">Gadgets</div>
+        <div class="cat-chip">Vehicles</div>
+        <div class="cat-chip">Fashion</div>
+        <div class="cat-chip">Real Estate</div>
+    </div>
+
+    <div class="market-grid" id="marketArea">
+        </div>
+
+    <div class="add-listing" onclick="document.getElementById('listingModal').style.display='flex'">
+        <i class="fas fa-plus"></i>
+    </div>
+
+    <div id="listingModal">
+        <div class="modal-body animate__animated animate__zoomIn">
+            <h3 style="margin:0 0 20px 0; color:var(--p);">List Your Product</h3>
+            <div class="form-control">
+                <label>Product Name</label>
+                <input type="text" id="itemName" placeholder="e.g. iPhone 15 Pro">
+            </div>
+            <div class="form-control">
+                <label>Price (₦)</label>
+                <input type="number" id="itemPrice" placeholder="Enter amount">
+            </div>
+            <div class="form-control">
+                <label>WhatsApp Number</label>
+                <input type="tel" id="itemPhone" placeholder="08123456789">
+            </div>
+            <div class="form-control">
+                <label>Image URL</label>
+                <input type="text" id="itemImg" placeholder="Paste image link">
+            </div>
+            <button class="btn-submit" onclick="publishAd()">PUBLISH LISTING</button>
+            <p style="text-align:center; color:#888; margin-top:15px; cursor:pointer; font-size:14px;" onclick="document.getElementById('listingModal').style.display='none'">Cancel</p>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // 1. Publish Ad Function
+        window.publishAd = () => {
+            const name = document.getElementById('itemName').value;
+            const price = document.getElementById('itemPrice').value;
+            const phone = document.getElementById('itemPhone').value;
+            const img = document.getElementById('itemImg').value;
+
+            if(!name || !price || !phone) { alert("Please complete all fields."); return; }
+
+            db.ref('market_items').push({
+                name, price, phone, 
+                image: img || 'https://via.placeholder.com/300?text=No+Image',
+                seller: localStorage.getItem('username') || "Member",
+                timestamp: Date.now()
+            }).then(() => {
+                alert("Your product is now LIVE!");
+                document.getElementById('listingModal').style.display='none';
+                clearForm();
+            });
+        };
+
+        function clearForm() {
+            document.getElementById('itemName').value = "";
+            document.getElementById('itemPrice').value = "";
+            document.getElementById('itemPhone').value = "";
+            document.getElementById('itemImg').value = "";
+        }
+
+        // 2. Load Products Function
+        db.ref('market_items').on('value', snap => {
+            const grid = document.getElementById('marketArea');
+            grid.innerHTML = "";
+            if(!snap.exists()) {
+                grid.innerHTML = '<div style="grid-column: 1 / span 2; text-align:center; padding:50px; color:#aaa;">No items for sale yet.</div>';
+                return;
+            }
+            snap.forEach(child => {
+                const p = child.val();
+                grid.innerHTML += `
+                <div class="product-item">
+                    <img src="${p.image}" class="product-img">
+                    <div class="product-details">
+                        <div class="price-tag">₦${Number(p.price).toLocaleString()}</div>
+                        <div class="product-name">${p.name}</div>
+                        <button class="whatsapp-btn" onclick="window.open('https://wa.me/${p.phone}?text=Hi, I am interested in ${p.name}')">
+                            <i class="fab fa-whatsapp"></i> Chat Seller
+                        </button>
+                    </div>
+                </div>`;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fund Wallet | CMchat Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <style>
+        :root {
+            --primary: #1A237E;
+            --accent: #FFD600;
+            --bg: #F4F7FE;
+            --white: #ffffff;
+            --text-main: #1C1C1E;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+        }
+
+        header {
+            background: var(--primary);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header i { font-size: 20px; cursor: pointer; margin-right: 15px; }
+
+        .container { padding: 20px; max-width: 500px; margin: 0 auto; }
+
+        /* --- VIRTUAL ACCOUNT CARD --- */
+        .bank-card {
+            background: linear-gradient(135deg, var(--primary) 0%, #3949AB 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 15px 30px rgba(26, 35, 126, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bank-card h3 { margin: 0 0 15px; font-size: 14px; opacity: 0.8; font-weight: 400; }
+        .account-num { font-size: 28px; font-weight: 800; letter-spacing: 2px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+        .bank-name { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+        
+        .copy-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        /* --- FUNDING OPTIONS --- */
+        .card {
+            background: var(--white);
+            border-radius: 25px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+
+        .option-title { font-size: 14px; font-weight: 800; color: #888; margin-bottom: 15px; display: block; }
+
+        .input-group { margin-bottom: 15px; }
+        input {
+            width: 100%; padding: 16px; border-radius: 18px;
+            border: 2px solid #E5E5EA; outline: none; font-family: inherit;
+            box-sizing: border-box; font-weight: 600; background: #F9F9FB;
+        }
+
+        .btn-pay {
+            width: 100%; padding: 18px; border: none; border-radius: 18px;
+            background: var(--primary); color: white; font-weight: 800;
+            font-size: 16px; cursor: pointer; box-shadow: 0 10px 20px rgba(26, 35, 126, 0.1);
+        }
+
+        .info-box {
+            background: #E8EAF6;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            color: var(--primary);
+            line-height: 1.5;
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
+        <b>Add Funds</b>
+    </header>
+
+    <div class="container">
+        
+        <div class="bank-card animate__animated animate__fadeIn">
+            <h3>Automatic Bank Transfer</h3>
+            <div class="account-num" id="accNum">9034567812 <i class="far fa-copy" style="font-size:18px; cursor:pointer;" onclick="copyAcc()"></i></div>
+            <div class="bank-name">Wema Bank / Monnify</div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; opacity: 0.7;">Account Name: CM-PRO-[User]</span>
+                <button class="copy-btn" onclick="copyAcc()">Copy No.</button>
+            </div>
+        </div>
+
+        <span class="option-title">Pay with Card / USSD</span>
+        <div class="card">
+            <div class="input-group">
+                <input type="number" id="fundAmount" placeholder="Enter Amount (min: ₦100)">
+            </div>
+            <button class="btn-pay" onclick="payWithPaystack()">
+                <i class="fas fa-credit-card"></i> Pay Securely Now
+            </button>
+        </div>
+
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i>
+            <div>Your wallet will be credited automatically after a successful payment or bank transfer. Standard bank charges may apply.</div>
+        </div>
+
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const username = localStorage.getItem('username') || "User";
+
+        // 1. Copy Account Number
+        function copyAcc() {
+            const acc = document.getElementById('accNum').innerText;
+            navigator.clipboard.writeText(acc);
+            alert("Account Number Copied!");
+        }
+
+        // 2. Paystack Integration Logic
+        function payWithPaystack() {
+            const amount = document.getElementById('fundAmount').value;
+            if(!amount || amount < 100) {
+                alert("Minimum funding amount is ₦100");
+                return;
+            }
+
+            // In a real app, you will use your Paystack Public Key
+            alert("Redirecting to Secure Gateway for ₦" + amount);
+            
+            // Simulating a successful transaction for your dashboard
+            updateWallet(amount);
+        }
+
+        function updateWallet(amt) {
+            const walletRef = db.ref('users/' + username + '/wallet');
+            walletRef.once('value', snap => {
+                let currentBal = snap.val() || 0;
+                let newBal = parseFloat(currentBal) + parseFloat(amt);
+                
+                walletRef.set(newBal).then(() => {
+                    // Record Transaction
+                    db.ref('transactions/' + username).push({
+                        type: 'credit',
+                        service: 'Wallet Funding',
+                        amount: amt,
+                        time: Date.now(),
+                        status: 'Success'
+                    });
+                    alert("Wallet Funded Successfully!");
+                    window.location.href = "Wallet.html";
+                });
+            });
+        }
+    </script>
+</body>
+</html>

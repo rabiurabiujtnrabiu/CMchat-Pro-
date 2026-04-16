@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Marketplace | CMchat Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <style>
+        :root { 
+            --primary: #1A237E; 
+            --accent: #FFD600; 
+            --bg: #F8F9FD;
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.8);
+        }
+
+        body { 
+            margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); color: #1e1e1e; overflow-x: hidden;
+        }
+
+        /* --- STICKY GLASS HEADER --- */
+        header { 
+            background: var(--glass); backdrop-filter: blur(15px);
+            padding: 15px 20px; display: flex; align-items: center; 
+            justify-content: space-between; position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .logo-text { font-weight: 800; font-size: 20px; color: var(--primary); letter-spacing: -1px; }
+
+        /* --- HORIZONTAL CATEGORIES --- */
+        .categories {
+            display: flex; gap: 10px; overflow-x: auto; padding: 15px 20px;
+            scrollbar-width: none; -ms-overflow-style: none;
+        }
+        .categories::-webkit-scrollbar { display: none; }
+        .cat-btn {
+            background: var(--white); padding: 10px 22px; border-radius: 50px;
+            font-size: 13px; font-weight: 600; white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #eee; cursor: pointer;
+        }
+        .cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* --- HERO PROMO --- */
+        .hero { padding: 0 20px; margin-bottom: 20px; }
+        .hero-card {
+            background: linear-gradient(135deg, #1A237E 0%, #311B92 100%);
+            border-radius: 30px; padding: 30px; color: white; position: relative;
+            overflow: hidden; box-shadow: 0 15px 30px rgba(26, 35, 126, 0.2);
+        }
+        .hero-card h2 { margin: 0; font-size: 24px; font-weight: 800; color: var(--accent); }
+        .hero-card p { margin: 10px 0 0; font-size: 13px; opacity: 0.8; line-height: 1.5; }
+        .hero-card i { position: absolute; right: -20px; bottom: -20px; font-size: 120px; opacity: 0.1; transform: rotate(-15deg); }
+
+        /* --- PRODUCT GRID --- */
+        .grid-container { padding: 0 20px 100px; }
+        .grid-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .grid-title h3 { font-size: 18px; margin: 0; font-weight: 800; }
+        .live-indicator { font-size: 11px; color: #ff5252; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
+
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        .product-card {
+            background: var(--white); border-radius: 24px; overflow: hidden;
+            border: 1px solid #f0f0f0; box-shadow: 0 10px 20px rgba(0,0,0,0.02);
+            animation: fadeInUp 0.6s ease both; transition: 0.3s;
+        }
+        .product-card:active { transform: scale(0.96); }
+
+        .img-box { position: relative; width: 100%; height: 160px; background: #eee; }
+        .img-box img { width: 100%; height: 100%; object-fit: cover; }
+        .expiry-tag {
+            position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px); color: white; padding: 4px 10px;
+            border-radius: 10px; font-size: 10px; font-weight: 600;
+        }
+
+        .info { padding: 15px; }
+        .price { font-size: 18px; font-weight: 800; color: var(--primary); }
+        .title { font-size: 13px; color: #666; margin: 5px 0 15px; font-weight: 600; height: 34px; overflow: hidden; }
+
+        .btn-action {
+            width: 100%; padding: 12px; border: none; border-radius: 14px;
+            background: #f1f3f9; color: var(--primary); font-weight: 700;
+            font-size: 12px; cursor: pointer; display: flex; align-items: center; 
+            justify-content: center; gap: 8px; transition: 0.3s;
+        }
+        .btn-action:hover { background: var(--primary); color: white; }
+
+        /* --- FLOATING POST BUTTON --- */
+        .fab {
+            position: fixed; bottom: 30px; right: 20px; width: 65px; height: 65px;
+            background: var(--accent); color: var(--primary); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 24px;
+            box-shadow: 0 10px 25px rgba(255, 214, 0, 0.4); z-index: 1001; cursor: pointer;
+            border: 5px solid var(--white);
+        }
+
+        /* --- POST MODAL --- */
+        .modal {
+            display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 2000;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-content {
+            background: white; width: 100%; max-width: 400px; border-radius: 35px;
+            padding: 30px; box-sizing: border-box; animation: zoomIn 0.3s;
+        }
+        .modal-content h2 { margin-top: 0; color: var(--primary); font-weight: 800; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 11px; font-weight: 700; color: #999; margin-bottom: 8px; }
+        .input-group input { 
+            width: 100%; padding: 15px; border-radius: 15px; border: 1.5px solid #eee;
+            background: #f9f9f9; outline: none; box-sizing: border-box; font-family: inherit;
+        }
+        .btn-post {
+            width: 100%; padding: 18px; border: none; border-radius: 18px;
+            background: var(--primary); color: white; font-weight: 800; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
+        <div class="logo-text">ELITE SHOP</div>
+        <i class="fas fa-search"></i>
+    </header>
+
+    <div class="categories">
+        <div class="cat-btn active">Discover</div>
+        <div class="cat-btn">Gadgets</div>
+        <div class="cat-btn">Fashion</div>
+        <div class="cat-btn">Gaming</div>
+        <div class="cat-btn">Deals</div>
+    </div>
+
+    <div class="hero">
+        <div class="hero-card">
+            <h2>Flash Marketplace</h2>
+            <p>Every listing here automatically disappears after 24 hours. Be fast or miss out!</p>
+            <i class="fas fa-bolt"></i>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        <div class="grid-title">
+            <h3>Recent Items</h3>
+            <span class="live-indicator"><i class="fas fa-circle animate__animated animate__flash animate__infinite"></i> Live Now</span>
+        </div>
+
+        <div class="product-grid" id="productGrid">
+            </div>
+    </div>
+
+    <div class="fab" onclick="document.getElementById('postModal').style.display='flex'">
+        <i class="fas fa-plus"></i>
+    </div>
+
+    <div id="postModal" class="modal">
+        <div class="modal-content">
+            <h2>Post Item</h2>
+            <div class="input-group">
+                <label>PRODUCT NAME</label>
+                <input type="text" id="pName" placeholder="e.g. Sony Headphones">
+            </div>
+            <div class="input-group">
+                <label>PRICE (₦)</label>
+                <input type="number" id="pPrice" placeholder="Enter amount">
+            </div>
+            <div class="input-group">
+                <label>IMAGE URL</label>
+                <input type="text" id="pImg" placeholder="Paste link here">
+            </div>
+            <button class="btn-post" onclick="uploadToFirebase()">PUBLISH LISTING</button>
+            <p style="text-align:center; margin-top:15px; color:#aaa; cursor:pointer; font-weight:600;" onclick="document.getElementById('postModal').style.display='none'">Cancel</p>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // --- YOUR FIREBASE CONFIG ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const currentUser = localStorage.getItem('username') || "Anonymous";
+
+        // --- UPLOAD FUNCTION ---
+        window.uploadToFirebase = () => {
+            const name = document.getElementById('pName').value;
+            const price = document.getElementById('pPrice').value;
+            const img = document.getElementById('pImg').value;
+
+            if(!name || !price) { alert("Please enter name and price."); return; }
+
+            const postData = {
+                name: name,
+                price: price,
+                img: img || 'https://via.placeholder.com/400x400?text=No+Image',
+                seller: currentUser,
+                createdAt: Date.now(), // Real-time timestamp
+                expiryAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours in milliseconds
+            };
+
+            db.ref('flash_market').push(postData).then(() => {
+                document.getElementById('postModal').style.display = 'none';
+                // Reset inputs
+                document.getElementById('pName').value = "";
+                document.getElementById('pPrice').value = "";
+                document.getElementById('pImg').value = "";
+            });
+        };
+
+        // --- REAL-TIME LISTENER & AUTO-DELETE ---
+        db.ref('flash_market').on('value', (snapshot) => {
+            const container = document.getElementById('productGrid');
+            container.innerHTML = "";
+            const now = Date.now();
+
+            snapshot.forEach((child) => {
+                const item = child.val();
+
+                // AUTOMATIC DELETE LOGIC
+                if (now > item.expiryAt) {
+                    db.ref('flash_market/' + child.key).remove();
+                } else {
+                    // Calculate hours remaining
+                    const remainingMs = item.expiryAt - now;
+                    const hoursLeft = Math.floor(remainingMs / (1000 * 60 * 60));
+
+                    container.innerHTML += `
+                        <div class="product-card">
+                            <div class="img-box">
+                                <img src="${item.img}">
+                                <div class="expiry-tag"><i class="far fa-clock"></i> ${hoursLeft}h left</div>
+                            </div>
+                            <div class="info">
+                                <div class="price">₦${Number(item.price).toLocaleString()}</div>
+                                <div class="title">${item.name}</div>
+                                <button class="btn-action" onclick="goToChat('${item.seller}')">
+                                    <i class="fas fa-comment-dots"></i> CHAT SELLER
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        });
+
+        window.goToChat = (sellerName) => {
+            localStorage.setItem('chat_target', sellerName);
+            window.location.href = "Chat.html"; // Direct link to your chat page
+        };
+    </script>
+</body>
+</html>

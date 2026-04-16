@@ -1,125 +1,289 @@
 <!DOCTYPE html>
-<html lang="ha">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings & Earn - CMchat</title>
+    <title>Account Settings - CMchat Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
-        :root { --p: #1A237E; --g: #FFD600; --bg: #f4f7f6; --txt: #333; }
-        body.dark-mode { --bg: #121212; --txt: #eee; }
-        body { margin: 0 auto; max-width: autopx; background: var(--bg); color: var(--txt); font-family: sans-serif; }
-        
-        .header { background: var(--p); color: white; padding: 15px; display: flex; align-items: center; gap: 15px; }
-        .card { background: white; margin: 10px; padding: 20px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        body.dark-mode .card { background: #1e1e1e; }
+        :root {
+            --p: #1A237E;
+            --accent: #FFD600;
+            --danger: #FF5252;
+            --card: #ffffff;
+            --text: #1e1e1e;
+            --bg: #F0F2F5;
+        }
 
-        .profile-img { width: 80px; height: 80px; border-radius: 50%; background: #eee; margin: 0 auto 10px; border: 3px solid var(--p); display: flex; align-items: center; justify-content: center; }
-        
-        /* Ads Section */
-        .ads-box { border: 2px dashed var(--g); background: #FFF9C4; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
-        body.dark-mode .ads-box { background: #332b00; border-color: gold; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding-bottom: 50px;
+        }
 
-        /* Full Screen Ad */
-        #adOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:9999; color:white; text-align:center; padding-top:100px; }
+        /* Header Navigation */
+        header {
+            background: var(--p);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* Profile Header Card */
+        .profile-header {
+            background: var(--p);
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            border-radius: 0 0 40px 40px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border: 4px solid var(--accent);
+            border-radius: 50%;
+            margin-bottom: 10px;
+            background: #eee;
+            overflow: hidden;
+        }
+
+        .avatar-container img { width: 100%; height: 100%; object-fit: cover; }
+
+        .edit-badge {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--accent);
+            color: var(--p);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Settings List */
+        .settings-container { padding: 20px; }
         
-        .input-group { margin-top: 15px; text-align: left; }
-        .input-group label { font-size: 11px; color: #888; }
-        .input-group input, select { width: 100%; border: none; border-bottom: 1px solid #ddd; padding: 8px 0; background: transparent; color: inherit; outline: none; }
+        .settings-card {
+            background: var(--card);
+            border-radius: 25px;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            gap: 15px;
+            cursor: pointer;
+            border-radius: 15px;
+            transition: 0.2s;
+        }
+
+        .setting-item:active { background: #f5f5f5; }
+
+        .icon-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .item-info { flex: 1; }
+        .item-info b { display: block; font-size: 15px; }
+        .item-info small { color: #888; font-size: 12px; }
+
+        .logout-btn {
+            background: #ffebee;
+            color: var(--danger);
+            border: none;
+            width: 100%;
+            padding: 15px;
+            border-radius: 20px;
+            font-weight: 800;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Modern Modal for Editing */
+        #editModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            align-items: center; justify-content: center;
+        }
+        .modal-body {
+            background: white;
+            width: 85%;
+            max-width: 400px;
+            padding: 25px;
+            border-radius: 30px;
+        }
+        input {
+            width: 100%; padding: 15px; margin: 10px 0;
+            border: 1px solid #ddd; border-radius: 15px; outline: none; box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <i class="fas fa-arrow-left" onclick="history.back()"></i>
-    <b>Profile & Settings</b>
-</div>
+    <header>
+        <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
+        <b style="font-size: 18px;">Settings</b>
+    </header>
 
-<div class="card" style="text-align: center;">
-    <div class="profile-img"><i class="fas fa-user" style="font-size: 40px; color: var(--p);"></i></div>
-    <div class="input-group">
-        <label>Sunanka</label>
-        <input type="text" value="Abubakar Sadiq">
+    <div class="profile-header">
+        <div class="avatar-container">
+            <img id="userImg" src="https://via.placeholder.com/150" alt="Profile">
+            <div class="edit-badge" onclick="showEdit('image')"><i class="fas fa-camera"></i></div>
+        </div>
+        <h2 id="userName" style="margin: 5px 0 0;">Loading...</h2>
+        <small id="userEmail" style="opacity: 0.7;">User ID: #0000</small>
     </div>
-    <div class="input-group">
-        <label>Jiha (State)</label>
-        <select>
-            <option>Kano</option>
-            <option>Kaduna</option>
-            <option>Lagos</option>
-        </select>
-    </div>
-</div>
 
-<div class="card">
-    <div class="ads-box" onclick="tryStartAd()">
-        <i class="fas fa-play-circle" style="font-size: 30px; color: #FBC02D;"></i>
-        <div>
-            <b style="font-size: 14px;">Watch Ad & Earn 5 Coins</b><br>
-            <small id="adLimitTxt">Limit na yau: 10/10</small>
+    <div class="settings-container">
+        
+        <h4 style="margin-left: 10px; color: #666;">Account Settings</h4>
+        <div class="settings-card">
+            <div class="setting-item" onclick="showEdit('name')">
+                <div class="icon-box" style="background: #5C6BC0;"><i class="fas fa-user"></i></div>
+                <div class="item-info">
+                    <b>Display Name</b>
+                    <small>Update your username</small>
+                </div>
+                <i class="fas fa-chevron-right" style="color:#ccc"></i>
+            </div>
+            <div class="setting-item" onclick="showEdit('password')">
+                <div class="icon-box" style="background: #26A69A;"><i class="fas fa-lock"></i></div>
+                <div class="item-info">
+                    <b>Security</b>
+                    <small>Change your password</small>
+                </div>
+                <i class="fas fa-chevron-right" style="color:#ccc"></i>
+            </div>
+        </div>
+
+        <h4 style="margin-left: 10px; color: #666;">Dashboard Modules</h4>
+        <div class="settings-card">
+            <div class="setting-item" onclick="window.location.href='School.html'">
+                <div class="icon-box" style="background: #FFA726;"><i class="fas fa-graduation-cap"></i></div>
+                <div class="item-info">
+                    <b>School Module</b>
+                    <small>Course & Grade settings</small>
+                </div>
+                <i class="fas fa-chevron-right" style="color:#ccc"></i>
+            </div>
+            <div class="setting-item" onclick="window.location.href='Shopping.html'">
+                <div class="icon-box" style="background: #66BB6A;"><i class="fas fa-shopping-bag"></i></div>
+                <div class="item-info">
+                    <b>Store Settings</b>
+                    <small>Manage your marketplace posts</small>
+                </div>
+                <i class="fas fa-chevron-right" style="color:#ccc"></i>
+            </div>
+        </div>
+
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> LOG OUT SESSION
+        </button>
+    </div>
+
+    <div id="editModal">
+        <div class="modal-body animate__animated animate__zoomIn">
+            <h3 id="modalTitle" style="color:var(--p)">Update Information</h3>
+            <input type="text" id="editInput" placeholder="Enter new value">
+            <button class="logout-btn" style="background:var(--p); color:white" onclick="saveChanges()">SAVE UPDATES</button>
+            <p style="text-align:center; margin-top:15px; cursor:pointer; color:#999" onclick="closeModal()">Dismiss</p>
         </div>
     </div>
-</div>
 
-<div class="card" style="padding: 10px;">
-    <div style="display:flex; justify-content:space-between; padding: 10px;" onclick="toggleDarkMode()">
-        <span><i class="fas fa-moon"></i> Dark Mode</span>
-        <i class="fas fa-toggle-on" id="darkIcon"></i>
-    </div>
-</div>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-<div id="adOverlay">
-    <div id="adTimer" style="font-size: 30px; border: 3px solid gold; border-radius: 50%; width: 60px; height: 60px; line-height: 60px; margin: 0 auto;">10</div>
-    <h2 style="margin-top: 40px; color: gold;">TALLA (AD)</h2>
-    <p>Kada ka fita har sai lokaci ya cika don samun Coins dinka.</p>
-</div>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const myName = localStorage.getItem('username') || "Guest";
 
-<script>
-    let dailyLimit = localStorage.getItem('adLimit') || 10;
-    document.getElementById('adLimitTxt').innerText = "Limit na yau: " + dailyLimit + "/10";
+        let currentField = "";
 
-    function tryStartAd() {
-        if (dailyLimit <= 0) {
-            alert("Ka riga ka kalli dukkan tallace-tallacen yau. Dawo gobe!");
-            return;
-        }
-        startAd();
-    }
-
-    function startAd() {
-        const overlay = document.getElementById('adOverlay');
-        const timerTxt = document.getElementById('adTimer');
-        let time = 10;
-        overlay.style.display = 'block';
-
-        const interval = setInterval(() => {
-            time--;
-            timerTxt.innerText = time;
-            if (time <= 0) {
-                clearInterval(interval);
-                overlay.style.display = 'none';
-                finishAd();
+        // 1. Initial Load
+        db.ref('users/' + myName).on('value', snap => {
+            const user = snap.val();
+            if(user) {
+                document.getElementById('userName').innerText = user.name || myName;
+                document.getElementById('userImg').src = user.avatar || "https://via.placeholder.com/150";
+                document.getElementById('userEmail').innerText = "Account ID: " + (user.id || "#7721");
             }
-        }, 1000);
-    }
+        });
 
-    function finishAd() {
-        dailyLimit--;
-        localStorage.setItem('adLimit', dailyLimit);
-        document.getElementById('adLimitTxt').innerText = "Limit na yau: " + dailyLimit + "/10";
-        
-        let coins = parseInt(localStorage.getItem('userCoins')) || 450;
-        coins += 5;
-        localStorage.setItem('userCoins', coins);
-        alert("Taya murna! An tura maka 5 Coins.");
-    }
+        // 2. Modal Controls
+        function showEdit(field) {
+            currentField = field;
+            document.getElementById('modalTitle').innerText = "Update " + field.toUpperCase();
+            document.getElementById('editInput').placeholder = "Enter new " + field;
+            document.getElementById('editModal').style.display = 'flex';
+        }
 
-    function toggleDarkMode() {
-        document.body.classList.toggle('dark-mode');
-        const isDark = document.body.classList.contains('dark-mode');
-        document.getElementById('darkIcon').className = isDark ? "fas fa-toggle-on" : "fas fa-toggle-off";
-    }
-</script>
+        function closeModal() { document.getElementById('editModal').style.display = 'none'; }
 
+        // 3. Save Changes to Firebase
+        function saveChanges() {
+            const newVal = document.getElementById('editInput').value;
+            if(!newVal) return alert("Field cannot be empty!");
+
+            let update = {};
+            if(currentField === 'name') update = { name: newVal };
+            if(currentField === 'image') update = { avatar: newVal };
+            if(currentField === 'password') update = { password: newVal };
+
+            db.ref('users/' + myName).update(update).then(() => {
+                alert("Settings updated successfully!");
+                closeModal();
+            });
+        }
+
+        // 4. Logout Function
+        function logout() {
+            if(confirm("Are you sure you want to log out from CMchat Pro?")) {
+                localStorage.clear();
+                window.location.href = "Login.html";
+            }
+        }
+    </script>
 </body>
 </html>

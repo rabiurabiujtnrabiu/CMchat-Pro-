@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History | CMchat Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <style>
+        :root {
+            --primary: #1A237E;
+            --success: #00C853;
+            --danger: #FF5252;
+            --bg: #F8F9FD;
+            --white: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: #1C1C1E;
+        }
+
+        header {
+            background: var(--primary);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        header i { font-size: 20px; cursor: pointer; margin-right: 15px; }
+
+        .history-container {
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* --- TRANSACTION ITEM --- */
+        .trans-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: 0.3s;
+        }
+
+        .icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .details { flex: 1; }
+        .details b { display: block; font-size: 14px; margin-bottom: 2px; }
+        .details small { font-size: 11px; color: #8E8E93; }
+
+        .amount {
+            text-align: right;
+            font-weight: 800;
+            font-size: 15px;
+        }
+
+        .status-badge {
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+            font-weight: 800;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        /* --- EMPTY STATE --- */
+        #emptyState {
+            text-align: center;
+            padding: 50px 20px;
+            display: none;
+        }
+        #emptyState i { font-size: 60px; color: #E5E5EA; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
+        <b>Transaction History</b>
+    </header>
+
+    <div class="history-container">
+        
+        <div id="transactionList">
+            </div>
+
+        <div id="emptyState">
+            <i class="fas fa-receipt"></i>
+            <h3 style="color:#8E8E93">No Transactions Yet</h3>
+            <p style="color:#AEAEB2; font-size:13px">Your payment history will appear here once you start using CMchat Pro services.</p>
+        </div>
+
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const username = localStorage.getItem('username') || "User";
+
+        // Fetch Transactions from Firebase
+        db.ref('transactions/' + username).orderByChild('time').on('value', snap => {
+            const list = document.getElementById('transactionList');
+            const empty = document.getElementById('emptyState');
+            list.innerHTML = "";
+
+            if (!snap.exists()) {
+                empty.style.display = 'block';
+                return;
+            }
+
+            empty.style.display = 'none';
+            let transArray = [];
+
+            snap.forEach(child => {
+                transArray.push(child.val());
+            });
+
+            // Reverse to show latest first
+            transArray.reverse().forEach(t => {
+                const isDebit = t.type === 'debit';
+                const date = new Date(t.time).toLocaleDateString('en-GB', {
+                    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+
+                list.innerHTML += `
+                    <div class="trans-card animate__animated animate__fadeInUp">
+                        <div class="icon-box" style="background: ${isDebit ? '#ffebee' : '#e8f5e9'}; color: ${isDebit ? var(--danger) : var(--success)}">
+                            <i class="fas ${isDebit ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+                        </div>
+                        <div class="details">
+                            <b>${t.service}</b>
+                            <small>${date}</small>
+                            <br>
+                            <span class="status-badge" style="background: #E8F5E9; color: var(--success)">${t.status || 'Completed'}</span>
+                        </div>
+                        <div class="amount" style="color: ${isDebit ? var(--danger) : var(--success)}">
+                            ${isDebit ? '-' : '+'}₦${parseFloat(t.amount).toLocaleString()}
+                        </div>
+                    </div>
+                `;
+            });
+        });
+
+        // Helper for colors
+        const style = getComputedStyle(document.documentElement);
+        const colors = {
+            success: style.getPropertyValue('--success').trim(),
+            danger: style.getPropertyValue('--danger').trim()
+        };
+    </script>
+</body>
+</html>

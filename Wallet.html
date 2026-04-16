@@ -1,118 +1,225 @@
 <!DOCTYPE html>
-<html lang="ha">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wallet & VTU - CMchat Pro</title>
+    <title>Elite Wallet | CMchat Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
-        :root { --primary: #075e54; --secondary: #128c7e; --accent: #25d366; --gold: #ffd700; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f6; color: #333; }
+        :root {
+            --primary: #1A237E;
+            --accent: #FFD600;
+            --bg: #F4F7FE;
+            --white: #ffffff;
+            --success: #4caf50;
+            --danger: #f44336;
+            --grad: linear-gradient(135deg, #1A237E 0%, #3949AB 100%);
+        }
+
+        body {
+            margin: 0; font-family: 'Poppins', sans-serif;
+            background: var(--bg); color: #333; padding-bottom: 30px;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { display: none; }
+
+        /* --- Header --- */
+        header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .user-greet b { font-size: 18px; display: block; }
+        .user-greet span { font-size: 12px; color: #888; }
+
+        /* --- Main Wallet Card --- */
+        .wallet-card {
+            margin: 0 20px; padding: 25px; border-radius: 30px;
+            background: var(--grad); color: white;
+            box-shadow: 0 15px 35px rgba(26, 35, 126, 0.3);
+            position: relative; overflow: hidden;
+        }
+
+        .balance-label { font-size: 13px; opacity: 0.8; }
+        .balance-amount { font-size: 32px; font-weight: 800; margin: 5px 0 20px; display: flex; align-items: center; gap: 10px; }
         
-        /* Header & Balance Section */
-        .wallet-header { background: var(--primary); color: white; padding: 30px 20px; text-align: center; border-radius: 0 0 30px 30px; }
-        .balance-card { background: white; color: #333; width: 85%; margin: -40px auto 20px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        .balance-amount { font-size: 28px; font-weight: bold; color: var(--primary); margin: 5px 0; }
-        .coins-badge { display: inline-block; background: #fff9c4; color: #f57f17; padding: 5px 15px; border-radius: 15px; font-weight: bold; font-size: 14px; border: 1px solid #fbc02d; }
+        .wallet-actions { display: flex; gap: 15px; }
+        .action-btn {
+            background: rgba(255,255,255,0.2); border: none; padding: 12px 20px;
+            border-radius: 15px; color: white; font-weight: 600; font-size: 12px;
+            backdrop-filter: blur(10px); cursor: pointer; display: flex; align-items: center; gap: 8px; flex: 1;
+        }
 
-        /* VTU Services Grid */
-        .vtu-container { padding: 20px; }
-        .section-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; color: #555; }
-        .vtu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .vtu-item { background: white; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.3s; border: 1px solid #eee; text-decoration: none; color: inherit; }
-        .vtu-item:active { transform: scale(0.95); }
-        .vtu-icon { font-size: 30px; margin-bottom: 10px; display: block; }
-        .vtu-label { font-size: 14px; font-weight: 500; }
-        .bonus-tag { font-size: 10px; color: var(--accent); display: block; margin-top: 5px; font-weight: bold; }
+        /* --- VTU Services Grid --- */
+        .services-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 15px; padding: 0 20px; margin-top: 25px;
+        }
+        .service-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+        .icon-circle {
+            width: 55px; height: 55px; background: var(--white);
+            border-radius: 18px; display: flex; align-items: center;
+            justify-content: center; font-size: 20px; color: var(--primary);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+        }
+        .service-item span { font-size: 11px; font-weight: 600; color: #555; }
 
-        /* Referral Box */
-        .referral-box { background: #e3f2fd; padding: 15px; border-radius: 15px; margin: 10px 0; border: 1px solid #bbdefb; }
-        .btn-copy { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; cursor: pointer; transition: 0.2s; }
-        .btn-copy:active { background: var(--secondary); }
+        /* --- Transactions Section --- */
+        .recent-box { margin: 30px 20px 0; }
+        .recent-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .transaction {
+            background: var(--white); padding: 15px; border-radius: 20px;
+            display: flex; align-items: center; gap: 15px; margin-bottom: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+        .trans-info { flex: 1; }
+        .trans-info b { font-size: 14px; display: block; }
+        .trans-amt { font-weight: 800; font-size: 14px; }
 
-        /* Banner Ad Area */
-        .ad-space { width: 100%; height: 60px; background: #e0e0e0; margin: 20px 0; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #888; border: 1px dashed #bbb; border-radius: 10px; }
+        /* --- FUNDING MODAL (Professional Overlay) --- */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+            z-index: 2000; display: none; align-items: flex-end;
+        }
+        .modal-content {
+            background: var(--bg); width: 100%; border-radius: 40px 40px 0 0;
+            padding: 30px 20px; box-sizing: border-box; max-height: 85vh; overflow-y: auto;
+        }
+        .bank-box {
+            background: var(--grad); color: white; padding: 20px;
+            border-radius: 25px; margin: 20px 0;
+        }
+        .input-group input {
+            width: 100%; padding: 18px; border-radius: 18px; border: none;
+            margin-bottom: 15px; background: white; font-weight: bold;
+        }
+        .btn-pay {
+            width: 100%; padding: 18px; border: none; border-radius: 18px;
+            background: var(--primary); color: white; font-weight: 800; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <div class="wallet-header">
-        <h2 style="margin:0;">CMchat Wallet</h2>
-        <p style="font-size:12px; opacity:0.8;">Lura: Duk recharge kana da Spend Bonus!</p>
+    <header>
+        <div class="user-greet">
+            <span>Welcome back,</span>
+            <b id="walletUser">User Name</b>
+        </div>
+        <div class="icon-circle" style="width:40px; height:40px; cursor:pointer" onclick="location.href='index.html'"><i class="fas fa-home"></i></div>
+    </header>
+
+    <div class="wallet-card animate__animated animate__fadeInDown">
+        <div class="balance-label">Available Balance</div>
+        <div class="balance-amount">₦<span id="balance">0.00</span></div>
+        <div class="wallet-actions">
+            <button class="action-btn" onclick="openFund()"><i class="fas fa-plus-circle"></i> Add Money</button>
+            <button class="action-btn" onclick="openHistory()"><i class="fas fa-history"></i> History</button>
+        </div>
     </div>
 
-    <div class="balance-card">
-        <div style="font-size: 12px; color: #777;">Kudin da kake da shi</div>
-        <div class="balance-amount">₦<span id="naira-balance">0.00</span></div>
-        <div class="coins-badge">💰 <span id="coin-count">0</span> Coins</div>
+    <div class="services-grid">
+        <div class="service-item" onclick="location.href='Buy-Service.html'">
+            <div class="icon-circle"><i class="fas fa-wifi"></i></div>
+            <span>Data</span>
+        </div>
+        <div class="service-item" onclick="location.href='Buy-Service.html'">
+            <div class="icon-circle"><i class="fas fa-phone"></i></div>
+            <span>Airtime</span>
+        </div>
+        <div class="service-item" onclick="location.href='Buy-Service.html'">
+            <div class="icon-circle"><i class="fas fa-tv"></i></div>
+            <span>Cable TV</span>
+        </div>
+        <div class="service-item" onclick="location.href='Security-Pin.html'">
+            <div class="icon-circle"><i class="fas fa-shield-alt"></i></div>
+            <span>Security</span>
+        </div>
     </div>
 
-    <div class="vtu-container" style="padding-top:0;">
-        <div class="ad-space">
-            [TALLAR BANNER TANA NAN]
-        </div>
+    <div class="recent-box">
+        <div class="recent-header"><b>Recent Activity</b></div>
+        <div id="miniHistory"></div>
+    </div>
 
-        <div class="section-title">Sabis-Sabis (VTU)</div>
-        <div class="vtu-grid">
-            <a href="BuyData.html" class="vtu-item">
-                <span class="vtu-icon">📶</span>
-                <span class="vtu-label">Data</span>
-                <span class="bonus-tag">+10 Coins Bonus</span>
-            </a>
-            <a href="BuyAirtime.html" class="vtu-item">
-                <span class="vtu-icon">📱</span>
-                <span class="vtu-label">Airtime</span>
-                <span class="bonus-tag">+2 Coins Bonus</span>
-            </a>
-            <a href="CableTV.html" class="vtu-item">
-                <span class="vtu-icon">📺</span>
-                <span class="vtu-label">TV Subscription</span>
-                <span class="bonus-tag">+20 Coins Bonus</span>
-            </a>
-            <a href="Electricity.html" class="vtu-item">
-                <span class="vtu-icon">💡</span>
-                <span class="vtu-label">Electricity</span>
-                <span class="bonus-tag">+25 Coins Bonus</span>
-            </a>
-        </div>
-
-        <div class="section-title" style="margin-top:25px;">Gayyaci Abokai</div>
-        <div class="referral-box">
-            <p style="font-size: 13px; margin-top: 0;">Gayyaci mutum 1 ka sami <b>50 Coins</b> nan take!</p>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <code id="ref-link-text" style="font-size: 11px; color: #444; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;">cmchat-pro.github.io/ref=User</code>
-                <button class="btn-copy" onclick="copyRef()">Copy Link</button>
+    <div id="fundOverlay" class="overlay">
+        <div class="modal-content animate__animated animate__slideInUp">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Fund Your Wallet</h3>
+                <i class="fas fa-times-circle" style="font-size:24px; color:#999;" onclick="closeFund()"></i>
+            </div>
+            <div class="bank-box">
+                <small>Bank Transfer (Automatic)</small>
+                <div style="font-size:22px; font-weight:800; margin:10px 0;">9034567812</div>
+                <small>Wema Bank / Monnify</small>
+            </div>
+            <div class="input-group">
+                <p style="font-size:12px; font-weight:bold; color:#666;">PAY WITH CARD / USSD</p>
+                <input type="number" id="fundAmt" placeholder="Enter Amount (₦)">
+                <button class="btn-pay" onclick="processPayment()">PAY SECURELY NOW</button>
             </div>
         </div>
-
-        <div class="ad-space">
-            [TALLAR BANNER TANA NAN]
-        </div>
     </div>
 
-    <script>
-        // Lokacin da aka bude shafin
-        window.onload = function() {
-            // Dauko adadin coins da naira daga wayar user (ko Database)
-            let coins = localStorage.getItem("user_coins") || 0;
-            let balance = localStorage.getItem("user_balance") || "0.00";
-            let userID = localStorage.getItem("userID") || "CM" + Math.floor(Math.random() * 9999);
-            
-            // Saka bayanan a fuskar shafin
-            document.getElementById('coin-count').innerText = coins;
-            document.getElementById('naira-balance').innerText = balance;
-            document.getElementById('ref-link-text').innerText = "cmchat-pro.github.io/ref=" + userID;
-        }
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-        // Aikin Copy Link
-        function copyRef() {
-            let userID = localStorage.getItem("userID") || "User";
-            let refLink = "https://cmchat-pro.github.io/register.html?ref=" + userID;
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const myName = localStorage.getItem('username') || "Guest";
+        document.getElementById('walletUser').innerText = myName;
+
+        // 1. Live Balance
+        db.ref('users/' + myName + '/wallet').on('value', snap => {
+            const val = snap.val() || 0;
+            document.getElementById('balance').innerText = parseFloat(val).toLocaleString();
+        });
+
+        // 2. Load Mini History
+        db.ref('transactions/' + myName).limitToLast(3).on('value', snap => {
+            const list = document.getElementById('miniHistory');
+            list.innerHTML = "";
+            snap.forEach(child => {
+                const t = child.val();
+                const isDebit = t.type === 'debit';
+                list.innerHTML += `
+                    <div class="transaction">
+                        <div style="width:40px; height:40px; border-radius:10px; background:${isDebit ? '#ffebee' : '#e8f5e9'}; color:${isDebit ? 'red' : 'green'}; display:flex; align-items:center; justify-content:center; margin-right:15px;">
+                            <i class="fas ${isDebit ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+                        </div>
+                        <div class="trans-info">
+                            <b>${t.service}</b>
+                            <small>${new Date(t.time).toLocaleDateString()}</small>
+                        </div>
+                        <div class="trans-amt" style="color:${isDebit ? 'red' : 'green'}">${isDebit ? '-' : '+'}₦${t.amount}</div>
+                    </div>
+                `;
+            });
+        });
+
+        // Overlay Controllers
+        window.openFund = () => document.getElementById('fundOverlay').style.display = 'flex';
+        window.closeFund = () => document.getElementById('fundOverlay').style.display = 'none';
+        window.openHistory = () => location.href = 'Transaction-History.html';
+
+        function processPayment() {
+            const amt = document.getElementById('fundAmt').value;
+            if(amt < 100) return alert("Minimum ₦100");
             
-            navigator.clipboard.writeText(refLink).then(() => {
-                alert("An kwafi link din gayyata!\n\n" + refLink);
-            }).catch(err => {
-                // Idan browser ta hana a kwafa kai tsaye
-                alert("Link dinka: " + refLink);
+            // Logic don kara kudi a Firebase
+            db.ref('users/' + myName + '/wallet').once('value', s => {
+                let current = s.val() || 0;
+                db.ref('users/' + myName + '/wallet').set(parseFloat(current) + parseFloat(amt));
+                db.ref('transactions/' + myName).push({
+                    type: 'credit', service: 'Wallet Funding', amount: amt, time: Date.now()
+                });
+                alert("Payment Successful!");
+                closeFund();
             });
         }
     </script>
