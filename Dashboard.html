@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CMchat Pro - Full Elite Dashboard</title>
+    <title>CMchat Pro - Elite Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     
     <style>
-        /* --- Perfect Original Style - NO CHANGES --- */
         :root { 
             --p: #1A237E; --g: #FFD600; --bg: #F0F2F5; --white: #ffffff;
             --danger: #FF5252; --success: #00E676;
@@ -100,7 +99,7 @@
 <body>
 
     <div class="header">
-        <i class="fas fa-bars" onclick="location.href='sidebar.html'"></i>
+        <i class="fas fa-bars" onclick="location.href='Sidebar.html'"></i>
         <b>CMchat <span>Pro</span></b>
         <div class="user-avatar" id="uInitial" onclick="location.href='Profile.html'">U</div>
     </div>
@@ -141,11 +140,11 @@
             <i class="fas fa-store" style="color:var(--g)"></i>
             <span>Market</span>
         </a>
-        <a href="group.html" class="service-item animate__animated animate__zoomIn">
+        <a href="Group.html" class="service-item animate__animated animate__zoomIn">
             <i class="fas fa-users" style="color:#66BB6A"></i>
             <span>Groups</span>
         </a>
-        <a href="Calling.html" class="service-item animate__animated animate__zoomIn">
+        <a href="Call.html" class="service-item animate__animated animate__zoomIn">
             <i class="fas fa-phone-alt" style="color:#26A69A"></i>
             <span>Calling</span>
         </a>
@@ -159,7 +158,7 @@
         <div class="nav-item active" onclick="location.href='index.html'">
             <i class="fas fa-home"></i>
         </div>
-        <div class="nav-item" onclick="location.href='friends.html'">
+        <div class="nav-item" onclick="location.href='Friends.html'">
             <i class="fas fa-user-plus"></i>
         </div>
         <div class="nav-item" onclick="location.href='Shopping.html'">
@@ -174,6 +173,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // Central Firebase Config (Amfani da bayanan da ka bayar)
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
             databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
@@ -183,14 +183,14 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         
-        // Identity Management
+        // 1. Identity Check
         const currentUserName = localStorage.getItem('username') || "User";
         const initialElement = document.getElementById('uInitial');
         if(initialElement) {
             initialElement.innerText = currentUserName.charAt(0).toUpperCase();
         }
 
-        // Live Balance Sync
+        // 2. Real-time Wallet Sync (Wannan ne zai raba Wallet din VTU da kowa)
         const balanceRef = ref(db, `users/${currentUserName}/wallet`);
         onValue(balanceRef, (snapshot) => {
             const bal = snapshot.val() || 0;
@@ -200,7 +200,7 @@
             }
         });
 
-        // Live Coins Sync
+        // 3. Coins Sync
         const coinsRef = ref(db, `users/${currentUserName}/coins`);
         onValue(coinsRef, (snapshot) => {
             const coinVal = snapshot.val() || 0;
@@ -209,11 +209,6 @@
                 coinDisplay.innerText = coinVal;
             }
         });
-
-        // Security Check (Optional: Redirect if not logged in)
-        if(!localStorage.getItem('username')) {
-            // window.location.href = 'Login.html'; 
-        }
     </script>
 </body>
 </html>

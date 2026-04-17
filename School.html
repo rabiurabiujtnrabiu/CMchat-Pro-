@@ -2,164 +2,214 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CM Academy Pro - Learning System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CM Academy Pro - Elite Learning</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
-        /* All your original styles remain untouched */
         :root {
-            --primary: #1A237E; --accent: #FFD600; --danger: #FF5252;
-            --success: #00E676; --info: #00B0FF; --bg: #F8F9FA; --card-bg: #ffffff;
+            --p: #1A237E; --g: #FFD600; --danger: #FF5252;
+            --success: #00E676; --white: #ffffff; --soft: #F4F7FE;
         }
-        body { margin: 0; background: var(--bg); font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; height: 100vh; color: #333; }
-        header { background: var(--primary); padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 1000; }
-        .header-left { display: flex; align-items: center; gap: 12px; }
-        .header-left i { font-size: 18px; cursor: pointer; }
-        .header-left b { font-size: 20px; letter-spacing: 0.5px; }
-        .live-badge { background: var(--danger); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 6px; animation: pulse-red 2s infinite; }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 82, 82, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 82, 82, 0); } }
-        .main-content { flex: 1; overflow-y: auto; padding-bottom: 20px; }
-        .video-box { margin: 15px; height: 230px; background: #000; border-radius: 24px; position: relative; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 4px solid var(--card-bg); overflow: hidden; }
-        .malami-tag { position: absolute; bottom: 12px; left: 12px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); padding: 6px 14px; border-radius: 12px; font-size: 12px; color: white; display: flex; align-items: center; gap: 8px; }
-        .section-header { padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 14px; color: #666; }
-        .attendance-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; padding: 0 15px 20px; }
-        .student-card { background: var(--card-bg); padding: 12px 5px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.04); transition: 0.3s; }
-        .student-card .status-dot { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-bottom: 6px; }
-        .bg-in { background: linear-gradient(135deg, var(--success), #00C853); }
-        .bg-out { background: linear-gradient(135deg, var(--danger), #D32F2F); }
-        .student-card span { font-size: 10px; color: #888; font-weight: 600; text-align: center; }
-        .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 15px 20px; }
-        .btn-pro { padding: 15px; border: none; border-radius: 18px; color: white; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: 0.2s; }
-        .btn-pro:active { transform: scale(0.95); }
-        .bottom-nav { background: var(--card-bg); padding: 15px 10px 25px; display: flex; justify-content: space-around; border-radius: 35px 35px 0 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.08); }
-        .tool-btn { width: 54px; height: 54px; border-radius: 16px; border: none; color: white; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
-        .tool-btn:active { transform: scale(0.9); }
+        body { 
+            margin: 0; background: var(--soft); font-family: 'Inter', 'Segoe UI', sans-serif; 
+            color: #2D3436; overflow-x: hidden; padding-bottom: 50px;
+        }
+        
+        .elite-header { 
+            background: linear-gradient(135deg, var(--p), #303F9F); 
+            padding: 35px 25px 50px; border-bottom-left-radius: 40px; 
+            border-bottom-right-radius: 40px; color: white;
+            box-shadow: 0 10px 30px rgba(26, 35, 126, 0.2);
+        }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; }
+        .user-profile { display: flex; align-items: center; gap: 15px; }
+        .avatar-main { 
+            width: 45px; height: 45px; background: rgba(255,255,255,0.2); 
+            border-radius: 14px; display: flex; align-items: center; 
+            justify-content: center; font-weight: 800; border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .instructor-nexus {
+            background: var(--white); margin: -30px 20px 25px; padding: 20px;
+            border-radius: 25px; display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.06); border: 1px solid rgba(255,255,255,0.8);
+        }
+        .live-pulse {
+            background: rgba(0, 230, 118, 0.1); color: var(--success);
+            padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800;
+            display: flex; align-items: center; gap: 5px;
+        }
+
+        .section-title { padding: 0 25px; margin: 20px 0 12px; font-size: 13px; font-weight: 800; color: var(--p); letter-spacing: 0.5px; }
+
+        .course-scroll { display: flex; gap: 15px; padding: 0 20px 5px; overflow-x: auto; scrollbar-width: none; }
+        .course-card {
+            min-width: 150px; background: white; padding: 15px; border-radius: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.02); text-align: center; border: 1px solid #f1f2f6;
+        }
+
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
+        .grid-card {
+            background: var(--white); padding: 22px 15px; border-radius: 25px;
+            text-align: center; text-decoration: none; transition: 0.3s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.01);
+        }
+        .grid-card i { font-size: 26px; margin-bottom: 10px; display: block; color: var(--p); }
+        .grid-card b { font-size: 14px; color: #1E272E; display: block; }
+        .grid-card span { font-size: 10px; color: #A4B0BE; margin-top: 4px; display: block; }
+
+        .full-width-card {
+            grid-column: span 2; display: flex !important; align-items: center;
+            justify-content: flex-start; gap: 18px; padding: 18px 25px !important;
+            text-align: left !important; background: #ffffff; margin-top: 5px;
+        }
+        .full-width-card i { margin-bottom: 0 !important; font-size: 32px !important; }
+
+        .student-nexus { padding: 0 25px; margin: 25px 0; }
+        .avatar-stack { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .stack-item { min-width: 40px; height: 40px; border-radius: 12px; background: #DDE1F8; color: var(--p); display: flex; align-items: center; justify-content: center; font-weight: 800; border: 2px solid white; }
+
+        .btn-hand-elite {
+            margin: 0 20px 20px; padding: 16px; border: none; border-radius: 20px;
+            background: var(--danger); color: white; font-weight: 800; font-size: 15px;
+            display: flex; align-items: center; justify-content: center; gap: 10px; width: calc(100% - 40px);
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-left">
+    <div class="elite-header">
+        <div class="header-flex">
             <i class="fas fa-chevron-left" onclick="window.history.back()"></i>
-            <b>CM Academy Pro</b>
-        </div>
-        <div class="live-badge" id="liveStatus">
-            <i class="fas fa-broadcast-tower"></i> LIVE VIDEO
-        </div>
-    </header>
-
-    <div class="main-content">
-        <div class="video-box" id="videoContainer">
-            <div class="malami-tag">
-                <i class="fas fa-user-tie"></i> Instructor: <span id="teacherName">Loading...</span>
+            <div class="user-profile">
+                <div class="avatar-main" id="initial">S</div>
+                <div style="text-align: right;">
+                    <small style="opacity: 0.8; font-size: 10px;">Elite Academy</small>
+                    <div style="font-weight: 700; font-size: 16px;" id="uName">Student</div>
+                </div>
             </div>
-        </div>
-
-        <div class="section-header">
-            <span>ACTIVE STUDENTS</span>
-            <span style="color: var(--success);" id="activeCount"><i class="fas fa-users"></i> 0 Active</span>
-        </div>
-
-        <div class="attendance-grid" id="studentGrid">
-            </div>
-
-        <div class="action-row">
-            <button class="btn-pro" style="background: #5C6BC0;" onclick="downloadNote()">
-                <i class="fas fa-file-download"></i> Download Note
-            </button>
-            <button class="btn-pro" style="background: #26A69A;" onclick="window.location.href='Chat.html'">
-                <i class="fas fa-comments"></i> Group Chat
-            </button>
-            <button class="btn-pro" style="background: var(--danger); grid-column: span 2;" onclick="raiseHand()">
-                <i class="fas fa-hand-paper"></i> Raise Your Hand (Question)
-            </button>
         </div>
     </div>
 
-    <div class="bottom-nav">
-        <button class="tool-btn" style="background: #42A5F5;" onclick="toggleVideo()"><i class="fas fa-video"></i></button>
-        <button class="tool-btn" style="background: var(--success);" onclick="toggleMic()"><i class="fas fa-microphone"></i></button>
-        <button class="tool-btn" style="background: var(--accent); color: #333;" onclick="openBoard()"><i class="fas fa-chalkboard"></i></button>
-        <button class="tool-btn" style="background: #78909C;" onclick="openSettings()"><i class="fas fa-cog"></i></button>
+    <div class="instructor-nexus">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <i class="fas fa-user-shield" style="color:var(--p); font-size:24px;"></i>
+            <div>
+                <b id="teacherName" style="font-size: 14px;">Instructor</b>
+                <p style="margin:0; font-size: 11px; color:#888;">Live Classroom</p>
+            </div>
+        </div>
+        <div class="live-pulse"><i class="fas fa-circle animate__flash animate__infinite"></i> ONLINE</div>
     </div>
+
+    <div class="section-title">MY ENROLLED COURSES</div>
+    <div class="course-scroll" id="myCoursesList">
+        <p style="font-size: 11px; color: #999; padding-left: 5px;">Syncing library...</p>
+    </div>
+
+    <div class="section-title">QUICK ACCESS</div>
+    <div class="grid-container">
+        <a href="Video-Portal.html" class="grid-card">
+            <i class="fas fa-play-circle"></i>
+            <b>Video Portal</b>
+            <span>Live Stream</span>
+        </a>
+        <a href="Audio-Room.html" class="grid-card">
+            <i class="fas fa-headset"></i>
+            <b>Audio Room</b>
+            <span>Voice Class</span>
+        </a>
+        <a href="Smartboard.html" class="grid-card">
+            <i class="fas fa-chalkboard"></i>
+            <b>Smart Board</b>
+            <span>Notes</span>
+        </a>
+        <a href="Consol.html" class="grid-card">
+            <i class="fas fa-cog"></i>
+            <b>Console</b>
+            <span>Settings</span>
+        </a>
+        <a href="CM-market.html" class="grid-card full-width-card">
+            <i class="fas fa-store-alt" style="color: var(--g);"></i>
+            <div style="display:flex; flex-direction:column;">
+                <b>CM Market</b>
+                <span style="color: #A4B0BE;">Browse and buy elite global courses</span>
+            </div>
+            <i class="fas fa-angle-right" style="margin-left: auto; color: #ccc;"></i>
+        </a>
+    </div>
+
+    <div class="student-nexus">
+        <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:800; color:#7F8C8D; margin-bottom:12px;">
+            <span>STUDENTS ATTENDING</span>
+            <span id="activeCount" style="color: var(--p);">0 Active</span>
+        </div>
+        <div class="avatar-stack" id="studentList"></div>
+    </div>
+
+    <button class="btn-hand-elite" onclick="raiseHand()">
+        <i class="fas fa-hand-sparkles"></i> RAISE HAND
+    </button>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // Firebase Setup
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
             databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
             projectId: "cmchat-pro"
         };
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
-        const myName = localStorage.getItem('username') || "Student_" + Math.floor(Math.random()*100);
+        const myName = localStorage.getItem('username') || "Student";
 
-        // 1. Live Attendance System
-        const userStatusRef = db.ref('academy/attendance/' + myName);
-        userStatusRef.set({ status: 'online', last_seen: Date.now() });
-        userStatusRef.onDisconnect().set({ status: 'offline', last_seen: Date.now() });
+        document.getElementById('uName').innerText = myName;
+        document.getElementById('initial').innerText = myName.charAt(0).toUpperCase();
 
-        // 2. Fetch Instructor & Live Status
-        db.ref('academy/config').on('value', snap => {
-            const config = snap.val() || { teacher: "Prof. Ibrahim", isLive: true };
-            document.getElementById('teacherName').innerText = config.teacher;
-            document.getElementById('liveStatus').style.display = config.isLive ? 'flex' : 'none';
-        });
-
-        // 3. Update Student Grid in Real-time
-        db.ref('academy/attendance').on('value', snap => {
-            const grid = document.getElementById('studentGrid');
-            const countLabel = document.getElementById('activeCount');
-            grid.innerHTML = "";
-            let onlineCount = 0;
-
+        db.ref('transactions/' + myName).on('value', snap => {
+            const list = document.getElementById('myCoursesList');
+            list.innerHTML = ""; let count = 0;
             snap.forEach(child => {
-                const user = child.val();
-                const isOnline = user.status === 'online';
-                if(isOnline) onlineCount++;
-
-                grid.innerHTML += `
-                    <div class="student-card animate__animated animate__fadeIn">
-                        <div class="status-dot ${isOnline ? 'bg-in' : 'bg-out'}">
-                            ${child.key.charAt(0).toUpperCase()}
-                        </div>
-                        <span>${child.key}</span>
-                    </div>
-                `;
-            });
-            countLabel.innerHTML = `<i class="fas fa-users"></i> ${onlineCount} Active`;
-        });
-
-        // 4. Functional Buttons
-        function raiseHand() {
-            db.ref('academy/notifications').push({
-                user: myName,
-                type: 'hand_raise',
-                time: Date.now()
-            });
-            alert("Your teacher has been notified that you have a question.");
-        }
-
-        function downloadNote() {
-            db.ref('academy/materials').once('value', snap => {
-                const data = snap.val();
-                if(data && data.noteUrl) {
-                    window.open(data.noteUrl);
-                } else {
-                    alert("No study materials uploaded yet for this session.");
+                const t = child.val();
+                if (t.service && (t.service.startsWith("Market: ") || t.service.startsWith("Purchase: "))) {
+                    count++;
+                    const name = t.service.replace("Market: ", "").replace("Purchase: ", "");
+                    list.innerHTML += `<div class="course-card">
+                        <div style="width:45px; height:45px; border-radius:15px; background:var(--soft); margin:0 auto 10px; display:flex; align-items:center; justify-content:center; color:var(--p);"><i class="fas fa-graduation-cap"></i></div>
+                        <b style="font-size:11px; display:block; height:32px; overflow:hidden;">${name}</b>
+                        <button style="border:none; background:var(--p); color:white; border-radius:10px; font-size:10px; padding:6px; margin-top:8px; width:100%" onclick="alert('Opening ${name}...')">Study</button>
+                    </div>`;
                 }
             });
+            if (count === 0) { list.innerHTML = `<p style="font-size: 11px; color: #999; padding-left: 5px;">No courses purchased yet.</p>`; }
+        });
+
+        const statusRef = db.ref('academy/attendance/' + myName);
+        statusRef.set({ status: 'online', time: Date.now() });
+        statusRef.onDisconnect().remove();
+
+        db.ref('academy/attendance').on('value', snap => {
+            const list = document.getElementById('studentList');
+            const count = document.getElementById('activeCount');
+            list.innerHTML = ""; let online = 0;
+            snap.forEach(child => {
+                online++;
+                list.innerHTML += `<div class="stack-item">${child.key.charAt(0).toUpperCase()}</div>`;
+            });
+            count.innerText = online + " ACTIVE";
+        });
+
+        db.ref('academy/config').on('value', snap => {
+            const data = snap.val() || { teacher: "Senior Instructor" };
+            document.getElementById('teacherName').innerText = data.teacher;
+        });
+
+        function raiseHand() {
+            db.ref('academy/notifications').push({ user: myName, type: 'hand_raise', time: Date.now() });
+            alert("Success! Your instructor has been notified.");
         }
-
-        // Dummy Tool Actions
-        function toggleVideo() { alert("Camera toggled"); }
-        function toggleMic() { alert("Microphone toggled"); }
-        function openBoard() { alert("Opening Interactive Whiteboard..."); }
-        function openSettings() { alert("Classroom Settings"); }
-
     </script>
 </body>
 </html>

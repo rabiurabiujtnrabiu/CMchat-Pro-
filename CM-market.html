@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CM Market - Worldwide Elite Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --p: #1A237E; --accent: #FFD600; --bg: #F4F7FE;
+            --white: #ffffff; --text: #2D3436; --success: #00E676;
+        }
+        body { 
+            margin: 0; background: var(--bg); font-family: 'Inter', sans-serif; 
+            color: var(--text); padding-bottom: 40px;
+        }
+
+        /* Modern Store Header */
+        .market-header {
+            background: linear-gradient(135deg, var(--p), #303F9F);
+            padding: 40px 25px 60px; border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px; color: white;
+            box-shadow: 0 10px 30px rgba(26, 35, 126, 0.2);
+        }
+        .header-nav { display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Live Balance in Market */
+        .market-balance {
+            background: rgba(255,255,255,0.15); padding: 8px 15px;
+            border-radius: 15px; font-size: 13px; font-weight: 700;
+            backdrop-filter: blur(10px); display: flex; align-items: center; gap: 8px;
+        }
+
+        /* Search Bar */
+        .search-container { margin: -25px 20px 25px; }
+        .search-box {
+            background: var(--white); border-radius: 20px; padding: 15px 20px;
+            display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.8);
+        }
+        .search-box input { border: none; outline: none; width: 100%; font-size: 14px; color: #636e72; }
+
+        /* Product Grid */
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
+        .product-card {
+            background: white; border-radius: 25px; padding: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.02); border: 1px solid #f1f2f6;
+            transition: 0.3s;
+        }
+        .product-img {
+            width: 100%; height: 130px; background: #f8f9fa;
+            border-radius: 20px; margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 35px; color: var(--p);
+        }
+        .product-info h3 { margin: 0; font-size: 13px; font-weight: 800; color: var(--text); height: 35px; overflow: hidden; }
+        .product-info p { margin: 5px 0; font-size: 9px; color: #b2bec3; font-weight: 600; text-transform: uppercase; }
+        .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .price { font-weight: 900; color: var(--p); font-size: 14px; }
+        .add-btn {
+            background: #E8EAF6; color: var(--p); width: 32px; height: 32px;
+            border-radius: 10px; display: flex; align-items: center; 
+            justify-content: center; font-size: 14px; cursor: pointer; transition: 0.2s;
+        }
+        .add-btn:active { background: var(--p); color: white; }
+
+        /* Sponsored Section */
+        .sponsored-label {
+            font-size: 10px; font-weight: 800; color: #A4B0BE;
+            margin: 25px 0 10px 30px; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .ad-box {
+            margin: 0 20px 25px; padding: 20px; background: #ffffff;
+            border-radius: 25px; border: 2px dashed #D1D8E0;
+            text-align: center; color: #7F8C8D; font-size: 13px; font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="market-header">
+        <div class="header-nav animate__animated animate__fadeIn">
+            <i class="fas fa-chevron-left" onclick="window.history.back()"></i>
+            <div class="market-balance">
+                <i class="fas fa-wallet" style="color:var(--accent)"></i>
+                <span id="marketBalDisplay">₦0.00</span>
+            </div>
+            <h2 style="margin:0; font-size: 18px; letter-spacing: -0.5px;">Elite Market</h2>
+        </div>
+    </header>
+
+    <div class="search-container animate__animated animate__fadeInUp">
+        <div class="search-box">
+            <i class="fas fa-search" style="color: #b2bec3;"></i>
+            <input type="text" placeholder="Search global courses...">
+        </div>
+    </div>
+
+    <div class="product-grid">
+        <div class="product-card animate__animated animate__zoomIn">
+            <div class="product-img" style="background: #E3F2FD;"><i class="fas fa-robot"></i></div>
+            <div class="product-info">
+                <p>AI & Future</p>
+                <h3>AI Prompt Engineering Mastery</h3>
+                <div class="price-row">
+                    <span class="price">₦10,000</span>
+                    <div class="add-btn" onclick="processPurchase(10000, 'AI Prompt Mastery')"><i class="fas fa-plus"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card animate__animated animate__zoomIn" style="animation-delay: 0.1s;">
+            <div class="product-img" style="background: #FFEBEE;"><i class="fas fa-user-secret"></i></div>
+            <div class="product-info">
+                <p>Security</p>
+                <h3>Cyber Ghost Security Protocol</h3>
+                <div class="price-row">
+                    <span class="price">₦15,000</span>
+                    <div class="add-btn" onclick="processPurchase(15000, 'Cyber Ghost Protocol')"><i class="fas fa-plus"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p class="sponsored-label">Featured Ad</p>
+    <div class="ad-box animate__animated animate__fadeIn">
+        <i class="fas fa-ad" style="margin-bottom: 8px; display: block; font-size: 20px; color: #BDC3C7;"></i>
+        Promote Your Global Product Here
+    </div>
+
+    <div class="product-grid">
+        <div class="product-card animate__animated animate__zoomIn" style="animation-delay: 0.2s;">
+            <div class="product-img" style="background: #FFF8E1;"><i class="fas fa-chart-line"></i></div>
+            <div class="product-info">
+                <p>Finance</p>
+                <h3>Crypto King Trading Strategy</h3>
+                <div class="price-row">
+                    <span class="price">₦12,000</span>
+                    <div class="add-btn" onclick="processPurchase(12000, 'Crypto King Strategy')"><i class="fas fa-plus"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card animate__animated animate__zoomIn" style="animation-delay: 0.3s;">
+            <div class="product-img" style="background: #E8EAF6;"><i class="fas fa-code"></i></div>
+            <div class="product-info">
+                <p>Development</p>
+                <h3>Elite Web App Development</h3>
+                <div class="price-row">
+                    <span class="price">₦20,000</span>
+                    <div class="add-btn" onclick="processPurchase(20000, 'Elite Web Dev')"><i class="fas fa-plus"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+        const myName = localStorage.getItem('username') || "User";
+
+        // 1. Live Sync Balance (Don malami ya san nawa yake da shi kafin ya siya)
+        db.ref('users/' + myName + '/wallet').on('value', snap => {
+            const val = snap.val() || 0;
+            document.getElementById('marketBalDisplay').innerText = "₦" + parseFloat(val).toLocaleString();
+        });
+
+        // 2. Buy Function
+        function processPurchase(price, itemName) {
+            if (confirm(`Kana son siyan ${itemName} akan ₦${price.toLocaleString()}?`)) {
+                const userRef = db.ref('users/' + myName + '/wallet');
+                
+                userRef.once('value', snapshot => {
+                    const currentBal = snapshot.val() || 0;
+                    
+                    if (currentBal >= price) {
+                        const newBal = currentBal - price;
+                        
+                        // Rage kudi daga Wallet
+                        userRef.set(newBal).then(() => {
+                            // Adana a History (Transaction)
+                            db.ref('transactions/' + myName).push({
+                                type: 'debit',
+                                service: 'Purchase: ' + itemName,
+                                amount: price,
+                                time: Date.now()
+                            });
+                            
+                            alert(`Nasarawa! Ka sayi ${itemName}. Sabon Balance: ₦${newBal.toLocaleString()}`);
+                        });
+                    } else {
+                        alert("Kudinka bai isa ba! Jeka Wallet kayi loda (Top-up).");
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

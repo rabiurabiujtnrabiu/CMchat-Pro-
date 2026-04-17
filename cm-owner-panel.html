@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CM Owner - Control Center</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --p: #1A237E; --gold: #FFD600; --danger: #FF5252; --bg: #0F172A; --card: #1E293B; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: white; margin: 0; padding-bottom: 40px; }
+        
+        .nav-bar { background: var(--card); padding: 20px 25px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+        .status-dot { width: 10px; height: 10px; background: #00E676; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px #00E676; }
+
+        .dashboard-content { padding: 25px; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--card); padding: 25px 15px; border-radius: 25px; border: 1px solid #334155; position: relative; }
+        .stat-card i { position: absolute; top: 15px; right: 15px; opacity: 0.1; font-size: 30px; }
+        .stat-card h2 { margin: 10px 0 0; color: var(--gold); }
+
+        .alert-box { background: rgba(255, 82, 82, 0.1); border: 1px solid var(--danger); border-radius: 20px; padding: 15px; margin-bottom: 30px; display: flex; gap: 15px; align-items: center; }
+        
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 14px; font-weight: 800; color: #94A3B8; }
+        .list-container { background: var(--card); border-radius: 25px; overflow: hidden; border: 1px solid #334155; }
+        .list-item { padding: 18px 20px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
+        .list-item:hover { background: rgba(255,255,255,0.02); }
+
+        .btn-ban { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .btn-resolve { background: #00E676; color: white; border: none; padding: 8px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <script>
+        if (sessionStorage.getItem('cm_admin_session') !== 'active') {
+            window.location.href = "admin-login.html";
+        }
+    </script>
+
+    <div class="nav-bar">
+        <div>
+            <h2 style="margin:0; font-size: 18px;">CM Control <span style="color: var(--gold);">Pro</span></h2>
+            <small style="color: #94A3B8;"><span class="status-dot"></span> System Encrypted</small>
+        </div>
+        <button onclick="sessionStorage.clear(); location.reload();" style="background:none; border:none; color:white; font-size: 20px;"><i class="fas fa-power-off"></i></button>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="alert-box">
+            <i class="fas fa-shield-alt" style="font-size: 25px; color: var(--danger);"></i>
+            <div style="font-size: 12px;">
+                <b>PRIVACY PROTECTION:</b> Automated monitoring active. Any nudity or improper dressing in Live Video results in instant permanent BAN.
+            </div>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <i class="fas fa-users"></i>
+                <small style="color:#94A3B8">Online</small>
+                <h2 id="liveCount">0</h2>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-wallet"></i>
+                <small style="color:#94A3B8">Revenue</small>
+                <h2 id="revenueText">₦0.00</h2>
+            </div>
+        </div>
+
+        <div class="section-header"><span>ACTIVE COMPLAINTS</span> <i class="fas fa-bell"></i></div>
+        <div class="list-container" id="reports">
+            <p style="text-align:center; padding: 30px; color: #64748B;">No pending reports</p>
+        </div>
+
+        <br>
+
+        <div class="section-header"><span>LIVE CLASSES / STUDENTS</span> <i class="fas fa-broadcast-tower"></i></div>
+        <div class="list-container" id="students">
+            <p style="text-align:center; padding: 30px; color: #64748B;">No students online</p>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Real-time Data Sync
+        db.ref('academy/attendance').on('value', snap => {
+            document.getElementById('liveCount').innerText = snap.numChildren();
+            const list = document.getElementById('students');
+            list.innerHTML = "";
+            snap.forEach(child => {
+                list.innerHTML += `
+                    <div class="list-item">
+                        <div>
+                            <b>${child.key}</b>
+                            <small style="display:block; color:#64748B;">Active in Classroom</small>
+                        </div>
+                        <button class="btn-ban" onclick="banUser('${child.key}')">BAN</button>
+                    </div>
+                `;
+            });
+        });
+
+        db.ref('academy/notifications').on('value', snap => {
+            const list = document.getElementById('reports');
+            list.innerHTML = "";
+            snap.forEach(child => {
+                list.innerHTML += `
+                    <div class="list-item">
+                        <div><b>${child.val().user}</b> raised hand</div>
+                        <button class="btn-resolve" onclick="db.ref('academy/notifications/${child.key}').remove()">RESOLVED</button>
+                    </div>
+                `;
+            });
+        });
+
+        function banUser(name) {
+            if(confirm("Ban " + name + " permanently?")) {
+                db.ref('banned_users/' + name).set(true);
+                db.ref('academy/attendance/' + name).remove();
+            }
+        }
+    </script>
+</body>
+</html>

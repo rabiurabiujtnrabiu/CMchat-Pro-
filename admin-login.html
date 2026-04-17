@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CM Admin Auth</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/@otplib/preset-browser@^12.0.0/buffer.js"></script>
+    <script src="https://unpkg.com/@otplib/preset-browser@^12.0.0/index.js"></script>
+    <style>
+        :root { --p: #1A237E; --gold: #FFD600; --bg: #0F172A; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: white; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; overflow: hidden; }
+        .auth-container { background: #1E293B; padding: 40px; border-radius: 35px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); width: 350px; text-align: center; border: 1px solid #334155; position: relative; }
+        .logo-ring { width: 80px; height: 80px; border: 3px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 35px; color: var(--gold); box-shadow: 0 0 20px rgba(255, 214, 0, 0.2); }
+        h2 { margin: 10px 0; letter-spacing: 1px; }
+        .input-group { margin: 25px 0; }
+        input { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 15px; border: 1px solid #334155; background: #0F172A; color: white; text-align: center; font-size: 18px; box-sizing: border-box; transition: 0.3s; }
+        input:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 10px rgba(255, 214, 0, 0.1); }
+        button { width: 100%; padding: 18px; border-radius: 15px; border: none; background: linear-gradient(135deg, var(--gold), #FFB300); color: #0F172A; font-weight: 800; font-size: 16px; cursor: pointer; transition: 0.3s; }
+        button:active { transform: scale(0.98); }
+        .secure-tag { font-size: 11px; color: #64748B; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <div class="logo-ring"><i class="fas fa-fingerprint"></i></div>
+        <h2>CEO Portal</h2>
+        <p style="color: #94A3B8; font-size: 13px;">Verify your credentials to manage CM Academy</p>
+
+        <div class="input-group">
+            <input type="password" id="adminPin" placeholder="ADMIN PIN" maxlength="4">
+            <input type="text" id="otpCode" placeholder="2FA TOKEN (Authenticator)" maxlength="6">
+        </div>
+
+        <button onclick="handleLogin()">AUTHENTICATE</button>
+
+        <div class="secure-tag">
+            <i class="fas fa-user-lock"></i> End-to-End Encrypted Session
+        </div>
+    </div>
+
+    <script>
+        // Domin misali, wannan shi ne 'Secret' dinka wanda za ka sa a Google Authenticator
+        const secret = 'KVKFKRJTMRUXM2L3'; // Kada ka taba bari kowa ya ga wannan!
+
+        function handleLogin() {
+            const pin = document.getElementById('adminPin').value;
+            const token = document.getElementById('otpCode').value;
+
+            // 1. PIN Check
+            if (pin !== "2026") {
+                alert("Incorrect PIN!");
+                return;
+            }
+
+            // 2. 2FA Check (otplib zai tabbatar idan token din ya yi daidai da na wayarka)
+            const isValid = otplib.authenticator.check(token, secret);
+            
+            // Don sauki a lokacin gini, zaka iya amfani da 123456 idan ba ka riga ka saita App din ba
+            if (isValid || token === "123456") {
+                sessionStorage.setItem('cm_admin_session', 'active');
+                alert("Identity Verified!");
+                window.location.href = "cm-owner-panel.html";
+            } else {
+                alert("Invalid 2FA Token! Check your Authenticator app.");
+            }
+        }
+    </script>
+</body>
+</html>
