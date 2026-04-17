@@ -19,7 +19,7 @@
 
         body {
             margin: 0; font-family: 'Poppins', sans-serif;
-            background: var(--bg); color: #333; padding-bottom: 30px;
+            background: var(--bg); color: #333; padding-bottom: 100px;
             overflow-x: hidden;
         }
 
@@ -74,7 +74,17 @@
         .trans-info b { font-size: 14px; display: block; }
         .trans-amt { font-weight: 800; font-size: 14px; }
 
-        /* --- FUNDING MODAL (Professional Overlay) --- */
+        /* --- BOTTOM NAVIGATION (Fix) --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; background: var(--white);
+            display: flex; justify-content: space-around; padding: 15px 0 25px;
+            border-top-left-radius: 35px; border-top-right-radius: 35px;
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.05); z-index: 1000;
+        }
+        .nav-item { color: #BBB; font-size: 22px; cursor: pointer; transition: 0.3s; }
+        .nav-item.active { color: var(--primary); }
+
+        /* --- FUNDING MODAL --- */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
@@ -113,7 +123,7 @@
         <div class="balance-amount">₦<span id="balance">0.00</span></div>
         <div class="wallet-actions">
             <button class="action-btn" onclick="openFund()"><i class="fas fa-plus-circle"></i> Add Money</button>
-            <button class="action-btn" onclick="openHistory()"><i class="fas fa-history"></i> History</button>
+            <button class="action-btn" onclick="location.href='Transaction-History.html'"><i class="fas fa-history"></i> History</button>
         </div>
     </div>
 
@@ -141,10 +151,17 @@
         <div id="miniHistory"></div>
     </div>
 
+    <div class="bottom-nav">
+        <div class="nav-item" onclick="location.href='index.html'"><i class="fas fa-home"></i></div>
+        <div class="nav-item" onclick="location.href='friends.html'"><i class="fas fa-user-plus"></i></div>
+        <div class="nav-item" onclick="location.href='Shopping.html'"><i class="fas fa-shopping-bag"></i></div>
+        <div class="nav-item active" onclick="location.href='Wallet.html'"><i class="fas fa-wallet"></i></div>
+    </div>
+
     <div id="fundOverlay" class="overlay">
         <div class="modal-content animate__animated animate__slideInUp">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>Fund Your Wallet</h3>
+                <h3 style="margin:0">Fund Your Wallet</h3>
                 <i class="fas fa-times-circle" style="font-size:24px; color:#999;" onclick="closeFund()"></i>
             </div>
             <div class="bank-box">
@@ -177,18 +194,22 @@
         // 1. Live Balance
         db.ref('users/' + myName + '/wallet').on('value', snap => {
             const val = snap.val() || 0;
-            document.getElementById('balance').innerText = parseFloat(val).toLocaleString();
+            document.getElementById('balance').innerText = parseFloat(val).toLocaleString(undefined, {minimumFractionDigits: 2});
         });
 
         // 2. Load Mini History
         db.ref('transactions/' + myName).limitToLast(3).on('value', snap => {
             const list = document.getElementById('miniHistory');
             list.innerHTML = "";
+            if(!snap.exists()) {
+                list.innerHTML = "<p style='text-align:center; color:#999; font-size:12px;'>No recent transactions.</p>";
+                return;
+            }
             snap.forEach(child => {
                 const t = child.val();
                 const isDebit = t.type === 'debit';
                 list.innerHTML += `
-                    <div class="transaction">
+                    <div class="transaction animate__animated animate__fadeIn">
                         <div style="width:40px; height:40px; border-radius:10px; background:${isDebit ? '#ffebee' : '#e8f5e9'}; color:${isDebit ? 'red' : 'green'}; display:flex; align-items:center; justify-content:center; margin-right:15px;">
                             <i class="fas ${isDebit ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
                         </div>
@@ -202,23 +223,20 @@
             });
         });
 
-        // Overlay Controllers
         window.openFund = () => document.getElementById('fundOverlay').style.display = 'flex';
         window.closeFund = () => document.getElementById('fundOverlay').style.display = 'none';
-        window.openHistory = () => location.href = 'Transaction-History.html';
 
         function processPayment() {
             const amt = document.getElementById('fundAmt').value;
-            if(amt < 100) return alert("Minimum ₦100");
+            if(amt < 100) return alert("Minimum amount is ₦100");
             
-            // Logic don kara kudi a Firebase
             db.ref('users/' + myName + '/wallet').once('value', s => {
                 let current = s.val() || 0;
                 db.ref('users/' + myName + '/wallet').set(parseFloat(current) + parseFloat(amt));
                 db.ref('transactions/' + myName).push({
                     type: 'credit', service: 'Wallet Funding', amount: amt, time: Date.now()
                 });
-                alert("Payment Successful!");
+                alert("₦" + amt + " added to your wallet successfully!");
                 closeFund();
             });
         }

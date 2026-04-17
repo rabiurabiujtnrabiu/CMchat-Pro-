@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CM Academy | Professional Live</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #1A237E; --accent: #FBC02D; --live: #FF3D00; --dark-bg: #0a0a0a; --glass: rgba(255, 255, 255, 0.1); }
+        body { margin: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--dark-bg); color: white; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* Header */
+        header { background: var(--primary); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; letter-spacing: 0.5px; }
+
+        /* Professional Ads Banner */
+        .ads-banner { background: #1a1a1a; padding: 10px; text-align: center; font-size: 12px; border-bottom: 1px solid #333; color: #aaa; z-index: 900; }
+        .ads-banner i { color: var(--accent); margin-right: 8px; }
+
+        /* Video Stage */
+        #main-stage { flex: 1; position: relative; background: #000; display: flex; flex-direction: column; overflow: hidden; }
+        #spotlight-container { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
+        #spotlight-video { width: 100%; height: 100%; object-fit: cover; background: #111; }
+
+        /* UI Overlays */
+        .live-indicator { position: absolute; top: 15px; left: 15px; background: var(--live); color: white; padding: 4px 12px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+        .live-indicator::before { content: ''; width: 8px; height: 8px; background: white; border-radius: 50%; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        .speaker-info { position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); padding: 10px 20px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
+
+        /* Guest Scroller */
+        .guest-tray { height: 140px; display: flex; gap: 12px; padding: 15px; overflow-x: auto; background: linear-gradient(to top, #000, transparent); border-top: 1px solid #222; }
+        .guest-card { min-width: 95px; height: 115px; background: #1e1e1e; border-radius: 12px; position: relative; overflow: hidden; border: 2px solid transparent; flex-shrink: 0; transition: 0.3s ease; }
+        .guest-card.active { border-color: var(--accent); transform: translateY(-5px); }
+        .guest-card video { width: 100%; height: 100%; object-fit: cover; }
+        .guest-name { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.6); font-size: 10px; text-align: center; padding: 4px 0; }
+
+        /* Side Admin Actions */
+        .admin-sidebar { position: absolute; right: 15px; top: 40%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 15px; }
+        .circle-btn { width: 50px; height: 50px; background: var(--glass); backdrop-filter: blur(12px); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); position: relative; }
+        .circle-btn:hover { background: var(--primary); }
+        .notification { position: absolute; top: -2px; right: -2px; background: var(--live); width: 18px; height: 18px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        /* Navigation */
+        nav { background: #000; height: 85px; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #1a1a1a; padding-bottom: 12px; }
+        .nav-item { text-align: center; color: #555; transition: 0.3s; cursor: pointer; flex: 1; }
+        .nav-item i { font-size: 24px; display: block; margin-bottom: 4px; }
+        .nav-item span { font-size: 11px; font-weight: 600; text-transform: uppercase; }
+        .nav-item.active { color: white; }
+        .nav-item.active i { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <i class="fas fa-broadcast-tower"></i>
+            <span>CM ACADEMY LIVE</span>
+        </div>
+        <div style="display:flex; gap:20px; align-items:center;">
+            <i class="fas fa-shield-alt" title="Safe Mode Active"></i>
+            <i class="fas fa-user-circle" style="font-size:24px;"></i>
+        </div>
+    </header>
+
+    <div class="ads-banner">
+        <i class="fas fa-info-circle"></i> ADVERTISEMENT: Promote your business here to thousands of students!
+    </div>
+
+    <div id="main-stage">
+        <div class="live-indicator">Live</div>
+        
+        <div id="spotlight-container">
+            <video id="spotlight-video" autoplay playsinline></video>
+            <div class="speaker-info">
+                <i class="fas fa-microphone"></i>
+                <span>Host: <strong>Hamza Rabiu</strong></span>
+            </div>
+        </div>
+
+        <div class="admin-sidebar">
+            <div class="circle-btn" onclick="openRequests()">
+                <i class="fas fa-users"></i>
+                <div class="notification">3</div>
+            </div>
+            <div class="circle-btn"><i class="fas fa-share"></i></div>
+            <div class="circle-btn"><i class="fas fa-heart"></i></div>
+            <div class="circle-btn"><i class="fas fa-comment-dots"></i></div>
+        </div>
+    </div>
+
+    <div class="guest-tray" id="guest-tray">
+        <div class="guest-card active" onclick="focusUser('host')">
+            <video id="host-mini" autoplay muted></video>
+            <div class="guest-name">MASTER</div>
+        </div>
+        <div class="guest-card" onclick="alert('Requesting access...')">
+            <div style="height:100%; display:flex; align-items:center; justify-content:center; background:#111;">
+                <i class="fas fa-plus" style="color:#333;"></i>
+            </div>
+            <div class="guest-name">Add Guest</div>
+        </div>
+    </div>
+
+    <nav>
+        <div class="nav-item active">
+            <i class="fas fa-video"></i><span>Watch Live</span>
+        </div>
+        <div class="nav-item">
+            <i class="fas fa-microphone"></i><span>Audio Room</span>
+        </div>
+        <div class="nav-item" onclick="switchToWhiteboard()">
+            <i class="fas fa-chalkboard"></i><span>Whiteboard</span>
+        </div>
+        <div class="nav-item">
+            <i class="fas fa-cog"></i><span>Settings</span>
+        </div>
+    </nav>
+
+    <script>
+        // Real-time Video Stream Initialization
+        async function initLiveStream() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "user" }, 
+                    audio: true 
+                });
+                document.getElementById('spotlight-video').srcObject = stream;
+                document.getElementById('host-mini').srcObject = stream;
+            } catch (error) {
+                console.error("Camera Access Denied:", error);
+                alert("Please enable camera permissions to start the live session.");
+            }
+        }
+
+        // Initialize on load
+        initLiveStream();
+
+        function openRequests() {
+            // TikTok style approval system
+            alert("Approval Required: 3 students are waiting to join the video. (Policy: No indecent dressing allowed)");
+        }
+
+        function focusUser(user) {
+            // Spotlight logic
+            const cards = document.querySelectorAll('.guest-card');
+            cards.forEach(c => c.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            console.log("Switching spotlight to:", user);
+        }
+
+        function switchToWhiteboard() {
+            // Mode switching logic
+            alert("Switching to Interactive Board mode... Your drawings are saved!");
+        }
+    </script>
+</body>
+</html>

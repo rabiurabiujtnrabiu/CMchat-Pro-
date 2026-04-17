@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pro Whiteboard | CM Academy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --p: #1A237E; --accent: #FBC02D; --white: #ffffff; }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background: #fff; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+
+        header { background: var(--p); color: white; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; z-index: 1000; }
+        
+        #board-wrapper { flex: 1; position: relative; overflow-y: auto; background: var(--white); scroll-behavior: smooth; }
+        /* Single canvas logic for all actions */
+        canvas { display: block; width: 100%; height: 3000px; touch-action: none; position: absolute; top: 0; left: 0; z-index: 10; }
+
+        /* Floating Sidebar Fix */
+        #menu-toggle { position: fixed; top: 80px; right: 10px; width: 45px; height: 45px; background: var(--p); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2000; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        
+        .side-tools { 
+            position: fixed; top: 135px; right: -70px; 
+            display: flex; flex-direction: column; gap: 12px; background: white; 
+            padding: 12px; border-radius: 20px 0 0 20px; 
+            box-shadow: -4px 0 15px rgba(0,0,0,0.1); z-index: 1500; 
+            transition: 0.4s ease-in-out;
+        }
+        .side-tools.open { right: 0; }
+
+        .tool-btn { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; color: #555; border: 1px solid #f0f0f0; }
+        .tool-btn.active { background: var(--p); color: white; }
+        .clr { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #eee; margin: 5px auto; cursor: pointer; }
+
+        .keypad-bar { 
+            position: fixed; bottom: 85px; left: 0; width: 100%; 
+            background: white; padding: 12px 18px; display: none; 
+            align-items: center; gap: 12px; box-shadow: 0 -8px 20px rgba(0,0,0,0.1);
+            z-index: 3000; border-radius: 25px 25px 0 0; box-sizing: border-box;
+        }
+        #auto-pencil-input { flex: 1; padding: 14px 20px; border: 2px solid var(--p); border-radius: 30px; outline: none; font-size: 16px; }
+
+        .bottom-nav { background: white; display: flex; justify-content: space-around; padding: 10px 0 25px; border-radius: 28px 28px 0 0; box-shadow: 0 -4px 15px rgba(0,0,0,0.05); z-index: 1000; }
+        .nav-item { width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #cbd5e0; }
+        .nav-item.active { color: var(--accent); background: #FFFDE7; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <i class="fas fa-chevron-left" onclick="window.history.back()"></i>
+            <span style="font-weight:600;">Interactive Board</span>
+        </div>
+        <i class="fas fa-trash-alt" onclick="clearBoard()" style="cursor:pointer;"></i>
+    </header>
+
+    <div id="board-wrapper">
+        <canvas id="mainBoard"></canvas>
+    </div>
+
+    <div id="menu-toggle" onclick="toggleMenu()"><i class="fas fa-tools"></i></div>
+
+    <div class="side-tools" id="sidebar">
+        <div class="tool-btn active" id="btn-pen" onclick="setTool('pen')"><i class="fas fa-pen"></i></div>
+        <div class="tool-btn" id="btn-text" onclick="setTool('text')"><i class="fas fa-keyboard"></i></div>
+        <div class="tool-btn" id="btn-eraser" onclick="setTool('eraser')"><i class="fas fa-eraser"></i></div>
+        <hr style="width:100%; border:0; border-top:1px solid #eee; margin:5px 0;">
+        <div class="clr" style="background:red;" onclick="setColor('red')"></div>
+        <div class="clr" style="background:#1A237E;" onclick="setColor('#1A237E')"></div>
+        <div class="clr" style="background:green;" onclick="setColor('green')"></div>
+    </div>
+
+    <div class="keypad-bar" id="inputBar">
+        <input type="text" id="auto-pencil-input" placeholder="Start typing here...">
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item"><i class="fas fa-video"></i></div>
+        <div class="nav-item"><i class="fas fa-microphone"></i></div>
+        <div class="nav-item active"><i class="fas fa-chalkboard"></i></div>
+        <div class="nav-item"><i class="fas fa-cog"></i></div>
+    </nav>
+
+    <script>
+        const wrapper = document.getElementById('board-wrapper');
+        const canvas = document.getElementById('mainBoard');
+        const ctx = canvas.getContext('2d');
+        const sidebar = document.getElementById('sidebar');
+        const inputBar = document.getElementById('inputBar');
+        const pencilInput = document.getElementById('auto-pencil-input');
+        const channel = new BroadcastChannel('whiteboard_stream');
+
+        let tool = 'pen', inkColor = "#1A237E";
+        let curX = 30, curY = 100, isDrawing = false;
+        let lastImageData;
+        let startX, startY;
+
+        function init() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = 3000;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = 3;
+            // Background initialization for clean state
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            lastImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+        }
+        init();
+
+        function toggleMenu() { sidebar.classList.toggle('open'); }
+
+        function setTool(t) {
+            tool = t;
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-${t}`).classList.add('active');
+            inputBar.style.display = (t === 'text') ? 'flex' : 'none';
+            if(t === 'text') { pencilInput.focus(); sidebar.classList.remove('open'); }
+        }
+
+        function setColor(c) { inkColor = c; sidebar.classList.remove('open'); }
+
+        // Wrapping and typing logic
+        function wrapText(text, x, y, maxWidth) {
+            let words = text.split('');
+            let line = '';
+            let ty = y;
+            for(let n=0; n<words.length; n++) {
+                let test = line + words[n];
+                if(ctx.measureText(test).width > maxWidth) {
+                    ctx.fillText(line, x, ty); line = words[n]; ty += 35;
+                } else { line = test; }
+            }
+            ctx.fillText(line, x, ty);
+            return ty;
+        }
+
+        pencilInput.addEventListener('input', () => {
+            ctx.putImageData(lastImageData, 0, 0); 
+            ctx.fillStyle = inkColor;
+            ctx.font = "bold 24px 'Poppins', sans-serif";
+            wrapText(pencilInput.value, curX, curY, canvas.width - 60);
+            if(curY > wrapper.scrollTop + 400) wrapper.scrollTo({top: curY - 200, behavior:'smooth'});
+            channel.postMessage({type:'pencil', text:pencilInput.value, x:curX, y:curY, color:inkColor});
+        });
+
+        pencilInput.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter') {
+                curY = wrapText(pencilInput.value, curX, curY, canvas.width - 60) + 45;
+                lastImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+                channel.postMessage({type:'save', text:pencilInput.value, x:curX, y:curY, color:inkColor});
+                pencilInput.value = "";
+            }
+        });
+
+        // FIXED PENCIL DRAWING LOGIC
+        function getXY(e) {
+            const rect = canvas.getBoundingClientRect();
+            const cx = (e.clientX || e.touches[0].clientX);
+            const cy = (e.clientY || e.touches[0].clientY);
+            return { x: cx - rect.left, y: cy - rect.top + wrapper.scrollTop };
+        }
+
+        function startDrawing(e) {
+            if (sidebar.classList.contains('open') && e.target.closest('#sidebar')) return;
+            const pos = getXY(e);
+            if(tool === 'text') { curX = pos.x; curY = pos.y; return; }
+            
+            isDrawing = true;
+            startX = pos.x;
+            startY = pos.y;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+        }
+
+        function moveDrawing(e) {
+            if(!isDrawing || tool === 'text') return;
+            const pos = getXY(e);
+            
+            ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over';
+            ctx.strokeStyle = inkColor;
+            ctx.lineWidth = tool === 'eraser' ? 40 : 3;
+            
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            
+            channel.postMessage({type:'draw', x1:startX, y1:startY, x2:pos.x, y2:pos.y, color:inkColor, tool});
+            startX = pos.x;
+            startY = pos.y;
+        }
+
+        function endDrawing() {
+            if(isDrawing) lastImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+            isDrawing = false;
+        }
+
+        canvas.addEventListener('mousedown', startDrawing);
+        window.addEventListener('mousemove', moveDrawing);
+        window.addEventListener('mouseup', endDrawing);
+
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); });
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); moveDrawing(e); });
+        canvas.addEventListener('touchend', endDrawing);
+
+        channel.onmessage = (e) => {
+            const d = e.data;
+            if(d.type === 'pencil') {
+                ctx.putImageData(lastImageData, 0, 0);
+                ctx.fillStyle = d.color; ctx.font = "bold 24px 'Poppins', sans-serif";
+                wrapText(d.text, d.x, d.y, canvas.width - 60);
+            } else if(d.type === 'save') {
+                curY = wrapText(d.text, d.x, d.y, canvas.width - 60) + 45;
+                lastImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+            } else if(d.type === 'draw') {
+                ctx.globalCompositeOperation = d.tool === 'eraser' ? 'destination-out' : 'source-over';
+                ctx.strokeStyle = d.color; ctx.lineWidth = d.tool === 'eraser' ? 40 : 3;
+                ctx.beginPath(); ctx.moveTo(d.x1, d.y1); ctx.lineTo(d.x2, d.y2); ctx.stroke();
+                lastImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+            }
+        };
+
+        function clearBoard() { if(confirm("Clear board?")) { ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height); lastImageData = ctx.getImageData(0,0,canvas.width,canvas.height); curY=100; } }
+    </script>
+</body>
+</html>

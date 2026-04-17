@@ -2,40 +2,61 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CMchat Pro - Messenger</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --p: #075E54; --s: #128C7E; --bg: #E5DDD5; --white: #ffffff; --my-msg: #DCF8C6; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; flex-direction: column; height: 100vh; }
         
-        .chat-header { background: var(--p); color: white; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        .user-info { display: flex; align-items: center; gap: 12px; }
-        .user-info i { cursor: pointer; font-size: 18px; }
-        .user-info img { width: 38px; height: 38px; border-radius: 50%; background: #eee; }
+        body { margin: 0; font-family: 'Segoe UI', Helvetica, sans-serif; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-attachment: fixed; display: flex; flex-direction: column; height: 100vh; }
+        
+        /* Professional Header */
+        .chat-header { background: var(--p); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; height: 50px; }
+        .user-info { display: flex; align-items: center; gap: 10px; flex: 1; }
+        .user-info i { font-size: 18px; cursor: pointer; padding: 5px; }
+        .user-info img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.2); }
+        .chat-names b { font-size: 16px; display: block; }
         .status-text { font-size: 11px; color: #cfd8dc; }
 
-        .chat-container { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .message { max-width: 75%; padding: 8px 12px; border-radius: 8px; font-size: 14.5px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.1); line-height: 1.4; }
+        /* Chat Area */
+        .chat-container { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; scroll-behavior: smooth; }
+        .message { max-width: 75%; padding: 6px 10px; border-radius: 10px; font-size: 14.5px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.15); line-height: 1.4; }
         .received { background: var(--white); align-self: flex-start; border-top-left-radius: 0; }
         .sent { background: var(--my-msg); align-self: flex-end; border-top-right-radius: 0; }
-        .time { font-size: 10px; color: #777; text-align: right; margin-top: 4px; }
-        .sender-name { font-size: 11px; font-weight: bold; color: var(--s); margin-bottom: 2px; }
+        .time { font-size: 10px; color: #888; text-align: right; margin-top: 3px; }
 
-        .input-area { background: #f0f0f0; padding: 10px; display: flex; align-items: center; gap: 8px; }
-        .input-box { flex: 1; background: white; border-radius: 25px; padding: 8px 15px; display: flex; align-items: center; }
-        #messageInput { border: none; outline: none; flex: 1; font-size: 16px; background: transparent; }
-        #sendBtn { width: 45px; height: 45px; background: var(--s); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        /* Input Area - WhatsApp Style */
+        .input-area { padding: 8px; display: flex; align-items: flex-end; gap: 5px; background: transparent; }
+        .input-box { flex: 1; background: white; border-radius: 25px; padding: 5px 12px; display: flex; align-items: center; min-height: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        #messageInput { border: none; outline: none; flex: 1; font-size: 16px; background: transparent; padding: 8px 5px; max-height: 100px; overflow-y: auto; }
+        
+        #sendBtn { width: 48px; height: 48px; background: var(--s); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: 0.2s; }
+        #sendBtn:active { transform: scale(0.9); }
+
+        /* Custom Professional Alert (Maimakon na Browser) */
+        .custom-alert { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(5px); }
+        .alert-card { background: white; width: 85%; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .alert-card b { font-size: 18px; color: var(--p); display: block; margin-bottom: 10px; }
+        .alert-card p { color: #666; font-size: 14px; margin-bottom: 20px; }
+        .alert-btn { background: var(--p); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; width: 100%; cursor: pointer; }
     </style>
 </head>
 <body>
 
+    <div id="alertBox" class="custom-alert">
+        <div class="alert-card">
+            <b>No Friend Selected</b>
+            <p>Please go back to the Dashboard and select a friend to start chatting.</p>
+            <button class="alert-btn" onclick="window.location.href='index.html'">Go Back</button>
+        </div>
+    </div>
+
     <header class="chat-header">
         <div class="user-info">
-            <i class="fas fa-arrow-left" onclick="window.location.href='Dashboard.html'"></i>
-            <img src="https://via.placeholder.com/40" alt="Logo">
-            <div>
-                <div id="chatWith" style="font-weight: 600;">Loading...</div>
+            <i class="fas fa-arrow-left" onclick="window.location.href='index.html'"></i>
+            <img src="https://via.placeholder.com/40" id="chatAvatar">
+            <div class="chat-names">
+                <b id="chatWith">Loading...</b>
                 <div class="status-text">online</div>
             </div>
         </div>
@@ -49,9 +70,10 @@
 
     <div class="input-area">
         <div class="input-box">
-            <i class="far fa-smile" style="color: #888; margin-right: 10px;"></i>
-            <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off">
-            <i class="fas fa-paperclip" style="color: #888; margin-left: 10px;"></i>
+            <i class="far fa-smile" style="color: #8696a0; font-size: 22px; cursor: pointer;"></i>
+            <input type="text" id="messageInput" placeholder="Message" autocomplete="off">
+            <i class="fas fa-paperclip" style="color: #8696a0; font-size: 20px; cursor: pointer; margin-left: 10px;"></i>
+            <i class="fas fa-camera" style="color: #8696a0; font-size: 20px; cursor: pointer; margin-left: 15px;"></i>
         </div>
         <button id="sendBtn"><i id="btnIcon" class="fas fa-microphone"></i></button>
     </div>
@@ -78,7 +100,7 @@
         const btnIcon = document.getElementById('btnIcon');
 
         let myUID = "";
-        let friendUID = localStorage.getItem('chattingWithUID'); // Za mu ajiye UID din aboki a nan
+        let friendUID = localStorage.getItem('chattingWithUID'); 
         let friendName = localStorage.getItem('chattingWithName') || "Chat";
 
         document.getElementById('chatWith').innerText = friendName;
@@ -89,15 +111,14 @@
                 if (friendUID) {
                     startChat();
                 } else {
-                    alert("Please select a friend from Dashboard first!");
-                    window.location.href = "Dashboard.html";
+                    // Maimakon alert(), muna amfani da namu custom alert din
+                    document.getElementById('alertBox').style.display = 'flex';
                 }
             } else {
                 window.location.href = "Login.html";
             }
         });
 
-        // Chat Room ID (Hada UID na mutum biyu don dakin ya zama na su kadai)
         function getChatID() {
             return myUID < friendUID ? myUID + "_" + friendUID : friendUID + "_" + myUID;
         }
@@ -120,7 +141,11 @@
         }
 
         messageInput.addEventListener('input', () => {
-            btnIcon.className = messageInput.value.trim() !== "" ? "fas fa-paper-plane" : "fas fa-microphone";
+            if (messageInput.value.trim() !== "") {
+                btnIcon.className = "fas fa-paper-plane animate__animated animate__zoomIn";
+            } else {
+                btnIcon.className = "fas fa-microphone";
+            }
         });
 
         sendBtn.addEventListener('click', () => {
@@ -134,6 +159,7 @@
                 });
                 messageInput.value = "";
                 btnIcon.className = "fas fa-microphone";
+                chatBox.scrollTop = chatBox.scrollHeight;
             }
         });
     </script>

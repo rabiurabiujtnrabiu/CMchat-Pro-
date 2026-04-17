@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Edit Status | CMchat Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --p: #1A237E; --g: #FFD600; }
+        body { margin: 0; background: #000; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* Editing Header */
+        .edit-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; color: white; z-index: 10; }
+        .edit-header i { font-size: 22px; cursor: pointer; }
+
+        /* Preview Area */
+        #preview-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+        #preview-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        /* Editing Tools Side Bar */
+        .tools { position: absolute; top: 80px; right: 15px; display: flex; flex-direction: column; gap: 20px; color: white; font-size: 20px; }
+
+        /* Caption Area (Maimakon Alert Box) */
+        .caption-section { background: rgba(0,0,0,0.6); padding: 15px; display: flex; align-items: center; gap: 10px; }
+        .caption-input { 
+            flex: 1; background: rgba(255,255,255,0.2); border: none; padding: 12px 20px; 
+            border-radius: 25px; color: white; outline: none; font-size: 15px;
+        }
+
+        /* Send Button */
+        .send-btn { 
+            background: var(--p); color: white; width: 50px; height: 50px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            border: none; font-size: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="edit-header">
+        <i class="fas fa-times" onclick="history.back()"></i>
+        <div style="display: flex; gap: 20px;">
+            <i class="fas fa-crop-alt"></i>
+            <i class="fas fa-sticky-note"></i>
+            <i class="fas fa-text-height"></i>
+            <i class="fas fa-paint-brush" style="color: var(--g);"></i>
+        </div>
+    </div>
+
+    <div id="preview-container">
+        <img id="preview-img" src="" alt="Selected Image">
+        <div class="tools">
+            <i class="fas fa-undo"></i>
+            <i class="fas fa-magic"></i>
+        </div>
+    </div>
+
+    <div class="caption-section">
+        <input type="text" id="captionText" class="caption-input" placeholder="Add a caption...">
+        <button class="send-btn" onclick="sendToStatus()">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+
+    <script>
+        // Karbo hoton daga Gallery wanda aka turo ta LocalStorage
+        const selectedImageData = localStorage.getItem('selectedImage');
+        if(selectedImageData) {
+            document.getElementById('preview-img').src = selectedImageData;
+        }
+
+        function sendToStatus() {
+            const caption = document.getElementById('captionText').value;
+            // A nan za ka saka Firebase Logic din turawa
+            alert("Status Uploading with caption: " + caption);
+            // Bayan ya gama, sai ya koma baya
+            window.location.href = 'Status.html';
+        }
+    </script>
+</body>
+</html>
