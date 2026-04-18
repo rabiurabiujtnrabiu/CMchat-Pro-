@@ -3,75 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pro Whiteboard | CM Academy</title>
+    <title>Professional Smart Board | CM Academy</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root { --p: #1A237E; --accent: #FBC02D; --white: #ffffff; }
-        body { margin: 0; font-family: 'Poppins', sans-serif; background: #fff; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background: #f8fafc; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
 
-        header { background: var(--p); color: white; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; z-index: 1000; }
+        header { background: var(--p); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         
-        #board-wrapper { flex: 1; position: relative; overflow-y: auto; background: var(--white); scroll-behavior: smooth; }
-        /* Single canvas logic for all actions */
-        canvas { display: block; width: 100%; height: 3000px; touch-action: none; position: absolute; top: 0; left: 0; z-index: 10; }
+        #board-container { flex: 1; position: relative; overflow-y: auto; background: var(--white); scroll-behavior: smooth; }
+        canvas { display: block; width: 100%; height: 8000px; touch-action: none; position: absolute; top: 0; left: 0; z-index: 10; }
 
-        /* Floating Sidebar Fix */
-        #menu-toggle { position: fixed; top: 80px; right: 10px; width: 45px; height: 45px; background: var(--p); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2000; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        
-        .side-tools { 
-            position: fixed; top: 135px; right: -70px; 
-            display: flex; flex-direction: column; gap: 12px; background: white; 
-            padding: 12px; border-radius: 20px 0 0 20px; 
-            box-shadow: -4px 0 15px rgba(0,0,0,0.1); z-index: 1500; 
-            transition: 0.4s ease-in-out;
+        #pencil-cursor { 
+            position: absolute; width: 35px; height: 35px; z-index: 100; 
+            pointer-events: none; display: none; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
         }
-        .side-tools.open { right: 0; }
 
-        .tool-btn { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; color: #555; border: 1px solid #f0f0f0; }
-        .tool-btn.active { background: var(--p); color: white; }
-        .clr { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #eee; margin: 5px auto; cursor: pointer; }
+        #menu-trigger {
+            position: fixed; bottom: 160px; right: 20px; width: 60px; height: 60px;
+            background: var(--p); color: white; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 24px; z-index: 2500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer;
+        }
+
+        .side-tools { 
+            position: fixed; top: 100px; right: -80px; display: flex; flex-direction: column; gap: 12px; 
+            z-index: 2000; transition: 0.4s; background: white;
+            padding: 15px; border-radius: 25px 0 0 25px; box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+        }
+        .side-tools.active { right: 0; }
+
+        .tool-btn { width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; border: 1px solid #eee; transition: 0.3s; color: #555; }
+        .tool-btn.active { background: var(--p); color: white; border-color: var(--p); }
+        
+        .colors { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
+        .clr { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid white; }
+        .clr.active { transform: scale(1.2); border-color: var(--p); }
 
         .keypad-bar { 
-            position: fixed; bottom: 85px; left: 0; width: 100%; 
-            background: white; padding: 12px 18px; display: none; 
-            align-items: center; gap: 12px; box-shadow: 0 -8px 20px rgba(0,0,0,0.1);
-            z-index: 3000; border-radius: 25px 25px 0 0; box-sizing: border-box;
+            position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); 
+            width: 92%; background: white; padding: 12px; display: none; 
+            border-radius: 30px; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); z-index: 3000; 
         }
-        #auto-pencil-input { flex: 1; padding: 14px 20px; border: 2px solid var(--p); border-radius: 30px; outline: none; font-size: 16px; }
+        #auto-pencil-input { width: 100%; padding: 12px 20px; border: 2px solid #eee; border-radius: 25px; outline: none; font-size: 16px; text-align: center; }
 
-        .bottom-nav { background: white; display: flex; justify-content: space-around; padding: 10px 0 25px; border-radius: 28px 28px 0 0; box-shadow: 0 -4px 15px rgba(0,0,0,0.05); z-index: 1000; }
-        .nav-item { width: 55px; height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #cbd5e0; }
-        .nav-item.active { color: var(--accent); background: #FFFDE7; }
+        .bottom-nav { background: white; display: flex; justify-content: space-around; padding: 12px 0 30px; border-radius: 35px 35px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 1000; }
+        .nav-item { font-size: 26px; color: #cbd5e0; }
+        .nav-item.active { color: var(--accent); }
     </style>
 </head>
 <body>
 
     <header>
         <div style="display:flex; align-items:center; gap:12px;">
-            <i class="fas fa-chevron-left" onclick="window.history.back()"></i>
-            <span style="font-weight:600;">Interactive Board</span>
+            <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
+            <span style="font-weight:700;">SMART BOARD PRO</span>
         </div>
-        <i class="fas fa-trash-alt" onclick="clearBoard()" style="cursor:pointer;"></i>
+        <i class="fas fa-trash-alt" onclick="clearBoard()" style="cursor:pointer; font-size: 20px;"></i>
     </header>
 
-    <div id="board-wrapper">
+    <div id="board-container">
+        <div id="pencil-cursor"><i class="fas fa-pencil-alt" style="color:var(--p); font-size:30px;"></i></div>
         <canvas id="mainBoard"></canvas>
     </div>
 
-    <div id="menu-toggle" onclick="toggleMenu()"><i class="fas fa-tools"></i></div>
+    <div id="menu-trigger" onclick="toggleSidebar()"><i class="fas fa-tools"></i></div>
 
     <div class="side-tools" id="sidebar">
-        <div class="tool-btn active" id="btn-pen" onclick="setTool('pen')"><i class="fas fa-pen"></i></div>
+        <div class="tool-btn active" id="btn-pen" onclick="setTool('pen')"><i class="fas fa-pen-nib"></i></div>
         <div class="tool-btn" id="btn-text" onclick="setTool('text')"><i class="fas fa-keyboard"></i></div>
         <div class="tool-btn" id="btn-eraser" onclick="setTool('eraser')"><i class="fas fa-eraser"></i></div>
-        <hr style="width:100%; border:0; border-top:1px solid #eee; margin:5px 0;">
-        <div class="clr" style="background:red;" onclick="setColor('red')"></div>
-        <div class="clr" style="background:#1A237E;" onclick="setColor('#1A237E')"></div>
-        <div class="clr" style="background:green;" onclick="setColor('green')"></div>
+        <div class="colors">
+            <div class="clr active" style="background:#1A237E;" onclick="changeColor('#1A237E', this)"></div>
+            <div class="clr" style="background:#D32F2F;" onclick="changeColor('#D32F2F', this)"></div>
+            <div class="clr" style="background:#2E7D32;" onclick="changeColor('#2E7D32', this)"></div>
+            <div class="clr" style="background:#000000;" onclick="changeColor('#000000', this)"></div>
+        </div>
     </div>
 
     <div class="keypad-bar" id="inputBar">
-        <input type="text" id="auto-pencil-input" placeholder="Start typing here...">
+        <input type="text" id="auto-pencil-input" placeholder="Type your lesson here...">
     </div>
 
     <nav class="bottom-nav">
@@ -81,145 +93,148 @@
         <div class="nav-item"><i class="fas fa-cog"></i></div>
     </nav>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <script>
-        const wrapper = document.getElementById('board-wrapper');
         const canvas = document.getElementById('mainBoard');
         const ctx = canvas.getContext('2d');
-        const sidebar = document.getElementById('sidebar');
+        const wrapper = document.getElementById('board-container');
+        const pencil = document.getElementById('pencil-cursor');
         const inputBar = document.getElementById('inputBar');
         const pencilInput = document.getElementById('auto-pencil-input');
-        const channel = new BroadcastChannel('whiteboard_stream');
+        const sidebar = document.getElementById('sidebar');
 
-        let tool = 'pen', inkColor = "#1A237E";
-        let curX = 30, curY = 100, isDrawing = false;
-        let lastImageData;
-        let startX, startY;
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let tool = 'pen', inkColor = "#1A237E", isDrawing = false;
+        let curX = 60, curY = 100, lastX, lastY;
+        let textHistory = [];
 
         function init() {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = 3000;
+            canvas.width = wrapper.clientWidth;
+            canvas.height = 8000;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
-            ctx.lineWidth = 3;
-            // Background initialization for clean state
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0,0,canvas.width,canvas.height);
-            lastImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+            ctx.font = "600 28px 'Poppins'";
         }
         init();
 
-        function toggleMenu() { sidebar.classList.toggle('open'); }
+        function toggleSidebar() { sidebar.classList.toggle('active'); }
 
         function setTool(t) {
             tool = t;
             document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`btn-${t}`).classList.add('active');
             inputBar.style.display = (t === 'text') ? 'flex' : 'none';
-            if(t === 'text') { pencilInput.focus(); sidebar.classList.remove('open'); }
+            if(t === 'text') { pencilInput.focus(); sidebar.classList.remove('active'); }
         }
 
-        function setColor(c) { inkColor = c; sidebar.classList.remove('open'); }
+        function changeColor(c, el) {
+            inkColor = c;
+            document.querySelectorAll('.clr').forEach(d => d.classList.remove('active'));
+            el.classList.add('active');
+        }
 
-        // Wrapping and typing logic
-        function wrapText(text, x, y, maxWidth) {
-            let words = text.split('');
-            let line = '';
-            let ty = y;
-            for(let n=0; n<words.length; n++) {
-                let test = line + words[n];
-                if(ctx.measureText(test).width > maxWidth) {
-                    ctx.fillText(line, x, ty); line = words[n]; ty += 35;
-                } else { line = test; }
+        // --- DRAWING LOGIC ---
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: (e.clientX || e.touches[0].clientX) - rect.left,
+                y: (e.clientY || e.touches[0].clientY) - rect.top + wrapper.scrollTop
+            };
+        }
+
+        canvas.addEventListener('touchstart', (e) => {
+            if(tool === 'text') return;
+            isDrawing = true;
+            const pos = getPos(e);
+            lastX = pos.x; lastY = pos.y;
+            ctx.beginPath(); ctx.moveTo(lastX, lastY);
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if(!isDrawing || tool === 'text') return;
+            e.preventDefault();
+            const pos = getPos(e);
+            ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over';
+            ctx.strokeStyle = inkColor;
+            ctx.lineWidth = tool === 'eraser' ? 50 : 4;
+            ctx.lineTo(pos.x, pos.y); ctx.stroke();
+            lastX = pos.x; lastY = pos.y;
+        });
+
+        canvas.addEventListener('touchend', () => isDrawing = false);
+
+        // --- FIXED SCROLLING & TYPING LOGIC ---
+        pencilInput.addEventListener('input', (e) => {
+            if (e.inputType === 'deleteContentBackward') {
+                if (textHistory.length > 0) {
+                    const last = textHistory.pop();
+                    ctx.clearRect(last.x - 2, last.y - 35, last.w + 6, 50);
+                    curX = last.x; curY = last.y;
+                }
+                return;
             }
-            ctx.fillText(line, x, ty);
-            return ty;
-        }
+            const char = e.data;
+            if (!char) return;
 
-        pencilInput.addEventListener('input', () => {
-            ctx.putImageData(lastImageData, 0, 0); 
+            const textWidth = ctx.measureText(char).width;
+            if (curX + textWidth > canvas.width - 60) { curX = 60; curY += 60; }
+
+            pencil.style.display = 'block';
+            pencil.style.left = curX + 'px';
+            pencil.style.top = (curY - 35) + 'px';
+
+            textHistory.push({ x: curX, y: curY, w: textWidth });
+            
+            ctx.globalCompositeOperation = 'source-over';
             ctx.fillStyle = inkColor;
-            ctx.font = "bold 24px 'Poppins', sans-serif";
-            wrapText(pencilInput.value, curX, curY, canvas.width - 60);
-            if(curY > wrapper.scrollTop + 400) wrapper.scrollTo({top: curY - 200, behavior:'smooth'});
-            channel.postMessage({type:'pencil', text:pencilInput.value, x:curX, y:curY, color:inkColor});
+            ctx.fillText(char, curX, curY);
+
+            curX += textWidth + 4;
+
+            // GYARA: Tabbatar allon yana bin rubutun zuwa KASA
+            const visibleBottom = wrapper.scrollTop + wrapper.clientHeight;
+            if (curY > visibleBottom - 100) {
+                wrapper.scrollTo({ top: curY - 200, behavior: 'smooth' });
+            }
+
+            clearTimeout(window.pTimeout);
+            window.pTimeout = setTimeout(() => { pencil.style.display = 'none'; }, 800);
         });
 
         pencilInput.addEventListener('keydown', (e) => {
-            if(e.key === 'Enter') {
-                curY = wrapText(pencilInput.value, curX, curY, canvas.width - 60) + 45;
-                lastImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-                channel.postMessage({type:'save', text:pencilInput.value, x:curX, y:curY, color:inkColor});
-                pencilInput.value = "";
+            if(e.key === 'Enter') { 
+                curY += 60; curX = 60; 
+                pencilInput.value = ""; textHistory = [];
+                // Tabbatar allon ya yi kasa idan an danna Enter a karshen allo
+                wrapper.scrollTo({ top: curY - 200, behavior: 'smooth' });
             }
         });
 
-        // FIXED PENCIL DRAWING LOGIC
-        function getXY(e) {
-            const rect = canvas.getBoundingClientRect();
-            const cx = (e.clientX || e.touches[0].clientX);
-            const cy = (e.clientY || e.touches[0].clientY);
-            return { x: cx - rect.left, y: cy - rect.top + wrapper.scrollTop };
+        function clearBoard() {
+            Swal.fire({
+                title: 'Clear Board?',
+                text: "This will permanently erase all content!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#1A237E',
+                confirmButtonText: 'Yes, Clear it'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    curX = 60; curY = 100; textHistory = [];
+                    wrapper.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
         }
-
-        function startDrawing(e) {
-            if (sidebar.classList.contains('open') && e.target.closest('#sidebar')) return;
-            const pos = getXY(e);
-            if(tool === 'text') { curX = pos.x; curY = pos.y; return; }
-            
-            isDrawing = true;
-            startX = pos.x;
-            startY = pos.y;
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
-        }
-
-        function moveDrawing(e) {
-            if(!isDrawing || tool === 'text') return;
-            const pos = getXY(e);
-            
-            ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over';
-            ctx.strokeStyle = inkColor;
-            ctx.lineWidth = tool === 'eraser' ? 40 : 3;
-            
-            ctx.lineTo(pos.x, pos.y);
-            ctx.stroke();
-            
-            channel.postMessage({type:'draw', x1:startX, y1:startY, x2:pos.x, y2:pos.y, color:inkColor, tool});
-            startX = pos.x;
-            startY = pos.y;
-        }
-
-        function endDrawing() {
-            if(isDrawing) lastImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-            isDrawing = false;
-        }
-
-        canvas.addEventListener('mousedown', startDrawing);
-        window.addEventListener('mousemove', moveDrawing);
-        window.addEventListener('mouseup', endDrawing);
-
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); });
-        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); moveDrawing(e); });
-        canvas.addEventListener('touchend', endDrawing);
-
-        channel.onmessage = (e) => {
-            const d = e.data;
-            if(d.type === 'pencil') {
-                ctx.putImageData(lastImageData, 0, 0);
-                ctx.fillStyle = d.color; ctx.font = "bold 24px 'Poppins', sans-serif";
-                wrapText(d.text, d.x, d.y, canvas.width - 60);
-            } else if(d.type === 'save') {
-                curY = wrapText(d.text, d.x, d.y, canvas.width - 60) + 45;
-                lastImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-            } else if(d.type === 'draw') {
-                ctx.globalCompositeOperation = d.tool === 'eraser' ? 'destination-out' : 'source-over';
-                ctx.strokeStyle = d.color; ctx.lineWidth = d.tool === 'eraser' ? 40 : 3;
-                ctx.beginPath(); ctx.moveTo(d.x1, d.y1); ctx.lineTo(d.x2, d.y2); ctx.stroke();
-                lastImageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-            }
-        };
-
-        function clearBoard() { if(confirm("Clear board?")) { ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height); lastImageData = ctx.getImageData(0,0,canvas.width,canvas.height); curY=100; } }
     </script>
 </body>
 </html>

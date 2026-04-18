@@ -2,264 +2,263 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Marketplace | CMchat Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Elite Market | CMchat Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    
     <style>
-        :root { 
-            --primary: #1A237E; 
-            --accent: #FFD600; 
-            --bg: #F8F9FD;
-            --white: #ffffff;
-            --glass: rgba(255, 255, 255, 0.8);
-        }
-
-        body { 
-            margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: var(--bg); color: #1e1e1e; overflow-x: hidden;
-        }
-
-        /* --- STICKY GLASS HEADER --- */
-        header { 
-            background: var(--glass); backdrop-filter: blur(15px);
-            padding: 15px 20px; display: flex; align-items: center; 
-            justify-content: space-between; position: sticky; top: 0; z-index: 1000;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
-        .logo-text { font-weight: 800; font-size: 20px; color: var(--primary); letter-spacing: -1px; }
-
-        /* --- HORIZONTAL CATEGORIES --- */
-        .categories {
-            display: flex; gap: 10px; overflow-x: auto; padding: 15px 20px;
-            scrollbar-width: none; -ms-overflow-style: none;
-        }
-        .categories::-webkit-scrollbar { display: none; }
-        .cat-btn {
-            background: var(--white); padding: 10px 22px; border-radius: 50px;
-            font-size: 13px; font-weight: 600; white-space: nowrap;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #eee; cursor: pointer;
-        }
-        .cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-        /* --- HERO PROMO --- */
-        .hero { padding: 0 20px; margin-bottom: 20px; }
-        .hero-card {
-            background: linear-gradient(135deg, #1A237E 0%, #311B92 100%);
-            border-radius: 30px; padding: 30px; color: white; position: relative;
-            overflow: hidden; box-shadow: 0 15px 30px rgba(26, 35, 126, 0.2);
-        }
-        .hero-card h2 { margin: 0; font-size: 24px; font-weight: 800; color: var(--accent); }
-        .hero-card p { margin: 10px 0 0; font-size: 13px; opacity: 0.8; line-height: 1.5; }
-        .hero-card i { position: absolute; right: -20px; bottom: -20px; font-size: 120px; opacity: 0.1; transform: rotate(-15deg); }
-
-        /* --- PRODUCT GRID --- */
-        .grid-container { padding: 0 20px 100px; }
-        .grid-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .grid-title h3 { font-size: 18px; margin: 0; font-weight: 800; }
-        .live-indicator { font-size: 11px; color: #ff5252; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
-
-        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        :root { --p: #1A237E; --g: #FFD600; --bg: #f4f7f6; --white: #ffffff; --green: #00a884; }
         
-        .product-card {
-            background: var(--white); border-radius: 24px; overflow: hidden;
-            border: 1px solid #f0f0f0; box-shadow: 0 10px 20px rgba(0,0,0,0.02);
-            animation: fadeInUp 0.6s ease both; transition: 0.3s;
-        }
-        .product-card:active { transform: scale(0.96); }
+        body { margin: 0; background: var(--bg); font-family: 'Segoe UI', Roboto, sans-serif; padding-bottom: 110px; overflow-x: hidden; }
 
-        .img-box { position: relative; width: 100%; height: 160px; background: #eee; }
-        .img-box img { width: 100%; height: 100%; object-fit: cover; }
-        .expiry-tag {
-            position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(8px); color: white; padding: 4px 10px;
-            border-radius: 10px; font-size: 10px; font-weight: 600;
+        /* Modern Navigation Header */
+        .market-nav {
+            background: var(--p); color: white; padding: 18px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        .info { padding: 15px; }
-        .price { font-size: 18px; font-weight: 800; color: var(--primary); }
-        .title { font-size: 13px; color: #666; margin: 5px 0 15px; font-weight: 600; height: 34px; overflow: hidden; }
+        /* Professional Ads Banner */
+        .ads-container {
+            margin: 15px; height: 130px; background: #e0e4e8; border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; position: relative; border: 1px solid rgba(0,0,0,0.05);
+        }
+        .ads-container img { width: 100%; height: 100%; object-fit: cover; }
+        .ads-tag { position: absolute; top: 12px; right: 15px; background: rgba(0,0,0,0.7); color: white; font-size: 10px; padding: 3px 10px; border-radius: 6px; font-weight: bold; }
 
-        .btn-action {
-            width: 100%; padding: 12px; border: none; border-radius: 14px;
-            background: #f1f3f9; color: var(--primary); font-weight: 700;
-            font-size: 12px; cursor: pointer; display: flex; align-items: center; 
-            justify-content: center; gap: 8px; transition: 0.3s;
+        /* Market Content UI */
+        .market-title { margin: 15px 20px; font-size: 20px; font-weight: 800; color: var(--p); display: flex; align-items: center; gap: 8px; }
+        .market-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 0 15px; }
+        
+        .item-card {
+            background: var(--white); border-radius: 22px; overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.04); transition: transform 0.2s ease;
+            border: 1px solid #f0f0f0;
         }
-        .btn-action:hover { background: var(--primary); color: white; }
+        .item-card:active { transform: scale(0.96); }
+        .item-card img { width: 100%; height: 150px; object-fit: cover; }
+        .item-data { padding: 12px; }
+        .item-data b { font-size: 15px; color: #2c3e50; display: block; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-data .price-tag { color: var(--green); font-weight: 800; font-size: 17px; }
 
-        /* --- FLOATING POST BUTTON --- */
-        .fab {
-            position: fixed; bottom: 30px; right: 20px; width: 65px; height: 65px;
-            background: var(--accent); color: var(--primary); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-size: 24px;
-            box-shadow: 0 10px 25px rgba(255, 214, 0, 0.4); z-index: 1001; cursor: pointer;
-            border: 5px solid var(--white);
+        /* Contact via CMchat Button */
+        .btn-chat-seller {
+            background: var(--p); color: white; border: none; width: 100%;
+            padding: 12px; border-radius: 14px; margin-top: 10px;
+            font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;
+            cursor: pointer;
         }
 
-        /* --- POST MODAL --- */
-        .modal {
-            display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 2000;
-            align-items: center; justify-content: center; padding: 20px;
+        /* Modern Floating Action Button */
+        .btn-add-item {
+            position: fixed; bottom: 35px; right: 25px; background: var(--g);
+            color: var(--p); width: 68px; height: 68px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; box-shadow: 0 10px 30px rgba(255, 214, 0, 0.4); z-index: 1001;
+            cursor: pointer;
         }
-        .modal-content {
-            background: white; width: 100%; max-width: 400px; border-radius: 35px;
-            padding: 30px; box-sizing: border-box; animation: zoomIn 0.3s;
+
+        /* Post Item Modal (Slide Up) */
+        #postModal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 2000; backdrop-filter: blur(5px);
         }
-        .modal-content h2 { margin-top: 0; color: var(--primary); font-weight: 800; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-size: 11px; font-weight: 700; color: #999; margin-bottom: 8px; }
-        .input-group input { 
-            width: 100%; padding: 15px; border-radius: 15px; border: 1.5px solid #eee;
-            background: #f9f9f9; outline: none; box-sizing: border-box; font-family: inherit;
+        .modal-sheet {
+            background: white; position: absolute; bottom: 0; width: 100%;
+            border-top-left-radius: 40px; border-top-right-radius: 40px;
+            padding: 35px 25px; box-sizing: border-box; animation: slideIn 0.4s ease-out;
         }
-        .btn-post {
-            width: 100%; padding: 18px; border: none; border-radius: 18px;
-            background: var(--primary); color: white; font-weight: 800; cursor: pointer;
+        @keyframes slideIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        /* Gallery Selector UI */
+        .gallery-box {
+            width: 100%; height: 200px; border: 3px dashed #eaedf0; border-radius: 28px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; margin-bottom: 25px; color: #95a5a6; overflow: hidden; position: relative;
+            background: #fbfcfc;
+        }
+        .gallery-box img { width: 100%; height: 100%; object-fit: cover; position: absolute; }
+
+        .input-wrap { margin-bottom: 20px; }
+        .input-wrap label { font-size: 12px; font-weight: 700; color: #7f8c8d; margin-left: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .field-input {
+            width: 100%; padding: 16px; background: #f0f3f5; border: 2px solid transparent;
+            border-radius: 18px; box-sizing: border-box; font-size: 16px; outline: none; margin-top: 5px;
+            transition: 0.3s;
+        }
+        .field-input:focus { border-color: var(--p); background: white; }
+
+        .btn-main-post {
+            background: var(--p); color: white; width: 100%; padding: 18px;
+            border: none; border-radius: 22px; font-weight: 800; font-size: 17px; margin-top: 15px;
+            box-shadow: 0 6px 20px rgba(26, 35, 126, 0.3);
+        }
+
+        /* Global English UI Settings */
+        .toast-english {
+            position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%);
+            background: #333; color: white; padding: 10px 25px; border-radius: 25px;
+            font-size: 14px; z-index: 5000; display: none;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
-        <div class="logo-text">ELITE SHOP</div>
-        <i class="fas fa-search"></i>
-    </header>
-
-    <div class="categories">
-        <div class="cat-btn active">Discover</div>
-        <div class="cat-btn">Gadgets</div>
-        <div class="cat-btn">Fashion</div>
-        <div class="cat-btn">Gaming</div>
-        <div class="cat-btn">Deals</div>
+    <div class="market-nav">
+        <i class="fas fa-arrow-left" onclick="history.back()"></i>
+        <span style="font-weight: 900; font-size: 18px;">ELITE MARKET</span>
+        <i class="fas fa-ellipsis-v"></i>
     </div>
 
-    <div class="hero">
-        <div class="hero-card">
-            <h2>Flash Marketplace</h2>
-            <p>Every listing here automatically disappears after 24 hours. Be fast or miss out!</p>
-            <i class="fas fa-bolt"></i>
-        </div>
+    <div class="ads-container">
+        <span class="ads-tag">ADS</span>
+        <img src="https://via.placeholder.com/600x250?text=Promote+Your+Brand+Live" alt="Banner">
     </div>
 
-    <div class="grid-container">
-        <div class="grid-title">
-            <h3>Recent Items</h3>
-            <span class="live-indicator"><i class="fas fa-circle animate__animated animate__flash animate__infinite"></i> Live Now</span>
+    <div class="market-title">Recent Listings <i class="fas fa-shopping-bag"></i></div>
+    <div style="padding: 0 20px; margin-top: -10px; margin-bottom: 20px; font-size: 12px; color: #7f8c8d;">
+        All items are live for 48 hours.
+    </div>
+
+    <div class="market-grid" id="liveMarket">
         </div>
 
-        <div class="product-grid" id="productGrid">
-            </div>
-    </div>
-
-    <div class="fab" onclick="document.getElementById('postModal').style.display='flex'">
+    <div class="btn-add-item" onclick="showModal()">
         <i class="fas fa-plus"></i>
     </div>
 
-    <div id="postModal" class="modal">
-        <div class="modal-content">
-            <h2>Post Item</h2>
-            <div class="input-group">
-                <label>PRODUCT NAME</label>
-                <input type="text" id="pName" placeholder="e.g. Sony Headphones">
+    <div id="postModal">
+        <div class="modal-sheet">
+            <div style="width: 50px; height: 6px; background: #e0e0e0; border-radius: 10px; margin: -10px auto 25px;"></div>
+            <h2 style="margin: 0 0 30px; text-align: center; color: var(--p); font-weight: 900;">Sell an Item</h2>
+            
+            <div class="gallery-box" onclick="document.getElementById('hiddenFile').click()">
+                <div id="uploadPlaceholder" style="text-align: center; padding: 20px;">
+                    <i class="fas fa-camera-retro" style="font-size: 50px; color: var(--p); margin-bottom: 15px;"></i>
+                    <p style="margin: 0; font-weight: 700; color: #34495e;">Select Product Photo</p>
+                    <small>High quality photos sell faster</small>
+                </div>
+                <img id="itemPreview" style="display: none;">
             </div>
-            <div class="input-group">
-                <label>PRICE (₦)</label>
-                <input type="number" id="pPrice" placeholder="Enter amount">
+
+            <input type="file" id="hiddenFile" accept="image/*" style="display: none;" onchange="handleFileSelect(this)">
+
+            <div class="input-wrap">
+                <label>Product Title</label>
+                <input type="text" id="pTitle" class="field-input" placeholder="What are you selling?">
             </div>
-            <div class="input-group">
-                <label>IMAGE URL</label>
-                <input type="text" id="pImg" placeholder="Paste link here">
+
+            <div class="input-wrap">
+                <label>Price (₦)</label>
+                <input type="number" id="pCost" class="field-input" placeholder="Set your price">
             </div>
-            <button class="btn-post" onclick="uploadToFirebase()">PUBLISH LISTING</button>
-            <p style="text-align:center; margin-top:15px; color:#aaa; cursor:pointer; font-weight:600;" onclick="document.getElementById('postModal').style.display='none'">Cancel</p>
+
+            <button class="btn-main-post" onclick="startPublish()">PUBLISH TO MARKET</button>
+            <p onclick="hideModal()" style="text-align: center; color: #e74c3c; margin-top: 25px; font-weight: 700; cursor: pointer;">Discard</p>
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <div id="toast" class="toast-english"></div>
 
-    <script>
-        // --- YOUR FIREBASE CONFIG ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
-            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
-            projectId: "cmchat-pro"
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, set, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", 
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com", 
+            projectId: "cmchat-pro" 
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const currentUser = localStorage.getItem('username') || "Anonymous";
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        // --- UPLOAD FUNCTION ---
-        window.uploadToFirebase = () => {
-            const name = document.getElementById('pName').value;
-            const price = document.getElementById('pPrice').value;
-            const img = document.getElementById('pImg').value;
+        let capturedImage = "";
 
-            if(!name || !price) { alert("Please enter name and price."); return; }
+        // UI Controllers
+        window.showModal = () => document.getElementById('postModal').style.display = 'block';
+        window.hideModal = () => {
+            document.getElementById('postModal').style.display = 'none';
+            capturedImage = "";
+            document.getElementById('itemPreview').style.display = 'none';
+            document.getElementById('uploadPlaceholder').style.display = 'block';
+        };
 
-            const postData = {
-                name: name,
-                price: price,
-                img: img || 'https://via.placeholder.com/400x400?text=No+Image',
-                seller: currentUser,
-                createdAt: Date.now(), // Real-time timestamp
-                expiryAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours in milliseconds
+        // Live Gallery Integration
+        window.handleFileSelect = (input) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                capturedImage = e.target.result;
+                const prev = document.getElementById('itemPreview');
+                prev.src = capturedImage;
+                prev.style.display = 'block';
+                document.getElementById('uploadPlaceholder').style.display = 'none';
             };
-
-            db.ref('flash_market').push(postData).then(() => {
-                document.getElementById('postModal').style.display = 'none';
-                // Reset inputs
-                document.getElementById('pName').value = "";
-                document.getElementById('pPrice').value = "";
-                document.getElementById('pImg').value = "";
-            });
+            reader.readAsDataURL(input.files[0]);
         };
 
-        // --- REAL-TIME LISTENER & AUTO-DELETE ---
-        db.ref('flash_market').on('value', (snapshot) => {
-            const container = document.getElementById('productGrid');
-            container.innerHTML = "";
-            const now = Date.now();
+        // Live Publishing Logic
+        window.startPublish = async () => {
+            const title = document.getElementById('pTitle').value;
+            const cost = document.getElementById('pCost').value;
+            const seller = localStorage.getItem('username') || "CM Member";
 
-            snapshot.forEach((child) => {
-                const item = child.val();
+            if(!title || !cost || !capturedImage) {
+                return notify("Please fill all details!");
+            }
 
-                // AUTOMATIC DELETE LOGIC
-                if (now > item.expiryAt) {
-                    db.ref('flash_market/' + child.key).remove();
-                } else {
-                    // Calculate hours remaining
-                    const remainingMs = item.expiryAt - now;
-                    const hoursLeft = Math.floor(remainingMs / (1000 * 60 * 60));
+            const marketRef = ref(db, 'market');
+            await push(marketRef, {
+                title,
+                cost,
+                image: capturedImage,
+                seller,
+                createdAt: serverTimestamp()
+            });
 
-                    container.innerHTML += `
-                        <div class="product-card">
-                            <div class="img-box">
-                                <img src="${item.img}">
-                                <div class="expiry-tag"><i class="far fa-clock"></i> ${hoursLeft}h left</div>
-                            </div>
-                            <div class="info">
-                                <div class="price">₦${Number(item.price).toLocaleString()}</div>
-                                <div class="title">${item.name}</div>
-                                <button class="btn-action" onclick="goToChat('${item.seller}')">
-                                    <i class="fas fa-comment-dots"></i> CHAT SELLER
+            hideModal();
+            notify("Item is now LIVE!");
+        };
+
+        // Automatic 48H Clean & Live Feed
+        onValue(ref(db, 'market'), (snapshot) => {
+            const grid = document.getElementById('liveMarket');
+            grid.innerHTML = '';
+            const currentTime = Date.now();
+            const lifespan = 48 * 60 * 60 * 1000; // 48 Hours Expiry
+
+            snapshot.forEach(item => {
+                const val = item.val();
+                if (currentTime - val.createdAt < lifespan) {
+                    const cardHtml = `
+                        <div class="item-card animate__animated animate__zoomIn">
+                            <img src="${val.image}">
+                            <div class="item-data">
+                                <b>${val.title}</b>
+                                <div class="price-tag">₦${Number(val.cost).toLocaleString()}</div>
+                                <button class="btn-chat-seller" onclick="openSellerChat('${val.seller}')">
+                                    <i class="fas fa-comment-dots"></i> CONTACT
                                 </button>
                             </div>
                         </div>
                     `;
+                    grid.insertAdjacentHTML('afterbegin', cardHtml);
                 }
             });
         });
 
-        window.goToChat = (sellerName) => {
-            localStorage.setItem('chat_target', sellerName);
-            window.location.href = "Chat.html"; // Direct link to your chat page
+        // Chat Link Logic
+        window.openSellerChat = (seller) => {
+            localStorage.setItem('chattingWith', seller);
+            window.location.href = 'Chats.html'; // Connecting Buyer to Seller
         };
+
+        function notify(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
+        }
     </script>
 </body>
 </html>

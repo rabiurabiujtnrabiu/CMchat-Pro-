@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CM Academy | Audio Spaces</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root { --primary: #1A237E; --twitter-blue: #1DA1F2; --dark: #15202B; --card: #192734; --accent: #FBC02D; }
         body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--dark); color: white; height: 100vh; display: flex; flex-direction: column; }
@@ -39,13 +40,18 @@
         .admin-tools { display: flex; gap: 15px; }
         .tool-icon { width: 45px; height: 45px; border-radius: 50%; background: var(--card); display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid #38444d; cursor: pointer; }
         .tool-icon.end-btn { color: #ff3d00; }
+
+        /* SweetAlert Dark Theme Fix */
+        .swal2-popup { background: var(--card) !important; color: white !important; border-radius: 20px !important; }
+        .swal2-title { color: white !important; }
+        .swal2-html-container { color: #8899a6 !important; }
     </style>
 </head>
 <body>
 
     <header>
         <div style="display:flex; align-items:center; gap:12px;">
-            <i class="fas fa-arrow-left" onclick="history.back()"></i>
+            <i class="fas fa-arrow-left" onclick="history.back()" style="cursor:pointer"></i>
             <span style="font-weight:bold; font-size:18px;">Voice Space</span>
         </div>
         <div class="live-tag" style="background:rgba(29, 161, 242, 0.1); color:var(--twitter-blue); padding:4px 12px; border-radius:15px; font-size:12px; font-weight:bold;">
@@ -61,7 +67,7 @@
         <div>
             <div class="section-label">Host</div>
             <div class="users-grid" style="margin-top:15px;">
-                <div class="user-slot" onclick="adminControl('host')">
+                <div class="user-slot" onclick="adminControl('Hamza Rabiu')">
                     <div class="avatar speaking">
                         <i class="fas fa-user-tie"></i>
                         <div class="mic-status"><i class="fas fa-microphone"></i></div>
@@ -102,34 +108,73 @@
         
         <div class="admin-tools">
             <div class="tool-icon" title="Mute All" onclick="muteAll()"><i class="fas fa-volume-mute"></i></div>
-            <div class="tool-icon" title="Settings"><i class="fas fa-cog"></i></div>
+            <div class="tool-icon" title="Settings" onclick="Swal.fire('Settings', 'Audio settings coming soon...', 'info')"><i class="fas fa-cog"></i></div>
             <div class="tool-icon end-btn" title="End Space" onclick="endSpace()"><i class="fas fa-times"></i></div>
         </div>
     </div>
 
     <script>
         function requestToSpeak() {
-            // TikTok/X Approval Style
-            alert("Your request has been sent to the Teacher. Please wait for approval.");
+            Swal.fire({
+                title: 'Request Sent',
+                text: 'Your request has been sent to the Teacher. Please wait for approval.',
+                icon: 'success',
+                confirmButtonColor: '#1DA1F2',
+                background: '#192734'
+            });
         }
 
         function muteAll() {
-            // Admin control over all speakers
-            if(confirm("Do you want to mute all speakers?")) {
-                alert("All speakers have been muted by Admin.");
-            }
+            Swal.fire({
+                title: 'Mute Everyone?',
+                text: "Do you want to mute all speakers in this space?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff3d00',
+                cancelButtonColor: '#38444d',
+                confirmButtonText: 'Yes, Mute All'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Muted!',
+                        text: 'All speakers have been muted by Admin.',
+                        icon: 'success',
+                        confirmButtonColor: '#1DA1F2'
+                    });
+                }
+            });
         }
 
         function endSpace() {
-            // Permanent closure of the voice room
-            if(confirm("Are you sure you want to end this Voice Space?")) {
-                window.location.href = "school.html";
-            }
+            Swal.fire({
+                title: 'End Voice Space?',
+                text: "Are you sure you want to close this session permanently?",
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonColor: '#ff3d00',
+                cancelButtonColor: '#38444d',
+                confirmButtonText: 'End Session'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "school.html";
+                }
+            });
         }
 
         function adminControl(user) {
-            // One-tap spotlight/management
-            alert("Admin Options for " + user + ": \n1. Mute\n2. Remove Speaker\n3. View Profile");
+            Swal.fire({
+                title: `Management: ${user}`,
+                html: `
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <button onclick="Swal.close()" style="padding:12px; background:#2f3336; color:white; border:none; border-radius:10px;">1. Mute Speaker</button>
+                        <button onclick="Swal.close()" style="padding:12px; background:#ff3d00; color:white; border:none; border-radius:10px;">2. Remove from Space</button>
+                        <button onclick="Swal.close()" style="padding:12px; background:#1DA1F2; color:white; border:none; border-radius:10px;">3. View Profile</button>
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCloseButton: true,
+                background: '#192734'
+            });
         }
     </script>
 </body>

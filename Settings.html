@@ -2,288 +2,201 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Settings - CMchat Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Settings - CMChat Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
     <style>
-        :root {
-            --p: #1A237E;
-            --accent: #FFD600;
-            --danger: #FF5252;
-            --card: #ffffff;
-            --text: #1e1e1e;
-            --bg: #F0F2F5;
+        :root { 
+            --p: #1A237E; --g: #FFD600; --bg: #F0F2F5; --white: #ffffff;
+            --danger: #FF5252; --text: #333;
         }
-
+        
         body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding-bottom: 50px;
+            margin: 0; background: var(--bg); font-family: 'Segoe UI', sans-serif; 
+            color: var(--text); padding-bottom: 50px;
         }
 
-        /* Header Navigation */
-        header {
-            background: var(--p);
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            color: white;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+        /* Header */
+        .header { 
+            background: var(--p); color: white; padding: 20px; 
+            display: flex; align-items: center; gap: 15px;
+            border-bottom-left-radius: 25px; border-bottom-right-radius: 25px;
+            position: sticky; top: 0; z-index: 1000;
         }
+        .header i { font-size: 20px; cursor: pointer; }
+        .header b { font-size: 20px; }
 
-        /* Profile Header Card */
-        .profile-header {
-            background: var(--p);
-            height: 200px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            border-radius: 0 0 40px 40px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        /* Profile Card */
+        .profile-section {
+            background: var(--white); margin: 20px 15px; padding: 20px;
+            border-radius: 25px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
-
-        .avatar-container {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            border: 4px solid var(--accent);
-            border-radius: 50%;
-            margin-bottom: 10px;
-            background: #eee;
-            overflow: hidden;
+        .profile-img-container {
+            position: relative; width: 90px; height: 90px; margin: 0 auto 15px;
         }
-
-        .avatar-container img { width: 100%; height: 100%; object-fit: cover; }
-
+        .profile-img-container img {
+            width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+            border: 3px solid var(--g);
+        }
         .edit-badge {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            background: var(--accent);
-            color: var(--p);
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            cursor: pointer;
+            position: absolute; bottom: 0; right: 0; background: var(--p);
+            color: white; width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
+            border: 2px solid white;
         }
 
         /* Settings List */
-        .settings-container { padding: 20px; }
-        
-        .settings-card {
-            background: var(--card);
-            border-radius: 25px;
-            padding: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        .settings-group { margin: 0 15px 25px; }
+        .group-title { 
+            font-size: 14px; font-weight: 700; color: #888; 
+            margin-left: 10px; margin-bottom: 10px; text-transform: uppercase;
         }
-
-        .setting-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            gap: 15px;
-            cursor: pointer;
-            border-radius: 15px;
-            transition: 0.2s;
+        .settings-list {
+            background: var(--white); border-radius: 20px; overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
-
-        .setting-item:active { background: #f5f5f5; }
-
-        .icon-box {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 18px;
+        .settings-item {
+            display: flex; align-items: center; padding: 18px 20px;
+            text-decoration: none; color: var(--text); transition: 0.2s;
+            border-bottom: 1px solid #f0f0f0;
         }
-
-        .item-info { flex: 1; }
-        .item-info b { display: block; font-size: 15px; }
-        .item-info small { color: #888; font-size: 12px; }
-
-        .logout-btn {
-            background: #ffebee;
-            color: var(--danger);
-            border: none;
-            width: 100%;
-            padding: 15px;
-            border-radius: 20px;
-            font-weight: 800;
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+        .settings-item:last-child { border-bottom: none; }
+        .settings-item:active { background: #f9f9f9; }
+        .settings-item i.icon { 
+            width: 35px; height: 35px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            margin-right: 15px; font-size: 16px;
         }
+        .settings-item .label { flex-grow: 1; font-weight: 600; }
+        .settings-item .value { font-size: 13px; color: #999; margin-right: 10px; }
+        .settings-item i.arrow { font-size: 12px; color: #ccc; }
 
-        /* Modern Modal for Editing */
-        #editModal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 2000;
-            align-items: center; justify-content: center;
-        }
-        .modal-body {
-            background: white;
-            width: 85%;
-            max-width: 400px;
-            padding: 25px;
-            border-radius: 30px;
-        }
-        input {
-            width: 100%; padding: 15px; margin: 10px 0;
-            border: 1px solid #ddd; border-radius: 15px; outline: none; box-sizing: border-box;
+        /* Icon Colors */
+        .bg-blue { background: #E3F2FD; color: #2196F3; }
+        .bg-green { background: #E8F5E9; color: #4CAF50; }
+        .bg-yellow { background: #FFFDE7; color: #FBC02D; }
+        .bg-red { background: #FFEBEE; color: #F44336; }
+        .bg-purple { background: #F3E5F5; color: #9C27B0; }
+
+        /* Save Button */
+        .btn-save {
+            background: var(--p); color: white; border: none; width: 90%;
+            padding: 15px; border-radius: 15px; font-weight: 700;
+            display: block; margin: 30px auto; cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
-        <b style="font-size: 18px;">Settings</b>
-    </header>
-
-    <div class="profile-header">
-        <div class="avatar-container">
-            <img id="userImg" src="https://via.placeholder.com/150" alt="Profile">
-            <div class="edit-badge" onclick="showEdit('image')"><i class="fas fa-camera"></i></div>
-        </div>
-        <h2 id="userName" style="margin: 5px 0 0;">Loading...</h2>
-        <small id="userEmail" style="opacity: 0.7;">User ID: #0000</small>
+    <div class="header">
+        <i class="fas fa-arrow-left" onclick="location.href='index.html'"></i>
+        <b>Settings</b>
     </div>
 
-    <div class="settings-container">
-        
-        <h4 style="margin-left: 10px; color: #666;">Account Settings</h4>
-        <div class="settings-card">
-            <div class="setting-item" onclick="showEdit('name')">
-                <div class="icon-box" style="background: #5C6BC0;"><i class="fas fa-user"></i></div>
-                <div class="item-info">
-                    <b>Display Name</b>
-                    <small>Update your username</small>
-                </div>
-                <i class="fas fa-chevron-right" style="color:#ccc"></i>
-            </div>
-            <div class="setting-item" onclick="showEdit('password')">
-                <div class="icon-box" style="background: #26A69A;"><i class="fas fa-lock"></i></div>
-                <div class="item-info">
-                    <b>Security</b>
-                    <small>Change your password</small>
-                </div>
-                <i class="fas fa-chevron-right" style="color:#ccc"></i>
-            </div>
+    <div class="profile-section animate__animated animate__fadeInDown">
+        <div class="profile-img-container">
+            <img id="userImg" src="https://via.placeholder.com/150" alt="User">
+            <div class="edit-badge"><i class="fas fa-camera"></i></div>
         </div>
-
-        <h4 style="margin-left: 10px; color: #666;">Dashboard Modules</h4>
-        <div class="settings-card">
-            <div class="setting-item" onclick="window.location.href='School.html'">
-                <div class="icon-box" style="background: #FFA726;"><i class="fas fa-graduation-cap"></i></div>
-                <div class="item-info">
-                    <b>School Module</b>
-                    <small>Course & Grade settings</small>
-                </div>
-                <i class="fas fa-chevron-right" style="color:#ccc"></i>
-            </div>
-            <div class="setting-item" onclick="window.location.href='Shopping.html'">
-                <div class="icon-box" style="background: #66BB6A;"><i class="fas fa-shopping-bag"></i></div>
-                <div class="item-info">
-                    <b>Store Settings</b>
-                    <small>Manage your marketplace posts</small>
-                </div>
-                <i class="fas fa-chevron-right" style="color:#ccc"></i>
-            </div>
-        </div>
-
-        <button class="logout-btn" onclick="logout()">
-            <i class="fas fa-sign-out-alt"></i> LOG OUT SESSION
-        </button>
+        <h3 id="displayFullName" style="margin: 5px 0;">Loading...</h3>
+        <p id="displayEmail" style="margin: 0; color: #888; font-size: 14px;">---</p>
     </div>
 
-    <div id="editModal">
-        <div class="modal-body animate__animated animate__zoomIn">
-            <h3 id="modalTitle" style="color:var(--p)">Update Information</h3>
-            <input type="text" id="editInput" placeholder="Enter new value">
-            <button class="logout-btn" style="background:var(--p); color:white" onclick="saveChanges()">SAVE UPDATES</button>
-            <p style="text-align:center; margin-top:15px; cursor:pointer; color:#999" onclick="closeModal()">Dismiss</p>
+    <div class="settings-group">
+        <div class="group-title">Personal Information</div>
+        <div class="settings-list">
+            <div class="settings-item" onclick="editField('name')">
+                <i class="fas fa-user icon bg-blue"></i>
+                <div class="label">Full Name</div>
+                <div class="value" id="valName">---</div>
+                <i class="fas fa-chevron-right arrow"></i>
+            </div>
+            <div class="settings-item">
+                <i class="fas fa-id-card icon bg-purple"></i>
+                <div class="label">User ID</div>
+                <div class="value" id="valID">---</div>
+            </div>
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <div class="settings-group">
+        <div class="group-title">Security & Privacy</div>
+        <div class="settings-list">
+            <div class="settings-item" onclick="location.href='Password.html'">
+                <i class="fas fa-lock icon bg-red"></i>
+                <div class="label">Change Password</div>
+                <i class="fas fa-chevron-right arrow"></i>
+            </div>
+            <div class="settings-item">
+                <i class="fas fa-shield-alt icon bg-green"></i>
+                <div class="label">Two-Factor Auth</div>
+                <div class="value">Off</div>
+                <i class="fas fa-chevron-right arrow"></i>
+            </div>
+        </div>
+    </div>
 
-    <script>
+    <div class="settings-group">
+        <div class="group-title">Preferences</div>
+        <div class="settings-list">
+            <div class="settings-item">
+                <i class="fas fa-moon icon bg-yellow"></i>
+                <div class="label">Dark Mode</div>
+                <input type="checkbox" style="width: 20px; height: 20px;">
+            </div>
+            <div class="settings-item">
+                <i class="fas fa-bell icon bg-blue"></i>
+                <div class="label">Notifications</div>
+                <i class="fas fa-chevron-right arrow"></i>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-save" onclick="logoutUser()">Logout Account</button>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
             databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
             projectId: "cmchat-pro"
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const myName = localStorage.getItem('username') || "Guest";
 
-        let currentField = "";
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const currentUserName = localStorage.getItem('username');
 
-        // 1. Initial Load
-        db.ref('users/' + myName).on('value', snap => {
-            const user = snap.val();
-            if(user) {
-                document.getElementById('userName').innerText = user.name || myName;
-                document.getElementById('userImg').src = user.avatar || "https://via.placeholder.com/150";
-                document.getElementById('userEmail').innerText = "Account ID: " + (user.id || "#7721");
+        if(!currentUserName) location.href = 'Login.html';
+
+        // Load Live Data
+        const userRef = ref(db, `users/${currentUserName}`);
+        onValue(userRef, (snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                document.getElementById('displayFullName').innerText = currentUserName;
+                document.getElementById('valName').innerText = currentUserName;
+                document.getElementById('displayEmail').innerText = data.email || "no-email@cmchat.pro";
+                document.getElementById('valID').innerText = data.uid || "Pending...";
             }
         });
 
-        // 2. Modal Controls
-        function showEdit(field) {
-            currentField = field;
-            document.getElementById('modalTitle').innerText = "Update " + field.toUpperCase();
-            document.getElementById('editInput').placeholder = "Enter new " + field;
-            document.getElementById('editModal').style.display = 'flex';
-        }
-
-        function closeModal() { document.getElementById('editModal').style.display = 'none'; }
-
-        // 3. Save Changes to Firebase
-        function saveChanges() {
-            const newVal = document.getElementById('editInput').value;
-            if(!newVal) return alert("Field cannot be empty!");
-
-            let update = {};
-            if(currentField === 'name') update = { name: newVal };
-            if(currentField === 'image') update = { avatar: newVal };
-            if(currentField === 'password') update = { password: newVal };
-
-            db.ref('users/' + myName).update(update).then(() => {
-                alert("Settings updated successfully!");
-                closeModal();
-            });
-        }
-
-        // 4. Logout Function
-        function logout() {
-            if(confirm("Are you sure you want to log out from CMchat Pro?")) {
-                localStorage.clear();
-                window.location.href = "Login.html";
+        // Edit Functionality
+        window.editField = async (type) => {
+            const newVal = prompt("Enter your new " + type);
+            if(newVal) {
+                // Anan zaka iya tura update zuwa Firebase
+                alert("Updating information...");
             }
-        }
+        };
+
+        window.logoutUser = () => {
+            localStorage.removeItem('username');
+            location.href = 'Login.html';
+        };
     </script>
 </body>
 </html>

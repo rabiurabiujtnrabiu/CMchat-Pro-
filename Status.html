@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Status Premier - CMchat Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
-        :root { --p: #1A237E; --g: #FFD600; --bg: #0b141a; }
+        :root { --p: #1A237E; --g: #FFD600; --bg: #0b141a; --wa-green: #00a884; }
         
         body { 
             margin: 0; background: var(--bg); color: white; 
@@ -25,16 +26,17 @@
         .status-container {
             height: calc(100vh - 150px); overflow-y: auto; padding: 10px 20px;
         }
+        .status-item { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; animation: fadeIn 0.5s; }
         .my-status { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
         .status-thumb {
-            width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--g);
+            width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--wa-green);
             padding: 2px; position: relative;
         }
         .status-thumb img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
         .add-btn-small {
-            position: absolute; bottom: 0; right: 0; background: #00a884;
+            position: absolute; bottom: 0; right: 0; background: var(--wa-green);
             color: white; border-radius: 50%; width: 20px; height: 20px;
-            display: flex; align-items: center; justify-content: center; font-size: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 10px;
             border: 2px solid var(--bg);
         }
 
@@ -46,15 +48,31 @@
         .fab-edit {
             background: #233138; color: #aebac1; width: 45px; height: 45px;
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 18px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 18px; cursor: pointer;
         }
         .fab-camera {
-            background: #00a884; color: white; width: 55px; height: 55px;
+            background: var(--wa-green); color: white; width: 55px; height: 55px;
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4); font-size: 22px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4); font-size: 22px; cursor: pointer;
         }
 
-        /* Professional Overlay for Posting */
+        /* Professional Text Status Overlay */
+        #textStatusOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #9C27B0; z-index: 2500; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            transition: background 0.5s;
+        }
+        .text-input-area {
+            background: transparent; border: none; color: white;
+            font-size: 32px; text-align: center; width: 85%;
+            outline: none; font-weight: bold; resize: none;
+        }
+        .text-tools {
+            position: absolute; bottom: 30px; left: 20px; display: flex; gap: 20px; font-size: 22px;
+        }
+
+        /* Media Overlay Posting */
         #uploadOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: black; z-index: 2000; display: none; flex-direction: column;
@@ -62,11 +80,6 @@
         .preview-box { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
         #mainPreview { max-width: 100%; max-height: 100%; object-fit: contain; }
         
-        .edit-tools {
-            position: absolute; top: 20px; right: 20px; display: flex; gap: 20px;
-            font-size: 20px; text-shadow: 0 2px 5px rgba(0,0,0,0.5);
-        }
-
         .caption-bar {
             padding: 15px 20px 40px; background: rgba(0,0,0,0.8);
             display: flex; align-items: center; gap: 12px;
@@ -76,12 +89,11 @@
             border-radius: 25px; color: white; outline: none; font-size: 15px;
         }
         .send-final {
-            background: #00a884; color: white; width: 50px; height: 50px;
+            background: var(--wa-green); color: white; width: 50px; height: 50px;
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            border: none; font-size: 20px;
+            border: none; font-size: 20px; cursor: pointer;
         }
 
-        /* Loading Spinner */
         .loader {
             display: none; position: fixed; top: 50%; left: 50%; 
             transform: translate(-50%, -50%); z-index: 3000; text-align: center;
@@ -96,7 +108,7 @@
     </div>
 
     <div class="status-container">
-        <div class="my-status">
+        <div class="my-status" id="myStatusHeader">
             <div class="status-thumb">
                 <img src="https://via.placeholder.com/100" id="myThumb">
                 <div class="add-btn-small"><i class="fas fa-plus"></i></div>
@@ -107,11 +119,25 @@
             </div>
         </div>
         
-        <p style="color: #8696a0; font-size: 13px; font-weight: 600;">RECENT UPDATES</p>
-        <div id="statusList" style="text-align: center; margin-top: 50px; color: #8696a0;">
-            <i class="fas fa-circle-notch fa-spin" style="font-size: 30px; margin-bottom: 10px;"></i>
-            <p>Looking for updates...</p>
+        <p style="color: #8696a0; font-size: 13px; font-weight: 600; margin-top: 20px;">RECENT UPDATES</p>
+        <div id="statusList">
+            <div style="text-align: center; margin-top: 50px; color: #8696a0;">
+                <i class="fas fa-circle-notch fa-spin" style="font-size: 30px; margin-bottom: 10px;"></i>
+                <p>Looking for updates...</p>
+            </div>
         </div>
+    </div>
+
+    <div id="textStatusOverlay" class="animate__animated">
+        <i class="fas fa-times" onclick="closeTextStatus()" style="position:absolute; top:30px; left:20px; font-size:24px;"></i>
+        <textarea id="textStatusInput" class="text-input-area" placeholder="Type a status" maxlength="200"></textarea>
+        <div class="text-tools">
+            <i class="fas fa-palette" onclick="changeBg()"></i>
+            <i class="fas fa-font"></i>
+        </div>
+        <button class="send-final" onclick="postTextStatus()" style="position:absolute; bottom:30px; right:20px;">
+            <i class="fas fa-paper-plane"></i>
+        </button>
     </div>
 
     <div class="fab-container">
@@ -121,15 +147,9 @@
         </div>
     </div>
 
-    <input type="file" id="mediaInput" accept="image/*,video/*" multiple style="display:none" onchange="previewMedia(this.files)">
+    <input type="file" id="mediaInput" accept="image/*" style="display:none" onchange="previewMedia(this.files)">
 
     <div id="uploadOverlay">
-        <div class="edit-tools">
-            <i class="fas fa-crop-alt"></i>
-            <i class="fas fa-sticky-note"></i>
-            <i class="fas fa-text-height"></i>
-            <i class="fas fa-paint-brush"></i>
-        </div>
         <div class="preview-box">
             <img id="mainPreview">
             <i class="fas fa-times" onclick="closePreview()" style="position:absolute; top:20px; left:20px; font-size:22px;"></i>
@@ -141,13 +161,13 @@
     </div>
 
     <div class="loader" id="mainLoader">
-        <i class="fas fa-circle-notch fa-spin" style="font-size: 50px; color: #00a884;"></i>
-        <p id="loadText" style="margin-top: 15px; font-weight: bold;">POSTING...</p>
+        <i class="fas fa-circle-notch fa-spin" style="font-size: 50px; color: var(--wa-green);"></i>
+        <p id="loadText" style="margin-top: 15px; font-weight: bold;">SENDING...</p>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
@@ -157,9 +177,46 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const myName = localStorage.getItem('username') || "Guest";
+        const myName = localStorage.getItem('username') || "User";
 
-        // Handle Media Selection
+        // Text Status Logic (Professional No-Prompt)
+        const bgColors = ['#9C27B0', '#E91E63', '#2196F3', '#4CAF50', '#FF5722', '#607D8B'];
+        let bgIdx = 0;
+
+        window.openTextStatus = () => {
+            document.getElementById('textStatusOverlay').style.display = 'flex';
+            document.getElementById('textStatusInput').focus();
+        };
+
+        window.closeTextStatus = () => {
+            document.getElementById('textStatusOverlay').style.display = 'none';
+            document.getElementById('textStatusInput').value = '';
+        };
+
+        window.changeBg = () => {
+            bgIdx = (bgIdx + 1) % bgColors.length;
+            document.getElementById('textStatusOverlay').style.background = bgColors[bgIdx];
+        };
+
+        window.postTextStatus = async () => {
+            const val = document.getElementById('textStatusInput').value;
+            if(!val.trim()) return;
+
+            showLoading(true);
+            const sRef = ref(db, 'statuses');
+            await push(sRef, {
+                username: myName,
+                type: 'text',
+                content: val,
+                bg: document.getElementById('textStatusOverlay').style.background || '#9C27B0',
+                time: serverTimestamp()
+            });
+            showLoading(false);
+            closeTextStatus();
+            showToast("Status updated!");
+        };
+
+        // Media Logic
         window.previewMedia = (files) => {
             if (files.length > 0) {
                 const reader = new FileReader();
@@ -176,47 +233,62 @@
             document.getElementById('mediaInput').value = '';
         };
 
-        // Professional Upload Logic
         window.uploadNow = async () => {
             const imgData = document.getElementById('mainPreview').src;
-            const caption = document.getElementById('captionInput').value;
+            const cap = document.getElementById('captionInput').value;
 
-            document.getElementById('uploadOverlay').style.opacity = '0.5';
-            document.getElementById('mainLoader').style.display = 'block';
-
-            try {
-                const statusRef = ref(db, 'statuses');
-                const newStatus = push(statusRef);
-                await set(newStatus, {
-                    username: myName,
-                    media: imgData,
-                    caption: caption,
-                    time: Date.now(),
-                    views: 0
-                });
-
-                document.getElementById('mainLoader').style.display = 'none';
-                closePreview();
-                // Custom notification maimakon alert
-                showToast("Status sent!");
-            } catch (err) {
-                alert("Failed to post status.");
-            }
+            showLoading(true);
+            const sRef = ref(db, 'statuses');
+            await push(sRef, {
+                username: myName,
+                type: 'image',
+                media: imgData,
+                caption: cap,
+                time: serverTimestamp()
+            });
+            showLoading(false);
+            closePreview();
+            showToast("Status sent!");
         };
+
+        // Live Fetch
+        const statusListRef = ref(db, 'statuses');
+        onValue(statusListRef, (snapshot) => {
+            const listDiv = document.getElementById('statusList');
+            listDiv.innerHTML = '';
+            if(!snapshot.exists()) {
+                listDiv.innerHTML = '<p style="text-align:center; color:#8696a0;">No updates yet.</p>';
+                return;
+            }
+
+            snapshot.forEach(child => {
+                const data = child.val();
+                const item = document.createElement('div');
+                item.className = 'status-item';
+                item.innerHTML = `
+                    <div class="status-thumb">
+                        <img src="${data.type === 'image' ? data.media : 'https://via.placeholder.com/100/444/fff?text=Text'}">
+                    </div>
+                    <div>
+                        <b>${data.username}</b>
+                        <small style="display:block; color:#8696a0;">Just now</small>
+                    </div>
+                `;
+                listDiv.prepend(item);
+            });
+        });
+
+        function showLoading(show) {
+            document.getElementById('mainLoader').style.display = show ? 'block' : 'none';
+        }
 
         function showToast(msg) {
             const t = document.createElement("div");
-            t.style = "position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:#323232; color:white; padding:10px 20px; border-radius:20px; z-index:5000; font-size:14px;";
+            t.style = "position:fixed; bottom:50px; left:50%; transform:translateX(-50%); background:#323232; color:white; padding:12px 25px; border-radius:30px; z-index:5000; font-size:14px; box-shadow:0 5px 15px rgba(0,0,0,0.3);";
             t.innerText = msg;
             document.body.appendChild(t);
             setTimeout(() => t.remove(), 3000);
         }
-
-        window.openTextStatus = () => {
-            // Logic na text status shima za mu iya sa input mai kyau
-            const text = prompt("What's on your mind?"); // In kana so mu cire wannan ma, zan iya samar da page na text
-            if(text) { /* upload logic */ }
-        };
     </script>
 </body>
 </html>

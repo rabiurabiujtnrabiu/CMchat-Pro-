@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CM Arena Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --p: #0A192F; --g: #FFD600; --accent: #64FFDA; --card: #112240; }
+        body { margin: 0; background: var(--p); font-family: 'Inter', sans-serif; color: white; padding: 15px; }
+
+        /* Salary Status Card */
+        .salary-card {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 30px; padding: 25px; border: 1px solid var(--g);
+            position: relative; overflow: hidden; margin-bottom: 25px;
+        }
+        .salary-card::after {
+            content: '\f3d1'; font-family: 'Font Awesome 5 Free'; font-weight: 900;
+            position: absolute; right: -20px; bottom: -20px; font-size: 120px; opacity: 0.05;
+        }
+        
+        .level-badge { background: var(--g); color: var(--p); padding: 4px 12px; border-radius: 8px; font-weight: 900; font-size: 12px; }
+        .salary-amount { font-size: 32px; font-weight: 900; color: var(--g); margin: 10px 0; }
+        
+        /* Requirement Progress */
+        .req-box { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
+        .req-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .req-label { font-size: 12px; opacity: 0.7; }
+        .req-value { font-weight: bold; color: var(--accent); }
+        
+        .progress-bar { width: 100%; height: 6px; background: #1d2d44; border-radius: 10px; margin-top: 5px; }
+        .progress-fill { height: 100%; background: var(--accent); border-radius: 10px; box-shadow: 0 0 10px var(--accent); }
+
+        .btn-withdraw {
+            width: 100%; padding: 15px; border-radius: 15px; border: none;
+            background: #334155; color: #94a3b8; font-weight: 800; margin-top: 10px;
+        }
+        .active-status { background: var(--g) !important; color: var(--p) !important; cursor: pointer !important; }
+    </style>
+</head>
+<body>
+
+    <div class="salary-card">
+        <span class="level-badge">AMBASSADOR TRACK</span>
+        <div style="margin-top: 15px; font-size: 13px; opacity: 0.8;">Potential Monthly Salary</div>
+        <div class="salary-amount">₦200,000</div>
+        <div style="font-size: 11px; color: var(--accent);">Next Level: 100 (Ambassador)</div>
+    </div>
+
+    <h3 style="font-size: 16px; margin-bottom: 15px;">Requirements to Level Up</h3>
+    
+    <div class="req-box">
+        <div class="req-item">
+            <div class="req-label">Active Referrals (Direct)</div>
+            <div class="req-value">3 / 5</div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 60%;"></div></div>
+        <p style="font-size: 10px; color: #ff9100; margin-top: 10px;"><i class="fas fa-clock"></i> Wait 48h for referral verification.</p>
+    </div>
+
+    <div class="req-box">
+        <div class="req-item">
+            <div class="req-label">Total Active Team (100 Needed)</div>
+            <div class="req-value">45 / 100</div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 45%;"></div></div>
+    </div>
+
+    <div class="req-box">
+        <div class="req-item">
+            <div class="req-label">Platform Active Days</div>
+            <div class="req-value">12 / 30</div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width: 40%;"></div></div>
+        <p style="font-size: 10px; opacity: 0.5; margin-top: 10px;">Salary will be calculated after 30 days of activity.</p>
+    </div>
+
+    <button class="btn-withdraw">CLAIM SALARY (LOCKED)</button>
+
+    <script>
+        // System Note:
+        // Wannan code din zai rika lura da 'Verified Referrals' kawai.
+        // Idan mutum bai kai kwana 30 ba, maballin 'Claim' ba zai taba budewa ba.
+    </script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arena Tasks & Spins</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --p: #0A192F; --g: #FFD600; --card: #112240; --accent: #64FFDA; }
+        body { margin: 0; background: var(--p); font-family: 'Inter', sans-serif; color: white; padding: 20px; }
+
+        /* Referral Box */
+        .referral-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            padding: 25px; border-radius: 30px; position: relative; overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3); margin-bottom: 30px;
+        }
+        .referral-card h2 { margin: 0; font-size: 22px; color: var(--g); }
+        .referral-card p { font-size: 13px; opacity: 0.9; margin: 10px 0; }
+        .invite-btn {
+            background: var(--g); color: var(--p); border: none; padding: 12px 25px;
+            border-radius: 15px; font-weight: 900; cursor: pointer; margin-top: 10px;
+        }
+
+        /* Spin the Wheel UI */
+        .spin-container {
+            text-align: center; margin-top: 40px; position: relative;
+        }
+        .wheel-box {
+            width: 280px; height: 280px; border: 8px solid var(--card);
+            border-radius: 50%; margin: 0 auto; position: relative;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            background: conic-gradient(
+                #FFD600 0% 12.5%, #112240 12.5% 25%, 
+                #64FFDA 25% 37.5%, #112240 37.5% 50%,
+                #FF3D00 50% 62.5%, #112240 62.5% 75%,
+                #00E676 75% 87.5%, #112240 87.5% 100%
+            );
+            box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.3);
+        }
+        .wheel-pointer {
+            position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0; border-left: 15px solid transparent;
+            border-right: 15px solid transparent; border-top: 30px solid white; z-index: 10;
+        }
+        .btn-spin {
+            background: var(--g); color: var(--p); border: none;
+            width: 80px; height: 80px; border-radius: 50%;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 15; font-weight: 900; box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            cursor: pointer; border: 4px solid var(--p);
+        }
+
+        /* Mission List */
+        .mission-header { margin-top: 40px; display: flex; justify-content: space-between; }
+        .mission-item {
+            background: var(--card); padding: 18px; border-radius: 20px;
+            display: flex; align-items: center; gap: 15px; margin-top: 15px;
+            border: 1px solid rgba(100,255,218,0.05);
+        }
+        .mission-icon {
+            width: 45px; height: 45px; background: rgba(100,255,218,0.1);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            color: var(--accent); font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="referral-card">
+        <h2>REFER & SPIN</h2>
+        <p>Invite 1 friend and get <b>1 FREE SPIN</b> on the Wheel of Fortune. Earn XP and Airtime prizes instantly!</p>
+        <div style="font-size: 11px; margin-bottom: 15px;">Your Spins: <b id="spinCount" style="color: var(--g);">2</b></div>
+        <button class="invite-btn" onclick="copyInvite()">COPY INVITE LINK</button>
+    </div>
+
+    <div class="spin-container">
+        <div class="wheel-pointer"></div>
+        <div id="mainWheel" class="wheel-box"></div>
+        <button class="btn-spin" onclick="spinWheel()">SPIN</button>
+        <p style="margin-top: 25px; font-size: 12px; opacity: 0.6;">Try your luck today!</p>
+    </div>
+
+    <div class="mission-header">
+        <b style="color: var(--accent);">DAILY MISSIONS</b>
+        <span style="font-size: 11px; opacity: 0.7;">Resets in 12h</span>
+    </div>
+
+    <div class="mission-item">
+        <div class="mission-icon"><i class="fas fa-comment-dots"></i></div>
+        <div style="flex: 1;">
+            <div style="font-weight: bold; font-size: 14px;">Active Chatter</div>
+            <div style="font-size: 11px; opacity: 0.6;">Send 20 messages in CMchat</div>
+        </div>
+        <div style="color: var(--g); font-weight: 800; font-size: 12px;">+50 XP</div>
+    </div>
+
+    <div class="mission-item" style="opacity: 0.5;">
+        <div class="mission-icon"><i class="fas fa-users"></i></div>
+        <div style="flex: 1;">
+            <div style="font-weight: bold; font-size: 14px;">Team Builder</div>
+            <div style="font-size: 11px; opacity: 0.6;">Invite 3 friends today</div>
+        </div>
+        <div style="color: var(--g); font-weight: 800; font-size: 12px;">+200 XP</div>
+    </div>
+
+    <script>
+        // Wheel Logic
+        let spinning = false;
+        function spinWheel() {
+            if(spinning) return;
+            const spins = parseInt(document.getElementById('spinCount').innerText);
+            if(spins <= 0) return alert("No more spins! Invite friends to get more.");
+
+            spinning = true;
+            const wheel = document.getElementById('mainWheel');
+            const randomDegree = Math.floor(Math.random() * 360) + 3600; // Akalla ya yi juyi 10
+            
+            wheel.style.transform = `rotate(${randomDegree}deg)`;
+            
+            setTimeout(() => {
+                spinning = false;
+                alert("Congratulations! You won a Prize. Check your notifications.");
+                // Update spin count in DB here
+            }, 4000);
+        }
+
+        function copyInvite() {
+            const link = "https://cmchatpro.com/join?ref=user123";
+            navigator.clipboard.writeText(link);
+            alert("Referral link copied!");
+        }
+    </script>
+</body>
+</html>

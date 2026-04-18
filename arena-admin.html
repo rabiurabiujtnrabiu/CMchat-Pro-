@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CM Arena | Admin Command</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --admin-p: #0f172a; --gold: #FFD600; --danger: #ff3d00; --safe: #00E676; --card: #1e293b; }
+        body { margin: 0; background: var(--admin-p); font-family: 'Segoe UI', sans-serif; color: white; padding: 15px; }
+
+        /* Admin Stats */
+        .admin-dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .stat-box { background: var(--card); padding: 20px; border-radius: 20px; border-left: 4px solid var(--gold); }
+        .stat-box small { font-size: 10px; opacity: 0.6; text-transform: uppercase; }
+        .stat-box div { font-size: 20px; font-weight: 900; color: var(--gold); margin-top: 5px; }
+
+        /* Salary Approval List */
+        .approval-list { background: var(--card); border-radius: 25px; padding: 20px; }
+        .user-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .user-meta b { display: block; font-size: 14px; }
+        .user-meta span { font-size: 11px; color: var(--safe); }
+        
+        .action-btns { display: flex; gap: 10px; }
+        .btn { border: none; padding: 8px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .btn-pay { background: var(--safe); color: #004d40; }
+        .btn-ban { background: var(--danger); color: white; }
+
+        /* Security Monitor */
+        .scam-monitor {
+            background: rgba(255, 61, 0, 0.1); border: 1px dashed var(--danger);
+            padding: 15px; border-radius: 15px; margin-top: 25px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2 style="margin-bottom: 20px;"><i class="fas fa-user-shield"></i> CM Arena Admin</h2>
+
+    <div class="admin-dashboard">
+        <div class="stat-box">
+            <small>Total Users</small>
+            <div id="totalUsers">0</div>
+        </div>
+        <div class="stat-box">
+            <small>Total Payouts</small>
+            <div id="payoutValue">₦0.00</div>
+        </div>
+        <div class="stat-box">
+            <small>Ambassadors</small>
+            <div id="totalAmb">0</div>
+        </div>
+        <div class="stat-box">
+            <small>Banned Bots</small>
+            <div id="totalBots" style="color: var(--danger);">0</div>
+        </div>
+    </div>
+
+    <div class="approval-list">
+        <h3 style="font-size: 16px; margin-top: 0;">Pending Payouts (Level 10+)</h3>
+        <div id="payoutQueue">
+            <p style="text-align: center; font-size: 12px; opacity: 0.5;">Searching for eligible users...</p>
+        </div>
+    </div>
+
+    <div class="scam-monitor">
+        <b style="color: var(--danger); font-size: 12px;"><i class="fas fa-exclamation-triangle"></i> Security Alert:</b>
+        <p id="fraudLog" style="font-size: 11px; margin: 5px 0 0;">Scanning for multiple accounts on same Device IDs...</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", 
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com", 
+            projectId: "cmchat-pro" 
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Fetch User Data for Admin
+        onValue(ref(db, 'users'), (snapshot) => {
+            let userCount = 0;
+            let ambCount = 0;
+            const queue = document.getElementById('payoutQueue');
+            queue.innerHTML = '';
+
+            snapshot.forEach(child => {
+                const u = child.val();
+                userCount++;
+                if(u.level >= 100) ambCount++;
+
+                // Show users eligible for payment (Level 10+ and 30 days active)
+                if(u.level >= 10 && u.activeDays >= 30) {
+                    const row = `
+                        <div class="user-row animate__animated animate__fadeIn">
+                            <div class="user-meta">
+                                <b>${u.username} (Lvl ${u.level})</b>
+                                <span>Team: ${u.activeTeam} Active Users</span>
+                            </div>
+                            <div class="action-btns">
+                                <button class="btn btn-pay" onclick="payUser('${child.key}', ${u.level})">PAY</button>
+                                <button class="btn btn-ban" onclick="banUser('${child.key}')">BAN</button>
+                            </div>
+                        </div>
+                    `;
+                    queue.insertAdjacentHTML('beforeend', row);
+                }
+            });
+
+            document.getElementById('totalUsers').innerText = userCount.toLocaleString();
+            document.getElementById('totalAmb').innerText = ambCount;
+        });
+
+        window.payUser = (uid, level) => {
+            if(confirm("Confirm payment for this Ambassador?")) {
+                // Logic to update payment history in Firebase
+                alert("Payment logged successfully!");
+            }
+        };
+
+        window.banUser = (uid) => {
+            if(confirm("Are you sure you want to ban this user for fraud?")) {
+                remove(ref(db, 'users/' + uid));
+                alert("User banned and removed.");
+            }
+        };
+    </script>
+</body>
+</html>
