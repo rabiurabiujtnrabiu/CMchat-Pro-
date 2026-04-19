@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arena Vault | Secured Rewards</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --p: #0A192F; --g: #FFD600; --card: #112240; --safe: #00E676; --pending: #FF9100; }
+        body { margin: 0; background: var(--p); font-family: 'Inter', sans-serif; color: white; padding: 20px; }
+
+        /* Security Dashboard */
+        .vault-status {
+            background: var(--card); border-radius: 25px; padding: 20px;
+            border: 1px solid rgba(255, 214, 0, 0.2); margin-bottom: 30px;
+        }
+        .points-row { display: flex; justify-content: space-between; margin-top: 15px; }
+        .p-box { text-align: center; flex: 1; }
+        .p-box b { display: block; font-size: 20px; }
+        .p-box span { font-size: 10px; opacity: 0.6; text-transform: uppercase; }
+
+        /* Anti-Scam Notice */
+        .scam-alert {
+            background: rgba(255, 145, 0, 0.1); color: var(--pending);
+            padding: 12px; border-radius: 15px; font-size: 11px;
+            display: flex; align-items: center; gap: 10px; margin-bottom: 25px;
+        }
+
+        /* The Vault Grid */
+        .vault-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .v-item {
+            background: var(--card); border-radius: 20px; overflow: hidden;
+            position: relative; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .v-item.locked { filter: grayscale(1); opacity: 0.7; }
+        
+        .lock-tag {
+            position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.8);
+            padding: 5px 12px; border-radius: 10px; font-size: 11px; color: var(--g);
+        }
+        .v-item img { width: 100%; height: 160px; object-fit: cover; }
+        .v-content { padding: 15px; }
+
+        .btn-unlock {
+            width: 100%; padding: 12px; border-radius: 12px; border: none;
+            background: #334155; color: #94a3b8; font-weight: 800; cursor: not-allowed;
+        }
+        .btn-ready {
+            background: var(--g) !important; color: var(--p) !important; cursor: pointer !important;
+        }
+    </style>
+</head>
+<body>
+
+    <h2 style="color: var(--g); margin-bottom: 5px;">THE VAULT</h2>
+    <p style="font-size: 12px; opacity: 0.7; margin-top: 0;">Your earned treasures and points.</p>
+
+    <div class="vault-status">
+        <div class="points-row">
+            <div class="p-box">
+                <b style="color: var(--safe);">1,250</b>
+                <span>Verified AP</span>
+            </div>
+            <div style="width: 1px; background: rgba(255,255,255,0.1); height: 40px;"></div>
+            <div class="p-box">
+                <b style="color: var(--pending);">400</b>
+                <span>Pending (48h)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="scam-alert">
+        <i class="fas fa-shield-alt"></i>
+        <span>Points from new referrals are held for 48h to verify account activity. Fake accounts will be banned.</span>
+    </div>
+
+    <div class="vault-grid">
+        <div class="v-item">
+            <div class="lock-tag">READY</div>
+            <img src="https://via.placeholder.com/400x200?text=Airtime+Voucher">
+            <div class="v-content">
+                <b style="display: block;">₦200 Instant Airtime</b>
+                <p style="font-size: 11px; opacity: 0.6; margin: 8px 0;">Cost: 500 Verified Points</p>
+                <button class="btn-unlock btn-ready">EXCHANGE NOW</button>
+            </div>
+        </div>
+
+        <div class="v-item locked">
+            <div class="lock-tag"><i class="fas fa-lock"></i> LVL 5 ONLY</div>
+            <img src="https://via.placeholder.com/400x200?text=Premium+Gift+Box">
+            <div class="v-content">
+                <b style="display: block;">Mystery Tech Box</b>
+                <p style="font-size: 11px; opacity: 0.6; margin: 8px 0;">Cost: 5,000 Verified Points</p>
+                <button class="btn-unlock">LEVEL TOO LOW</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

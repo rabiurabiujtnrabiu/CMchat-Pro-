@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ha">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit - CMchat Pro</title>
+    <style>
+        :root { --primary: #075e54; --secondary: #128c7e; --accent: #25d366; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f6; color: #333; }
+        
+        .header { background: var(--primary); color: white; padding: 20px; text-align: center; font-weight: bold; font-size: 18px; }
+        .container { padding: 20px; }
+        
+        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .instruction { font-size: 14px; color: #666; margin-bottom: 15px; }
+        
+        .bank-info { background: #e8f5e9; border: 1px dashed var(--secondary); padding: 15px; border-radius: 10px; margin: 10px 0; position: relative; }
+        .bank-info b { display: block; font-size: 12px; color: #555; }
+        .acc-num { font-size: 20px; font-weight: bold; color: var(--primary); margin: 5px 0; }
+        
+        .copy-btn { background: var(--primary); color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 11px; cursor: pointer; position: absolute; right: 10px; top: 15px; }
+
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; font-size: 13px; margin-bottom: 5px; font-weight: bold; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+
+        .btn-submit { background: var(--accent); color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-submit:active { transform: scale(0.98); }
+
+        .ad-space { width: 100%; height: 50px; background: #eee; margin-top: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #999; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">Saka Kuɗi (Deposit)</div>
+
+    <div class="container">
+        <div class="card">
+            <div class="instruction">Tura kuɗin da kake son sakawa zuwa wannan asusun bankin:</div>
+            
+            <div class="bank-info">
+                <b>Sunan Banki:</b>
+                <div>OPay / Monnify</div>
+                <b>Lambar Akawunt:</b>
+                <div class="acc-num" id="accNum">8144223344</div>
+                <b>Sunan Akawunt:</b>
+                <div>CMchat Pro Services</div>
+                <button class="copy-btn" onclick="copyAcc()">Copy</button>
+            </div>
+            <p style="font-size: 11px; color: #999;">* Bayan ka tura, cika bayanan kasa don tabbatarwa.</p>
+        </div>
+
+        <div class="card">
+            <div class="input-group">
+                <label>Adadin da ka tura (Amount)</label>
+                <input type="number" id="depAmount" placeholder="Misali: 1000">
+            </div>
+            
+            <div class="input-group">
+                <label>Sunan da ka yi transfer da shi</label>
+                <input type="text" id="senderName" placeholder="Sunanka na Banki">
+            </div>
+
+            <button class="btn-submit" onclick="submitDeposit()">Tura Shaida (Submit)</button>
+        </div>
+
+        <div class="ad-space">
+            [TALLAR BANNER TANA NAN]
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // Firebase dinka
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Aikin Copy Number
+        window.copyAcc = function() {
+            const num = document.getElementById('accNum').innerText;
+            navigator.clipboard.writeText(num);
+            alert("An kwafi lambar banki: " + num);
+        }
+
+        // Tura bayanan deposit zuwa admin
+        window.submitDeposit = function() {
+            const amount = document.getElementById('depAmount').value;
+            const name = document.getElementById('senderName').value;
+            const userID = localStorage.getItem("userID") || "Unknown";
+
+            if(amount === "" || name === "") {
+                alert("Don Allah cika dukkan wuraren!");
+                return;
+            }
+
+            const depositRef = ref(db, 'pending_deposits');
+            const newDeposit = push(depositRef);
+            
+            set(newDeposit, {
+                userID: userID,
+                amount: amount,
+                senderName: name,
+                status: "pending",
+                time: new Date().toLocaleString()
+            }).then(() => {
+                alert("An tura! Admin zai duba ya saka maka kuɗi nan ba da daɗewa ba.");
+                window.location.href = "Wallet.html";
+            });
+        }
+    </script>
+</body>
+</html>

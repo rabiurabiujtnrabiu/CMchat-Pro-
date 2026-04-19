@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - CMchat Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #1a73e8; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .register-card { background: white; padding: 40px 30px; border-radius: 30px; width: 90%; max-width: 400px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); text-align: center; }
+        .input-box { position: relative; margin-bottom: 15px; }
+        .input-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa; }
+        .input-box input { width: 100%; padding: 14px 15px 14px 45px; border: 1.5px solid #eee; border-radius: 15px; outline: none; box-sizing: border-box; font-size: 14px; }
+        .reg-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .reg-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .optional { font-size: 10px; color: #999; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); }
+    </style>
+</head>
+<body>
+    <div class="register-card">
+        <h2>Create Account</h2>
+        <div class="input-box"><i class="fas fa-user"></i><input type="text" id="regName" placeholder="Full Name"></div>
+        <div class="input-box"><i class="fas fa-envelope"></i><input type="email" id="regEmail" placeholder="Email Address"></div>
+        <div class="input-box"><i class="fas fa-lock"></i><input type="password" id="regPass" placeholder="Create Password"></div>
+        
+        <div class="input-box"><i class="fas fa-camera"></i><input type="text" id="regImg" placeholder="Profile Image URL"><span class="optional">Optional</span></div>
+        <div class="input-box"><i class="fas fa-link"></i><input type="text" id="regRef" placeholder="Referral Code"><span class="optional">Optional</span></div>
+        
+        <button class="reg-btn" id="regBtn" onclick="handleRegister()">Sign Up</button>
+        
+        <div style="margin-top:20px; font-size:14px;">
+            Already have an account? <span style="color:var(--primary); font-weight:bold; cursor:pointer;" onclick="location.href='login.html'">Login</span>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            authDomain: "cmchat-pro.firebaseapp.com",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.database();
+
+        async function handleRegister() {
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPass').value.trim();
+            const img = document.getElementById('regImg').value.trim();
+            const btn = document.getElementById('regBtn');
+
+            // 1. Validation (Tuntancewa)
+            if(!name || !email || !pass) {
+                alert("Please fill in all required fields!");
+                return;
+            }
+            if(pass.length < 6) {
+                alert("Password must be at least 6 characters!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Creating Account...";
+
+            // 2. Duba ko sunan ya riga ya kasance a database
+            const userCheck = await db.ref('users/' + name).once('value');
+            if(userCheck.exists()) {
+                alert("This username is already taken. Try another name.");
+                btn.disabled = false;
+                btn.innerText = "Sign Up";
+                return;
+            }
+
+            // 3. Adana bayanan mamba (Saving data)
+            const userData = {
+                username: name,
+                email: email,
+                password: pass,
+                profilePic: img || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+                uid: "UID-" + Math.floor(Math.random() * 1000000),
+                joinedAt: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            db.ref('users/' + name).set(userData)
+            .then(() => {
+                // Adana session na wucin gadi don login ya zama smooth
+                localStorage.setItem('temp_user', name);
+                alert("Registration Successful! Now please login.");
+                location.href = 'login.html';
+            })
+            .catch(err => {
+                alert("Error: " + err.message);
+                btn.disabled = false;
+                btn.innerText = "Sign Up";
+            });
+        }
+    </script>
+</body>
+</html>

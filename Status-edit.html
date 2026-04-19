@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Edit Status | CMchat Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root { --p: #1A237E; --g: #FFD600; --bg: #000; }
+        body { 
+            margin: 0; background: var(--bg); font-family: 'Segoe UI', sans-serif; 
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden; 
+        }
+        
+        /* Editing Header */
+        .edit-header { 
+            padding: 20px; display: flex; justify-content: space-between; 
+            align-items: center; color: white; z-index: 100;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        }
+        .edit-header i { font-size: 22px; cursor: pointer; transition: 0.3s; }
+        .edit-header i:active { transform: scale(0.8); }
+
+        /* Preview Area - Scaled to fit */
+        #preview-container { 
+            flex: 1; display: flex; align-items: center; justify-content: center; 
+            position: relative; overflow: hidden; background: #000;
+            padding: 10px;
+        }
+        #preview-img { 
+            max-width: 100%; max-height: 80vh; /* Hana shi rufe page */
+            object-fit: contain; border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* Tools Side Bar (Floating) */
+        .tools { 
+            position: absolute; top: 100px; right: 15px; 
+            display: flex; flex-direction: column; gap: 25px; 
+            color: white; font-size: 20px; z-index: 50;
+        }
+
+        /* Modern Caption Section (Glassmorphism) */
+        .caption-section { 
+            background: rgba(11, 20, 26, 0.95); padding: 15px 20px 35px; 
+            display: flex; align-items: center; gap: 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            z-index: 100;
+        }
+        .caption-input { 
+            flex: 1; background: #2a3942; border: none; padding: 14px 22px; 
+            border-radius: 30px; color: white; outline: none; font-size: 16px;
+        }
+
+        /* Send Button */
+        .send-btn { 
+            background: #00a884; color: white; width: 55px; height: 55px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            border: none; font-size: 22px; cursor: pointer; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: 0.3s;
+        }
+        .send-btn:active { transform: scale(0.9); background: #008f70; }
+
+        /* Professional Loader */
+        .loader-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 1000;
+            flex-direction: column; align-items: center; justify-content: center; color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="edit-header">
+        <i class="fas fa-times" onclick="window.location.href='Status.html'"></i>
+        <div style="display: flex; gap: 25px;">
+            <i class="fas fa-crop-alt"></i>
+            <i class="fas fa-sticky-note"></i>
+            <i class="fas fa-text-height"></i>
+            <i class="fas fa-paint-brush" style="color: var(--g);"></i>
+        </div>
+    </div>
+
+    <div id="preview-container">
+        <img id="preview-img" class="animate__animated animate__zoomIn" src="" alt="Selected Image">
+        <div class="tools">
+            <i class="fas fa-undo"></i>
+            <i class="fas fa-magic"></i>
+            <i class="fas fa-sliders-h"></i>
+        </div>
+    </div>
+
+    <div class="caption-section">
+        <input type="text" id="captionText" class="caption-input" placeholder="Add a caption...">
+        <button class="send-btn" id="sendBtn" onclick="sendToStatus()">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+
+    <div class="loader-overlay" id="loader">
+        <i class="fas fa-circle-notch fa-spin" style="font-size: 50px; color: #00a884;"></i>
+        <p style="margin-top: 15px; font-weight: 600; letter-spacing: 1px;">SENDING STATUS...</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Karbo hoton
+        const selectedImageData = localStorage.getItem('selectedImage');
+        if(selectedImageData) {
+            document.getElementById('preview-img').src = selectedImageData;
+        } else {
+            window.location.href = 'Status.html';
+        }
+
+        window.sendToStatus = async () => {
+            const caption = document.getElementById('captionText').value;
+            const myName = localStorage.getItem('username') || "User";
+            const loader = document.getElementById('loader');
+
+            loader.style.display = 'flex';
+
+            try {
+                const statusRef = ref(db, 'statuses');
+                const newStatus = push(statusRef);
+                
+                await set(newStatus, {
+                    username: myName,
+                    media: selectedImageData,
+                    caption: caption,
+                    type: 'image',
+                    time: serverTimestamp()
+                });
+
+                // Cire hoton daga storage bayan an gama
+                localStorage.removeItem('selectedImage');
+                window.location.href = 'Status.html';
+            } catch (err) {
+                loader.style.display = 'none';
+                alert("Upload failed. Please check your connection.");
+            }
+        };
+    </script>
+</body>
+</html>

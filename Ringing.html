@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ha">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In-Call CMchat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { margin: 0; background: #1A237E; color: white; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: space-around; }
+        .caller-img { width: 120px; height: 120px; background: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 50px; color: #1A237E; }
+        .caller-name { font-size: 24px; font-weight: bold; }
+        .call-status { font-size: 16px; color: #bbdefb; }
+        .actions { display: flex; gap: 50px; }
+        .btn { width: 70px; height: 70px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 25px; border: none; color: white; cursor: pointer; }
+        .decline { background: #f44336; }
+        .accept { background: #4CAF50; }
+    </style>
+</head>
+<body>
+    <div class="caller-img"><i class="fas fa-user"></i></div>
+    <div style="text-align: center;">
+        <div class="caller-name" id="name">Abubakar Sadiq</div>
+        <div class="call-status">CMchat Voice Call...</div>
+    </div>
+    <div class="actions">
+        <button class="btn decline" onclick="window.close()"><i class="fas fa-phone-slash"></i></button>
+        <button class="btn accept" onclick="alert('Connecting...')"><i class="fas fa-phone"></i></button>
+    </div>
+</body>
+</html>

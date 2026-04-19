@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network - CMchat Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root { --p: #1A237E; --g: #FFD600; --bg: #0a0e27; --card: rgba(255,255,255,0.08); }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; overflow-x: hidden; }
+        header { background: var(--p); padding: 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; }
+        .search-container { background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 15px; display: flex; align-items: center; gap: 10px; width: 75%; }
+        .search-container input { background: transparent; border: none; color: white; outline: none; width: 100%; font-size: 15px; }
+        .tabs { display: flex; background: #12183d; position: sticky; top: 68px; z-index: 999; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tab { flex: 1; text-align: center; padding: 15px 0; font-weight: bold; color: #888; cursor: pointer; font-size: 12px; position: relative; }
+        .tab.active { color: var(--g); border-bottom: 3px solid var(--g); }
+        .badge { background: #ff0000; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; position: absolute; top: 8px; right: 10px; border: 2px solid #12183d; }
+        .content { padding: 15px; min-height: 80vh; }
+        .user-card { background: var(--card); backdrop-filter: blur(10px); border-radius: 20px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.1); animation: fadeInUp 0.4s ease; }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 50px; height: 50px; border-radius: 12px; object-fit: cover; border: 2px solid var(--g); }
+        .details b { display: block; font-size: 15px; color: var(--g); }
+        .details span { font-size: 11px; color: #aaa; }
+        .btn { padding: 9px 15px; border-radius: 10px; font-weight: bold; font-size: 11px; border: none; cursor: pointer; transition: 0.3s; min-width: 80px; }
+        .btn-add { background: var(--g); color: var(--p); }
+        .btn-sent { background: #333 !important; color: #777 !important; cursor: not-allowed; }
+        .btn-accept { background: #00E676; color: white; }
+        .btn-friends { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #ccc; pointer-events: none; }
+        .empty { text-align: center; padding: 80px 20px; color: #555; }
+        .empty i { font-size: 45px; margin-bottom: 12px; opacity: 0.3; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
+        <div class="search-container">
+            <i class="fas fa-search" style="color: var(--g);"></i>
+            <input type="text" placeholder="Search for members..." id="searchBox" oninput="filterUsers()">
+        </div>
+        <i class="fas fa-ellipsis-v"></i>
+    </header>
+
+    <div class="tabs">
+        <div class="tab active" id="tab-explore" onclick="switchTab('explore')">EXPLORE</div>
+        <div class="tab" id="tab-requests" onclick="switchTab('requests')">REQUESTS <span id="reqBadge" class="badge" style="display:none;">0</span></div>
+        <div class="tab" id="tab-friends" onclick="switchTab('friends')">FRIENDS</div>
+    </div>
+
+    <div class="content" id="mainDisplay"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            authDomain: "cmchat-pro.firebaseapp.com",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro",
+            storageBucket: "cmchat-pro.appspot.com"
+        };
+        
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.database();
+        
+        const myUid = localStorage.getItem('user_uid') || "USER_" + Date.now(); 
+        const myName = localStorage.getItem('username') || "Elite Member";
+
+        let currentTab = 'explore';
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            currentTab = tab;
+            document.getElementById('searchBox').value = "";
+            renderView();
+        }
+
+        window.filterUsers = () => {
+            const queryText = document.getElementById('searchBox').value.trim().toLowerCase();
+            const display = document.getElementById('mainDisplay');
+            if (queryText === "") { if (currentTab === 'explore') renderView(); return; }
+            display.innerHTML = '<div class="empty"><i class="fas fa-search fa-spin"></i><p>Searching...</p></div>';
+            db.ref('users').once('value').then(snap => {
+                display.innerHTML = "";
+                let found = false;
+                snap.forEach(child => {
+                    const u = child.val();
+                    const username = (u.username || "").toLowerCase();
+                    if (username.includes(queryText) && child.key !== myUid) {
+                        found = true;
+                        display.innerHTML += createCard(child.key, u);
+                    }
+                });
+                if (!found) display.innerHTML = '<div class="empty"><i class="fas fa-user-times"></i><p>No results.</p></div>';
+            });
+        };
+
+        function createCard(id, u) {
+            return `
+            <div class="user-card animate__animated animate__fadeIn">
+                <div class="user-info">
+                    <img src="${u.profilePic || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="avatar">
+                    <div class="details"><b>${u.username || 'Member'}</b><span>Global Member</span></div>
+                </div>
+                <button class="btn btn-add" id="btn-${id}" onclick="sendReq('${id}', '${u.username}')">CONNECT</button>
+            </div>`;
+        }
+
+        function renderView() {
+            const display = document.getElementById('mainDisplay');
+            display.innerHTML = '<div class="empty"><i class="fas fa-spinner fa-spin"></i><p>Syncing...</p></div>';
+
+            if(currentTab === 'explore') {
+                db.ref('users').limitToLast(50).once('value').then(snap => {
+                    display.innerHTML = "";
+                    snap.forEach(child => {
+                        const u = child.val();
+                        if(child.key !== myUid) {
+                            display.innerHTML += createCard(child.key, u);
+                        }
+                    });
+                });
+            } else if(currentTab === 'requests') {
+                db.ref('requests/' + myUid).once('value', snap => {
+                    display.innerHTML = "";
+                    if(!snap.exists()) {
+                        display.innerHTML = '<div class="empty"><i class="fas fa-ghost"></i><p>No requests.</p></div>';
+                        return;
+                    }
+                    snap.forEach(child => {
+                        const r = child.val();
+                        display.innerHTML += `
+                        <div class="user-card">
+                            <div class="user-info">
+                                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="avatar">
+                                <div class="details"><b>${r.senderName}</b><span>Wants to connect</span></div>
+                            </div>
+                            <button class="btn btn-accept" onclick="acceptFriend('${child.key}', '${r.senderName}')">ACCEPT</button>
+                        </div>`;
+                    });
+                });
+            } else if(currentTab === 'friends') {
+                db.ref('friends/' + myUid).once('value', snap => {
+                    display.innerHTML = "";
+                    if(!snap.exists()) {
+                        display.innerHTML = '<div class="empty"><i class="fas fa-user-friends"></i><p>No friends yet.</p></div>';
+                        return;
+                    }
+                    snap.forEach(child => {
+                        const f = child.val();
+                        display.innerHTML += `
+                        <div class="user-card">
+                            <div class="user-info">
+                                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="avatar">
+                                <div class="details"><b>${f.name}</b><span>Connected</span></div>
+                            </div>
+                            <button class="btn btn-friends">FRIENDS</button>
+                        </div>`;
+                    });
+                });
+            }
+        }
+
+        window.sendReq = (id, name) => {
+            const btn = document.getElementById('btn-' + id);
+            // Silent sending - Babu Alert don ɓoye address
+            db.ref('requests/' + id + '/' + myUid).set({ 
+                senderName: myName, 
+                timestamp: firebase.database.ServerValue.TIMESTAMP 
+            }).then(() => {
+                if(btn) {
+                    btn.className = "btn btn-sent";
+                    btn.innerText = "PENDING";
+                    btn.disabled = true;
+                }
+            }).catch(err => {
+                if(btn) btn.innerText = "RETRY";
+                console.log("Security check: Update Firebase Rules.");
+            });
+        };
+
+        window.acceptFriend = (senderId, senderName) => {
+            db.ref('friends/' + myUid + '/' + senderId).set({ name: senderName });
+            db.ref('friends/' + senderId + '/' + myUid).set({ name: myName });
+            db.ref('requests/' + myUid + '/' + senderId).remove();
+            renderView();
+        };
+
+        db.ref('requests/' + myUid).on('value', snap => {
+            const badge = document.getElementById('reqBadge');
+            if(snap.exists()) {
+                badge.style.display = 'block';
+                badge.innerText = snap.numChildren();
+            } else { badge.style.display = 'none'; }
+        });
+
+        document.addEventListener('DOMContentLoaded', renderView);
+    </script>
+</body>
+</html>

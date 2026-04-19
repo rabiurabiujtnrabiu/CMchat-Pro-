@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ha">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw - CMchat Premier</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { 
+            margin: 0 auto; max-width: autopx; height: 720px; 
+            background: #f4f7f6; font-family: sans-serif;
+            display: flex; flex-direction: column;
+        }
+        .header { background: #1A237E; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; }
+        
+        .amount-card { 
+            background: white; margin: 20px; padding: 25px; border-radius: 20px; 
+            text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        
+        .input-group { margin-top: 15px; }
+        .input-group input { 
+            width: 100%; border: none; border-bottom: 2px solid #1A237E; 
+            font-size: 24px; text-align: center; padding: 10px; outline: none; background: transparent;
+        }
+
+        .withdraw-btn { 
+            background: #1A237E; color: white; border: none; padding: 15px; 
+            border-radius: 12px; margin: 20px; font-weight: bold; cursor: pointer;
+        }
+
+        /* Modal na Fingerprint */
+        .fingerprint-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .fp-content {
+            background: white; width: 280px; padding: 30px; border-radius: 20px; text-align: center;
+        }
+        .fp-icon { font-size: 60px; color: #1A237E; margin-bottom: 20px; animation: pulse 1.5s infinite; }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <i class="fas fa-arrow-left" onclick="history.back()"></i>
+    <b>Withdraw to Bank</b>
+</div>
+
+<div class="amount-card">
+    <small style="color: #888;">Nawa kake son cirewa?</small>
+    <div class="input-group">
+        <input type="number" placeholder="₦0.00" id="withdrawAmount">
+    </div>
+    <p style="font-size: 11px; color: #666; margin-top: 10px;">Balance: ₦1,250.00</p>
+</div>
+
+<button class="withdraw-btn" onclick="showFingerprintModal()">Cire Kudi Yanzu</button>
+
+<div class="fingerprint-overlay" id="fpModal">
+    <div class="fp-content">
+        <i class="fas fa-fingerprint fp-icon"></i>
+        <b style="display: block; margin-bottom: 10px;">Security Verification</b>
+        <p style="font-size: 13px; color: #666;">Tabo wajen sensor da yatsarka don tabbatar da wannan withdraw.</p>
+        <button onclick="closeModal()" style="margin-top: 20px; background: none; border: none; color: red; font-size: 12px; cursor: pointer;">Cancel</button>
+    </div>
+</div>
+
+<script>
+    function showFingerprintModal() {
+        const amount = document.getElementById('withdrawAmount').value;
+        if (amount < 1000) {
+            alert("Kalla ₦1,000 ake cirewa.");
+            return;
+        }
+        document.getElementById('fpModal').style.display = 'flex';
+        
+        // Bayan 3 seconds mu yi kamar an taba yatsan
+        setTimeout(() => {
+            alert("Verification Successful! Mun aika ₦" + amount + " zuwa bankin ka.");
+            document.getElementById('fpModal').style.display = 'none';
+            location.href = 'wallet.html';
+        }, 3000);
+    }
+
+    function closeModal() {
+        document.getElementById('fpModal').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

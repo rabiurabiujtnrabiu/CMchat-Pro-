@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Services | CMchat Pro VTU</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <style>
+        :root {
+            --primary: #1A237E;
+            --accent: #FFD600;
+            --bg: #F4F7FE;
+            --white: #ffffff;
+            --text-main: #1C1C1E;
+            --text-sub: #8E8E93;
+            --border: #E5E5EA;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* --- STICKY HEADER --- */
+        header {
+            background: var(--primary);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        header i { font-size: 20px; cursor: pointer; margin-right: 15px; }
+        header b { font-size: 18px; font-weight: 700; }
+
+        .container {
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* --- SERVICE SELECTOR CARD --- */
+        .card {
+            background: var(--white);
+            border-radius: 30px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+            margin-bottom: 20px;
+        }
+
+        .label-text {
+            display: block;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 16px;
+            border-radius: 18px;
+            border: 2px solid var(--border);
+            outline: none;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            box-sizing: border-box;
+            transition: 0.3s ease;
+            background: #F9F9FB;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(26, 35, 126, 0.05);
+        }
+
+        /* --- NETWORK GRID (ALL 4 VISIBLE) --- */
+        .network-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .network-item {
+            background: #F9F9FB;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .network-item img {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            object-fit: contain;
+        }
+
+        .network-item span {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .network-item.active {
+            border-color: var(--primary);
+            background: #E8EAF6;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(26, 35, 126, 0.1);
+        }
+
+        /* --- SUMMARY BOX --- */
+        .summary-box {
+            background: #F0F2F8;
+            border-radius: 20px;
+            padding: 15px 20px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .summary-box span { font-size: 13px; color: var(--text-sub); font-weight: 600; }
+        .summary-box b { font-size: 15px; color: var(--primary); }
+
+        /* --- BUTTONS --- */
+        .btn-primary {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 22px;
+            background: var(--primary);
+            color: white;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(26, 35, 126, 0.2);
+            transition: 0.3s;
+        }
+
+        .btn-primary:active { transform: scale(0.96); }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
+        <b>Purchase Services</b>
+    </header>
+
+    <div class="container">
+        <div class="card animate__animated animate__fadeInUp">
+            
+            <div style="margin-bottom: 25px;">
+                <span class="label-text">Transaction Type</span>
+                <select id="serviceType" onchange="toggleFields()">
+                    <option value="airtime">Buy Airtime (Top-up)</option>
+                    <option value="data">Buy Data Bundle</option>
+                </select>
+            </div>
+
+            <span class="label-text">Choose Network Provider</span>
+            <div class="network-grid" id="networkGrid">
+                <div class="network-item active" onclick="selectNetwork('MTN', this)">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/MTN_Logo.svg/1200px-MTN_Logo.svg.png">
+                    <span>MTN</span>
+                </div>
+                <div class="network-item" onclick="selectNetwork('GLO', this)">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/7/77/Globacom_Limited_Logo.svg/1200px-Globacom_Limited_Logo.svg.png">
+                    <span>GLO</span>
+                </div>
+                <div class="network-item" onclick="selectNetwork('AIRTEL', this)">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Airtel_logo.png">
+                    <span>Airtel</span>
+                </div>
+                <div class="network-item" onclick="selectNetwork('9MOBILE', this)">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/9/90/9mobile_logo.png">
+                    <span>9Mobile</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <span class="label-text">Recipient Phone Number</span>
+                <input type="number" id="phoneNumber" placeholder="e.g. 08103456789">
+            </div>
+
+            <div id="dataSection" style="display: none; margin-bottom: 20px;">
+                <span class="label-text">Select Data Plan</span>
+                <select id="dataPlan">
+                    <option value="250">1GB - ₦250 (SME - 30 Days)</option>
+                    <option value="500">2GB - ₦500 (SME - 30 Days)</option>
+                    <option value="1200">5GB - ₦1,200 (SME - 30 Days)</option>
+                    <option value="2300">10GB - ₦2,300 (SME - 30 Days)</option>
+                </select>
+            </div>
+
+            <div id="airtimeSection" style="margin-bottom: 20px;">
+                <span class="label-text">Amount (₦)</span>
+                <input type="number" id="amount" placeholder="Minimum ₦100">
+            </div>
+
+            <div class="summary-box">
+                <span>Fee: <b>₦0.00</b></span>
+                <span id="totalDisplay">Total: <b id="totalPrice">₦0.00</b></span>
+            </div>
+
+            <button class="btn-primary" onclick="initiateTransaction()">
+                <i class="fas fa-shield-alt"></i> SECURE PURCHASE
+            </button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const username = localStorage.getItem('username') || "User";
+
+        let currentNetwork = "MTN";
+
+        function selectNetwork(net, element) {
+            currentNetwork = net;
+            document.querySelectorAll('.network-item').forEach(i => i.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        function toggleFields() {
+            const type = document.getElementById('serviceType').value;
+            const dataSec = document.getElementById('dataSection');
+            const airtimeSec = document.getElementById('airtimeSection');
+            
+            if(type === 'data') {
+                dataSec.style.display = 'block';
+                airtimeSec.style.display = 'none';
+            } else {
+                dataSec.style.display = 'none';
+                airtimeSec.style.display = 'block';
+            }
+        }
+
+        function initiateTransaction() {
+            const phone = document.getElementById('phoneNumber').value;
+            const type = document.getElementById('serviceType').value;
+            const amount = type === 'data' ? document.getElementById('dataPlan').value : document.getElementById('amount').value;
+
+            if(!phone || phone.length < 10) {
+                alert("Please enter a valid phone number.");
+                return;
+            }
+            if(!amount || amount < 100) {
+                alert("Minimum purchase is ₦100.");
+                return;
+            }
+
+            const confirmPin = prompt("Enter your Transaction PIN to authorize:");
+            if(confirmPin) {
+                // Here you would connect to a real VTU API
+                // For now, we simulate success
+                processInFirebase(type, amount, phone);
+            }
+        }
+
+        function processInFirebase(type, amt, phone) {
+            const transRef = db.ref('transactions/' + username).push();
+            transRef.set({
+                type: 'debit',
+                service: type.toUpperCase() + " (" + currentNetwork + ")",
+                recipient: phone,
+                amount: amt,
+                time: Date.now(),
+                status: 'Success'
+            }).then(() => {
+                alert("Transaction Successful! Your " + type + " has been sent to " + phone);
+                window.location.href = "Wallet.html";
+            });
+        }
+    </script>
+</body>
+</html>

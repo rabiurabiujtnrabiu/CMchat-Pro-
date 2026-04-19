@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Center | CMchat Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <style>
+        :root {
+            --primary: #1A237E;
+            --accent: #FFD600;
+            --success: #00C853;
+            --bg: #F8F9FD;
+            --white: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: #1C1C1E;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            background: var(--primary);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        header i { font-size: 20px; cursor: pointer; margin-right: 15px; }
+
+        .container { padding: 25px; max-width: 450px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+
+        /* --- SECURITY CARDS --- */
+        .security-card {
+            background: var(--white);
+            border-radius: 25px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sec-info { display: flex; align-items: center; gap: 15px; }
+        .sec-icon { 
+            width: 45px; height: 45px; background: #E8EAF6; 
+            border-radius: 12px; display: flex; align-items: center; 
+            justify-content: center; color: var(--primary); font-size: 18px;
+        }
+        .sec-text b { font-size: 14px; display: block; }
+        .sec-text small { font-size: 11px; color: #8E8E93; }
+
+        /* --- TOGGLE SWITCH --- */
+        .switch {
+            position: relative; display: inline-block; width: 45px; height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc; transition: .4s; border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(21px); }
+
+        /* --- PIN INPUT PAD --- */
+        .pin-display {
+            text-align: center; margin: 30px 0; display: flex; justify-content: center; gap: 15px;
+        }
+        .dot {
+            width: 18px; height: 18px; border: 2px solid #ddd; border-radius: 50%; transition: 0.2s;
+        }
+        .dot.active { background: var(--primary); border-color: var(--primary); }
+
+        .keypad {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 10px;
+        }
+        .key {
+            background: var(--white); border: none; padding: 20px; border-radius: 15px;
+            font-size: 20px; font-weight: 800; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+        .key:active { background: #eee; transform: scale(0.9); }
+
+        .btn-action {
+            width: 100%; padding: 18px; border: none; border-radius: 18px;
+            background: var(--primary); color: white; font-weight: 800;
+            margin-top: 25px; cursor: pointer; font-size: 15px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
+        <b>Security Center</b>
+    </header>
+
+    <div class="container animate__animated animate__fadeInUp">
+        
+        <div class="security-card">
+            <div class="sec-info">
+                <div class="sec-icon"><i class="fas fa-fingerprint"></i></div>
+                <div class="sec-text">
+                    <b>Fingerprint Login</b>
+                    <small>Use Biometric to authorize</small>
+                </div>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="fingerToggle" onchange="toggleBiometric()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="security-card">
+            <div class="sec-info">
+                <div class="sec-icon"><i class="fas fa-shield-alt"></i></div>
+                <div class="sec-text">
+                    <b>Transaction PIN</b>
+                    <small id="pinStatus">Status: Not set</small>
+                </div>
+            </div>
+            <i class="fas fa-chevron-right" style="color:#ccc"></i>
+        </div>
+
+        <div id="pinSection" style="text-align:center;">
+            <p style="font-size: 13px; font-weight: 600; color: #666;">SET YOUR 4-DIGIT PIN</p>
+            <div class="pin-display">
+                <div class="dot" id="dot1"></div>
+                <div class="dot" id="dot2"></div>
+                <div class="dot" id="dot3"></div>
+                <div class="dot" id="dot4"></div>
+            </div>
+
+            <div class="keypad">
+                <button class="key" onclick="press(1)">1</button>
+                <button class="key" onclick="press(2)">2</button>
+                <button class="key" onclick="press(3)">3</button>
+                <button class="key" onclick="press(4)">4</button>
+                <button class="key" onclick="press(5)">5</button>
+                <button class="key" onclick="press(6)">6</button>
+                <button class="key" onclick="press(7)">7</button>
+                <button class="key" onclick="press(8)">8</button>
+                <button class="key" onclick="press(9)">9</button>
+                <button class="key" style="background:transparent; box-shadow:none;"><i class="fas fa-fingerprint" style="color:var(--primary)"></i></button>
+                <button class="key" onclick="press(0)">0</button>
+                <button class="key" onclick="backspace()" style="color:var(--danger)"><i class="fas fa-backspace"></i></button>
+            </div>
+
+            <button class="btn-action" onclick="savePin()">SAVE SECURITY PIN</button>
+        </div>
+
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const username = localStorage.getItem('username') || "User";
+
+        let currentPin = "";
+
+        // 1. PIN Keypad Logic
+        function press(num) {
+            if(currentPin.length < 4) {
+                currentPin += num;
+                updateDots();
+            }
+        }
+
+        function backspace() {
+            currentPin = currentPin.slice(0, -1);
+            updateDots();
+        }
+
+        function updateDots() {
+            for(let i=1; i<=4; i++) {
+                document.getElementById('dot' + i).classList.toggle('active', currentPin.length >= i);
+            }
+        }
+
+        // 2. Save PIN to Firebase
+        function savePin() {
+            if(currentPin.length < 4) return alert("Please enter a 4-digit PIN");
+            
+            db.ref('users/' + username + '/security').update({
+                pin: currentPin,
+                updatedAt: Date.now()
+            }).then(() => {
+                alert("Security PIN saved successfully!");
+                currentPin = "";
+                updateDots();
+                checkPinStatus();
+            });
+        }
+
+        // 3. Biometric (Fingerprint) Simulation
+        function toggleBiometric() {
+            const isChecked = document.getElementById('fingerToggle').checked;
+            if(isChecked) {
+                if (window.PublicKeyCredential) {
+                    // This uses the native Fingerprint prompt on modern phones
+                    alert("Please touch your Fingerprint Sensor to activate.");
+                    db.ref('users/' + username + '/security').update({ biometric: true });
+                } else {
+                    alert("Biometric not supported on this device.");
+                    document.getElementById('fingerToggle').checked = false;
+                }
+            } else {
+                db.ref('users/' + username + '/security').update({ biometric: false });
+            }
+        }
+
+        // 4. Initial Status Check
+        function checkPinStatus() {
+            db.ref('users/' + username + '/security').once('value', snap => {
+                if(snap.exists() && snap.val().pin) {
+                    document.getElementById('pinStatus').innerText = "Status: Protected";
+                    document.getElementById('pinStatus').style.color = "var(--success)";
+                }
+            });
+        }
+        checkPinStatus();
+
+    </script>
+</body>
+</html>

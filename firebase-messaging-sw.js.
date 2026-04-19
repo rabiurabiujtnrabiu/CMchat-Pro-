@@ -1,0 +1,34 @@
+// firebase-messaging-sw.js
+importScripts('https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.6.10/firebase-messaging-compat.js');
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+    authDomain: "cmchat-pro.firebaseapp.com",
+    projectId: "cmchat-pro",
+    storageBucket: "cmchat-pro.firebasestorage.app",
+    messagingSenderId: "227572132170",
+    appId: "1:227572132170:web:cc39de4627d4da01c7f9b3"
+};
+
+firebase.initializeApp(firebaseConfig);
+const messaging = firebase.messaging();
+
+// Wannan zai riƙa nuna sanarwar kira koda app ɗin a rufe yake
+messaging.onBackgroundMessage((payload) => {
+  console.log('Kiran Gaggawa Ya Iso:', payload);
+  
+  const notificationTitle = 'Kira Daga CMchat Pro';
+  const notificationOptions = {
+    body: payload.data.callerName + ' yana kiran ka...',
+    icon: '/icon.png', // Saka icon ɗin app ɗinka anan
+    tag: 'call-notification',
+    vibrate: [200, 100, 200, 100, 200, 100, 400],
+    actions: [
+      { action: 'accept', title: 'Dagawa' },
+      { action: 'decline', title: 'Kashewa' }
+    ]
+  };
+
+  self.registration.showNotification(notificationTitle, notificationOptions);
+});

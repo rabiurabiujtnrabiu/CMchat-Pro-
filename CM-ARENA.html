@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CM Arena | Professional Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #0A192F; --gold: #FFD600; --accent: #64FFDA; --dark-card: #112240; --text-main: #CCD6F6; }
+        
+        body { margin: 0; background: var(--primary); font-family: 'Inter', sans-serif; color: var(--text-main); }
+
+        /* Navigation Tabs at Bottom */
+        .arena-tabs {
+            position: fixed; bottom: 0; width: 100%; background: var(--dark-card);
+            display: flex; justify-content: space-around; padding: 15px 0;
+            border-top: 1px solid rgba(100, 255, 218, 0.1); z-index: 1000;
+        }
+        .tab-item { text-align: center; color: #8892B0; cursor: pointer; transition: 0.3s; }
+        .tab-item.active { color: var(--gold); }
+        .tab-item i { font-size: 20px; display: block; margin-bottom: 5px; }
+        .tab-item span { font-size: 10px; font-weight: bold; text-transform: uppercase; }
+
+        /* Content Container */
+        #arena-content { padding-bottom: 100px; min-height: 100vh; }
+        
+        /* Glassmorphism Header */
+        .arena-header-glass {
+            background: rgba(17, 34, 64, 0.8); backdrop-filter: blur(10px);
+            padding: 20px; sticky: top; top: 0; border-bottom: 1px solid rgba(255,214,0,0.2);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="arena-header-glass">
+        <div>
+            <span style="color: var(--gold); font-size: 10px; font-weight: 900;">CM ARENA PRO</span>
+            <div style="font-size: 18px; font-weight: 800;">Welcome, Commander</div>
+        </div>
+        <div id="userXP" style="background: var(--dark-card); padding: 8px 15px; border-radius: 12px; border: 1px solid var(--gold);">
+            <i class="fas fa-star" style="color: var(--gold);"></i> 2,450 XP
+        </div>
+    </div>
+
+    <div id="arena-content">
+        </div>
+
+    <nav class="arena-tabs">
+        <div class="tab-item active" onclick="loadModule('dashboard')">
+            <i class="fas fa-th-large"></i>
+            <span>Hub</span>
+        </div>
+        <div class="tab-item" onclick="loadModule('tasks')">
+            <i class="fas fa-tasks"></i>
+            <span>Tasks</span>
+        </div>
+        <div class="tab-item" onclick="loadModule('vault')">
+            <i class="fas fa-vault"></i>
+            <span>Vault</span>
+        </div>
+        <div class="tab-item" onclick="loadModule('ranks')">
+            <i class="fas fa-crown"></i>
+            <span>Ranks</span>
+        </div>
+    </nav>
+
+    <script>
+        // Professional Module Loader
+        function loadModule(name) {
+            // Update Active Tab UI
+            document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            const content = document.getElementById('arena-content');
+            
+            // Wannan zai rika dauko bayani daga daban-daban files
+            if(name === 'dashboard') {
+                content.innerHTML = `<div style="padding: 20px;">
+                        <div style="background: var(--dark-card); padding: 25px; border-radius: 30px; text-align: center;">
+                            <h2 style="color: var(--gold);">LEVEL 2</h2>
+                            <p>You are in the "Warrior" class. Earn more XP to unlock the Vault.</p>
+                        </div>
+                    </div>`;
+            } else if(name === 'tasks') {
+                content.innerHTML = `<div style="padding: 20px;"><h2>Missions & Referrals</h2></div>`;
+            }
+            // Haka zaka rika sanya sauran files din
+        }
+
+        // Default Load
+        window.onload = () => loadModule('dashboard');
+    </script>
+</body>
+</html>

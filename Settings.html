@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Settings - CMChat Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <style>
+        :root { 
+            --p: #1A237E; --g: #FFD600; --bg: #F0F2F5; --white: #ffffff;
+            --danger: #FF5252; --text: #333;
+        }
+        
+        body {
+            margin: 0; background: var(--bg); font-family: 'Segoe UI', sans-serif; 
+            color: var(--text); padding-bottom: 50px;
+        }
+
+        /* Header */
+        .header { 
+            background: var(--p); color: white; padding: 20px; 
+            display: flex; align-items: center; gap: 15px;
+            border-bottom-left-radius: 25px; border-bottom-right-radius: 25px;
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .header i { font-size: 20px; cursor: pointer; }
+        .header b { font-size: 20px; }
+
+        .profile-section {
+            background: var(--white); margin: 20px 15px; padding: 20px;
+            border-radius: 25px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .profile-img-container {
+            position: relative; width: 90px; height: 90px; margin: 0 auto 15px;
+        }
+        .profile-img-container img {
+            width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+            border: 3px solid var(--g);
+        }
+        .edit-badge {
+            position: absolute; bottom: 0; right: 0; background: var(--p);
+            color: white; width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
+            border: 2px solid white;
+        }
+
+        .settings-group { margin: 0 15px 25px; }
+        .group-title { 
+            font-size: 14px; font-weight: 700; color: #888; 
+            margin-left: 10px; margin-bottom: 10px; text-transform: uppercase;
+        }
+        .settings-list {
+            background: var(--white); border-radius: 20px; overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .settings-item {
+            display: flex; align-items: center; padding: 18px 20px;
+            text-decoration: none; color: var(--text); transition: 0.2s;
+            border-bottom: 1px solid #f0f0f0; cursor: pointer;
+        }
+        .settings-item:last-child { border-bottom: none; }
+        .settings-item:active { background: #f9f9f9; }
+        .settings-item i.icon { 
+            width: 35px; height: 35px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            margin-right: 15px; font-size: 16px;
+        }
+        .settings-item .label { flex-grow: 1; font-weight: 600; }
+        .settings-item .value { font-size: 13px; color: #999; margin-right: 10px; }
+        .settings-item i.arrow { font-size: 12px; color: #ccc; }
+
+        .bg-blue { background: #E3F2FD; color: #2196F3; }
+        .bg-green { background: #E8F5E9; color: #4CAF50; }
+        .bg-yellow { background: #FFFDE7; color: #FBC02D; }
+        .bg-red { background: #FFEBEE; color: #F44336; }
+        .bg-purple { background: #F3E5F5; color: #9C27B0; }
+
+        .btn-save {
+            background: #FF5252; color: white; border: none; width: 90%;
+            padding: 15px; border-radius: 15px; font-weight: 700;
+            display: block; margin: 30px auto; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <i class="fas fa-arrow-left" onclick="location.href='index.html'"></i>
+        <b>Settings</b>
+    </div>
+
+    <div class="profile-section animate__animated animate__fadeInDown">
+        <div class="profile-img-container">
+            <img id="userImg" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="User">
+            <div class="edit-badge" onclick="alert('Profile picture update coming soon!')"><i class="fas fa-camera"></i></div>
+        </div>
+        <h3 id="displayFullName" style="margin: 5px 0;">Loading...</h3>
+        <p id="displayEmail" style="margin: 0; color: #888; font-size: 14px;">---</p>
+    </div>
+
+    <div class="settings-group">
+        <div class="group-title">Personal Information</div>
+        <div class="settings-list">
+            <div class="settings-item">
+                <i class="fas fa-user icon bg-blue"></i>
+                <div class="label">Username</div>
+                <div class="value" id="valName">---</div>
+            </div>
+            <div class="settings-item">
+                <i class="fas fa-id-card icon bg-purple"></i>
+                <div class="label">User ID</div>
+                <div class="value" id="valID" style="font-size: 10px;">---</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-group">
+        <div class="group-title">Security & Privacy</div>
+        <div class="settings-list">
+            <div class="settings-item" onclick="location.href='Password.html'">
+                <i class="fas fa-lock icon bg-red"></i>
+                <div class="label">Change Password</div>
+                <i class="fas fa-chevron-right arrow"></i>
+            </div>
+            <div class="settings-item" onclick="alert('Feature coming soon!')">
+                <i class="fas fa-shield-alt icon bg-green"></i>
+                <div class="label">Two-Factor Auth</div>
+                <div class="value">Off</div>
+                <i class="fas fa-chevron-right arrow"></i>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-save" onclick="logoutUser()">Logout Account</button>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Gyara: Muna duba username da UID duka
+        const currentUserName = localStorage.getItem('username');
+        const currentUserUid = localStorage.getItem('user_uid');
+
+        // Idan babu username, to sai mu duba ko akwai wani UID don gudun kuskure
+        if(!currentUserName && !currentUserUid) {
+            console.log("No user session found, redirecting...");
+            location.href = 'Login.html';
+        }
+
+        // Load Live Data daga Firebase
+        // Idan kana amfani da UID ne a matsayin key a users table
+        const userPath = currentUserUid ? `users/${currentUserUid}` : `users/${currentUserName}`;
+        const userRef = ref(db, userPath);
+
+        onValue(userRef, (snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                document.getElementById('displayFullName').innerText = data.username || currentUserName || "User";
+                document.getElementById('valName').innerText = data.username || currentUserName || "---";
+                document.getElementById('displayEmail').innerText = data.email || "no-email@cmchat.pro";
+                document.getElementById('valID').innerText = data.uid || currentUserUid || "ID-12345";
+                if(data.profilePic) {
+                    document.getElementById('userImg').src = data.profilePic;
+                }
+            } else {
+                // Idan ba'a samu data a Firebase ba, yi amfani da na LocalStorage
+                document.getElementById('displayFullName').innerText = currentUserName || "Guest";
+                document.getElementById('valName').innerText = currentUserName || "---";
+            }
+        }, (error) => {
+            console.error("Firebase error:", error);
+        });
+
+        window.logoutUser = () => {
+            if(confirm("Are you sure you want to logout?")) {
+                localStorage.clear(); // Goge komai don tsaro
+                location.href = 'Login.html';
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arena Ranks | Live Leaderboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root { --p: #0A192F; --g: #FFD600; --accent: #64FFDA; --card: #112240; }
+        body { margin: 0; background: var(--p); font-family: 'Inter', sans-serif; color: white; padding: 20px; }
+
+        /* Top 3 Podium Style */
+        .podium-container {
+            display: flex; justify-content: center; align-items: flex-end;
+            gap: 10px; margin-top: 30px; height: 200px;
+        }
+        .podium-user { text-align: center; width: 30%; }
+        .p-avatar { 
+            width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--g); 
+            margin: 0 auto 10px; position: relative; overflow: hidden;
+            background: #1d2d44; display: flex; align-items: center; justify-content: center;
+        }
+        .p-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .crown { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); color: var(--g); font-size: 18px; }
+        
+        .bar { width: 100%; border-top-left-radius: 15px; border-top-right-radius: 15px; background: var(--card); }
+        .rank-2 .bar { height: 80px; background: #c0c0c0; } /* Silver */
+        .rank-1 .bar { height: 110px; background: var(--g); } /* Gold */
+        .rank-3 .bar { height: 60px; background: #cd7f32; } /* Bronze */
+
+        /* List View Leaderboard */
+        .ranks-list { margin-top: 40px; background: var(--card); border-radius: 30px; overflow: hidden; }
+        .rank-item {
+            display: flex; align-items: center; padding: 15px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.3s;
+        }
+        .rank-num { width: 30px; font-weight: 900; color: var(--accent); }
+        .user-info { flex: 1; display: flex; align-items: center; gap: 12px; }
+        .mini-avatar { width: 40px; height: 40px; border-radius: 50%; background: #0A192F; }
+        .v-badge { color: #3b82f6; font-size: 10px; margin-left: 4px; }
+        
+        .user-stats { text-align: right; }
+        .xp-val { display: block; font-weight: 800; color: var(--g); font-size: 14px; }
+        .f-val { font-size: 10px; opacity: 0.5; }
+
+        .follow-btn {
+            background: transparent; border: 1px solid var(--accent); color: var(--accent);
+            padding: 5px 12px; border-radius: 10px; font-size: 11px; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h2 style="text-align: center; letter-spacing: 2px;">ARENA LEGENDS</h2>
+    <p style="text-align: center; font-size: 11px; opacity: 0.6; margin-top: -10px;">Weekly Top Influencers</p>
+
+    <div class="podium-container" id="topThree">
+        <div class="podium-user rank-2 animate__animated animate__fadeInUp">
+            <div class="p-avatar"><img id="p2_img" src=""></div>
+            <div class="bar"><b style="color:var(--p); font-size:12px;">2nd</b></div>
+            <small id="p2_name">---</small>
+        </div>
+        <div class="podium-user rank-1 animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+            <i class="fas fa-crown crown"></i>
+            <div class="p-avatar" style="width: 80px; height: 80px;"><img id="p1_img" src=""></div>
+            <div class="bar"><b style="color:var(--p); font-size:12px;">1st</b></div>
+            <small id="p1_name" style="font-weight: 900;">---</small>
+        </div>
+        <div class="podium-user rank-3 animate__animated animate__fadeInUp" style="animation-delay: 0.4s;">
+            <div class="p-avatar"><img id="p3_img" src=""></div>
+            <div class="bar"><b style="color:var(--p); font-size:12px;">3rd</b></div>
+            <small id="p3_name">---</small>
+        </div>
+    </div>
+
+    <div class="ranks-list" id="leaderboardList">
+        </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", 
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com", 
+            projectId: "cmchat-pro" 
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Fetch Live Rankings
+        const usersRef = query(ref(db, 'users'), orderByChild('xp'), limitToLast(10));
+        
+        onValue(usersRef, (snapshot) => {
+            let users = [];
+            snapshot.forEach(child => {
+                users.push({ id: child.key, ...child.val() });
+            });
+            users.reverse(); // Domin babba ya dawo sama
+
+            const list = document.getElementById('leaderboardList');
+            list.innerHTML = '';
+
+            // Update Podium (Top 3)
+            if(users[0]) {
+                document.getElementById('p1_name').innerText = users[0].username;
+                document.getElementById('p1_img').src = users[0].avatar || 'https://via.placeholder.com/100';
+            }
+            if(users[1]) {
+                document.getElementById('p2_name').innerText = users[1].username;
+                document.getElementById('p2_img').src = users[1].avatar || 'https://via.placeholder.com/100';
+            }
+            if(users[2]) {
+                document.getElementById('p3_name').innerText = users[2].username;
+                document.getElementById('p3_img').src = users[2].avatar || 'https://via.placeholder.com/100';
+            }
+
+            // Update List
+            users.forEach((u, index) => {
+                const item = `
+                    <div class="rank-item">
+                        <div class="rank-num">#${index + 1}</div>
+                        <div class="user-info">
+                            <img class="mini-avatar" src="${u.avatar || 'https://via.placeholder.com/100'}">
+                            <div>
+                                <b>${u.username}</b>
+                                ${u.verified ? '<i class="fas fa-check-circle v-badge"></i>' : ''}
+                            </div>
+                        </div>
+                        <div class="user-stats">
+                            <span class="xp-val">${u.xp.toLocaleString()} XP</span>
+                            <span class="f-val">${u.followers || 0} Followers</span>
+                        </div>
+                    </div>
+                `;
+                list.insertAdjacentHTML('beforeend', item);
+            });
+        });
+    </script>
+</body>
+</html>
