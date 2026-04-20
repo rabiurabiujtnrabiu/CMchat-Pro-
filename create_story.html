@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Special Story | CMchat PRO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+    <style>
+        :root { --glass: rgba(255, 255, 255, 0.1); --primary: #1877f2; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body { 
+            background: #000; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            color: white; 
+            overflow: hidden;
+        }
+
+        /* LIVE PREVIEW BACKGROUND */
+        #storyPreview {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: 1; opacity: 0.6;
+        }
+
+        /* HEADER */
+        .story-header {
+            position: relative; z-index: 10; padding: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+        }
+        .close-btn { font-size: 24px; color: white; text-decoration: none; }
+        .publish-btn {
+            background: var(--primary); color: white; border: none;
+            padding: 10px 25px; border-radius: 30px; font-weight: 800;
+            box-shadow: 0 4px 15px rgba(24, 119, 242, 0.4);
+        }
+
+        /* UI CONTROLS */
+        .content-area {
+            flex-grow: 1; position: relative; z-index: 10;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .caption-input {
+            background: transparent; border: none; outline: none;
+            color: white; font-size: 24px; text-align: center;
+            font-weight: 700; width: 80%; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        /* BOTTOM TOOLS */
+        .story-tools {
+            position: relative; z-index: 10; padding: 30px;
+            display: flex; justify-content: space-around;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+        }
+        .tool-item { text-align: center; cursor: pointer; }
+        .tool-circle {
+            width: 50px; height: 50px; background: rgba(255,255,255,0.2);
+            border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; margin-bottom: 8px; backdrop-filter: blur(10px);
+        }
+
+        /* ANIMATION */
+        .uploading-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            z-index: 100; display: none; flex-direction: column;
+            justify-content: center; align-items: center;
+        }
+        .loader {
+            width: 40px; height: 40px; border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 15px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <img id="storyPreview" src="https://via.placeholder.com/1080x1920/222/555?text=Select+Media">
+
+    <div class="story-header">
+        <a href="index.html" class="close-btn"><i class="fas fa-times"></i></a>
+        <button id="publishBtn" class="publish-btn">Share Story</button>
+    </div>
+
+    <div class="content-area">
+        <input type="text" id="caption" class="caption-input" placeholder="Type a caption...">
+    </div>
+
+    <div class="story-tools">
+        <label for="mediaInput" class="tool-item">
+            <div class="tool-circle"><i class="fas fa-image"></i></div>
+            <span style="font-size: 11px; font-weight: 600;">Gallery</span>
+        </label>
+        <div class="tool-item">
+            <div class="tool-circle"><i class="fas fa-font"></i></div>
+            <span style="font-size: 11px; font-weight: 600;">Text</span>
+        </div>
+        <div class="tool-item">
+            <div class="tool-circle"><i class="fas fa-music"></i></div>
+            <span style="font-size: 11px; font-weight: 600;">Music</span>
+        </div>
+    </div>
+
+    <input type="file" id="mediaInput" hidden accept="image/*">
+
+    <div class="uploading-overlay" id="loading">
+        <div class="loader"></div>
+        <p style="font-weight: 700;">Sharing your story...</p>
+    </div>
+
+    <script>
+        // FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            authDomain: "cmchat-pro.firebaseapp.com",
+            projectId: "cmchat-pro",
+            storageBucket: "cmchat-pro.firebasestorage.app",
+            messagingSenderId: "227572132170",
+            appId: "1:227572132170:web:cc39de4627d4da01c7f9b3"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const mediaInput = document.getElementById('mediaInput');
+        const storyPreview = document.getElementById('storyPreview');
+        const publishBtn = document.getElementById('publishBtn');
+
+        // HANDLE PREVIEW
+        mediaInput.onchange = e => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    storyPreview.src = reader.result;
+                    storyPreview.style.opacity = "1";
+                }
+                reader.readAsDataURL(file);
+            }
+        };
+
+        // PUBLISH TO FIREBASE (LIVE)
+        publishBtn.onclick = async () => {
+            if(storyPreview.src.includes('placeholder')) return alert("Please select a photo first!");
+
+            document.getElementById('loading').style.display = 'flex';
+            
+            try {
+                await db.collection('stories').add({
+                    imageUrl: storyPreview.src, // Normally you'd upload to Storage first, this is Base64 for demo
+                    caption: document.getElementById('caption').value,
+                    username: "Commander CM",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 Hours
+                });
+                
+                window.location.href = "index.html";
+            } catch (err) {
+                alert("Error: " + err.message);
+                document.getElementById('loading').style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>

@@ -5,92 +5,136 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CM Arena | Professional Hub</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <style>
         :root { --primary: #0A192F; --gold: #FFD600; --accent: #64FFDA; --dark-card: #112240; --text-main: #CCD6F6; }
-        
-        body { margin: 0; background: var(--primary); font-family: 'Inter', sans-serif; color: var(--text-main); }
+        body { margin: 0; background: var(--primary); font-family: 'Inter', sans-serif; color: var(--text-main); overflow-x: hidden; }
 
-        /* Navigation Tabs at Bottom */
+        /* HEADER */
+        .arena-header-glass {
+            background: rgba(17, 34, 64, 0.8); backdrop-filter: blur(12px);
+            padding: 20px; position: sticky; top: 0; border-bottom: 1px solid rgba(255,214,0,0.2);
+            display: flex; justify-content: space-between; align-items: center; z-index: 1000;
+        }
+
+        /* CONTENT AREA */
+        #arena-content { padding: 10px; padding-bottom: 100px; min-height: 80vh; transition: opacity 0.3s ease; }
+
+        /* NAVIGATION TABS */
         .arena-tabs {
             position: fixed; bottom: 0; width: 100%; background: var(--dark-card);
-            display: flex; justify-content: space-around; padding: 15px 0;
+            display: flex; justify-content: space-around; padding: 12px 0 25px;
             border-top: 1px solid rgba(100, 255, 218, 0.1); z-index: 1000;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
         }
-        .tab-item { text-align: center; color: #8892B0; cursor: pointer; transition: 0.3s; }
-        .tab-item.active { color: var(--gold); }
-        .tab-item i { font-size: 20px; display: block; margin-bottom: 5px; }
-        .tab-item span { font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .tab-item { text-align: center; color: #8892B0; cursor: pointer; transition: 0.3s; flex: 1; }
+        .tab-item.active { color: var(--gold); transform: translateY(-3px); }
+        .tab-item i { font-size: 22px; display: block; margin-bottom: 5px; }
+        .tab-item span { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Content Container */
-        #arena-content { padding-bottom: 100px; min-height: 100vh; }
-        
-        /* Glassmorphism Header */
-        .arena-header-glass {
-            background: rgba(17, 34, 64, 0.8); backdrop-filter: blur(10px);
-            padding: 20px; sticky: top; top: 0; border-bottom: 1px solid rgba(255,214,0,0.2);
-            display: flex; justify-content: space-between; align-items: center;
-        }
+        /* LOADING ANIMATION */
+        .loader-ring { display: none; margin: 50px auto; width: 40px; height: 40px; border: 4px solid var(--dark-card); border-top: 4px solid var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div class="arena-header-glass">
         <div>
-            <span style="color: var(--gold); font-size: 10px; font-weight: 900;">CM ARENA PRO</span>
-            <div style="font-size: 18px; font-weight: 800;">Welcome, Commander</div>
+            <span style="color: var(--gold); font-size: 10px; font-weight: 900; text-transform: uppercase;">CM ARENA PRO</span>
+            <div style="font-size: 18px; font-weight: 800;">Commander Hub</div>
         </div>
-        <div id="userXP" style="background: var(--dark-card); padding: 8px 15px; border-radius: 12px; border: 1px solid var(--gold);">
-            <i class="fas fa-star" style="color: var(--gold);"></i> 2,450 XP
+        <div id="userXP" style="background: var(--dark-card); padding: 8px 15px; border-radius: 12px; border: 1px solid var(--gold); font-weight: 800; font-size: 13px;">
+            <i class="fas fa-bolt" style="color: var(--gold);"></i> <span id="xpValue">0</span> XP
         </div>
     </div>
 
+    <div class="loader-ring" id="arenaLoader"></div>
     <div id="arena-content">
         </div>
 
     <nav class="arena-tabs">
-        <div class="tab-item active" onclick="loadModule('dashboard')">
+        <div class="tab-item active" onclick="loadModule('dashboard', this)">
             <i class="fas fa-th-large"></i>
-            <span>Hub</span>
+            <span>Dashboard</span>
         </div>
-        <div class="tab-item" onclick="loadModule('tasks')">
+        <div class="tab-item" onclick="loadModule('tasks', this)">
             <i class="fas fa-tasks"></i>
             <span>Tasks</span>
         </div>
-        <div class="tab-item" onclick="loadModule('vault')">
+        <div class="tab-item" onclick="loadModule('vault', this)">
             <i class="fas fa-vault"></i>
             <span>Vault</span>
         </div>
-        <div class="tab-item" onclick="loadModule('ranks')">
+        <div class="tab-item" onclick="loadModule('ranks', this)">
             <i class="fas fa-crown"></i>
             <span>Ranks</span>
         </div>
     </nav>
 
     <script>
-        // Professional Module Loader
-        function loadModule(name) {
-            // Update Active Tab UI
+        // FIREBASE CONFIGURATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            authDomain: "cmchat-pro.firebaseapp.com",
+            projectId: "cmchat-pro",
+            storageBucket: "cmchat-pro.firebasestorage.app",
+            messagingSenderId: "227572132170",
+            appId: "1:227572132170:web:cc39de4627d4da01c7f9b3"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // PROFESSIONAL MODULE LOADER (AJAX)
+        async function loadModule(name, element) {
+            // UI Feedback
             document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            if(element) element.classList.add('active');
 
             const content = document.getElementById('arena-content');
+            const loader = document.getElementById('arenaLoader');
             
-            // Wannan zai rika dauko bayani daga daban-daban files
-            if(name === 'dashboard') {
-                content.innerHTML = `<div style="padding: 20px;">
-                        <div style="background: var(--dark-card); padding: 25px; border-radius: 30px; text-align: center;">
-                            <h2 style="color: var(--gold);">LEVEL 2</h2>
-                            <p>You are in the "Warrior" class. Earn more XP to unlock the Vault.</p>
-                        </div>
+            content.style.opacity = '0.3';
+            loader.style.display = 'block';
+
+            try {
+                // Fetching the local HTML files you mentioned
+                const response = await fetch(`arena-${name}.html`);
+                if(response.ok) {
+                    const html = await response.text();
+                    content.innerHTML = html;
+                } else {
+                    content.innerHTML = `<div style="text-align:center; padding:50px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size:40px; color:var(--gold);"></i>
+                        <p style="margin-top:15px;">Module "arena-${name}.html" not found.</p>
                     </div>`;
-            } else if(name === 'tasks') {
-                content.innerHTML = `<div style="padding: 20px;"><h2>Missions & Referrals</h2></div>`;
+                }
+            } catch (error) {
+                console.error("Error loading module:", error);
+            } finally {
+                content.style.opacity = '1';
+                loader.style.display = 'none';
             }
-            // Haka zaka rika sanya sauran files din
         }
 
-        // Default Load
-        window.onload = () => loadModule('dashboard');
+        // REAL-TIME XP TRACKER
+        function syncUserStats(userId) {
+            db.collection('users').doc(userId).onSnapshot(doc => {
+                if(doc.exists) {
+                    document.getElementById('xpValue').innerText = Number(doc.data().xp || 0).toLocaleString();
+                }
+            });
+        }
+
+        // DEFAULT LOAD
+        window.onload = () => {
+            loadModule('dashboard', document.querySelector('.tab-item'));
+            // Example: syncUserStats('commander_001'); 
+        };
     </script>
 </body>
 </html>

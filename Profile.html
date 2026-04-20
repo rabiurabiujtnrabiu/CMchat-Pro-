@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Profile | CMchat PRO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        :root { --accent: #1877f2; --bg: #f0f2f5; --glass: rgba(255, 255, 255, 0.9); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); padding-bottom: 100px; }
+
+        /* PROFILE HEADER GLASSMORPHISM */
+        .profile-header {
+            background: linear-gradient(to bottom, #1877f2, #0d6efd);
+            height: 220px; position: relative; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+        }
+        .profile-info {
+            position: absolute; bottom: -60px; left: 0; right: 0;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .profile-pic-container {
+            width: 120px; height: 120px; border-radius: 50%; border: 5px solid white;
+            background: #eee; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .profile-pic-container img { width: 100%; height: 100%; object-fit: cover; }
+        .edit-badge {
+            position: absolute; bottom: 5px; right: 5px; background: white;
+            width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* STATS SECTION */
+        .stats-card {
+            background: white; margin: 70px 20px 20px; padding: 20px;
+            border-radius: 20px; display: flex; justify-content: space-around;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .stat-item { text-align: center; }
+        .stat-value { display: block; font-size: 18px; font-weight: 800; color: #1c1e21; }
+        .stat-label { font-size: 12px; color: #65676b; text-transform: uppercase; font-weight: 700; }
+
+        /* SETTINGS GROUPS */
+        .settings-container { padding: 0 20px; }
+        .section-title { font-size: 14px; font-weight: 800; color: #65676b; margin: 20px 0 10px 5px; text-transform: uppercase; }
+        
+        .menu-list { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .menu-item {
+            display: flex; align-items: center; padding: 16px 20px;
+            text-decoration: none; color: #050505; border-bottom: 1px solid #f0f2f5;
+            transition: 0.3s;
+        }
+        .menu-item:last-child { border-bottom: none; }
+        .menu-item:active { background: #f0f2f5; }
+        .menu-item i { width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 16px; }
+        
+        /* SECURITY COLORS */
+        .icon-blue { background: #e7f3ff; color: #1877f2; }
+        .icon-green { background: #e6fcf5; color: #0ca678; }
+        .icon-red { background: #fff5f5; color: #fa5252; }
+        .icon-gold { background: #fff9db; color: #fab005; }
+
+        .toggle-btn { margin-left: auto; width: 40px; height: 20px; background: #ddd; border-radius: 20px; position: relative; }
+        .toggle-btn::after { content: ''; position: absolute; width: 16px; height: 16px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: 0.3s; }
+        .toggle-btn.active { background: #45bd62; }
+        .toggle-btn.active::after { left: 22px; }
+
+        /* BACK BUTTON */
+        .back-btn {
+            position: absolute; top: 40px; left: 20px; width: 40px; height: 40px;
+            background: rgba(255,255,255,0.2); border-radius: 12px; display: flex;
+            align-items: center; justify-content: center; color: white; backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="profile-header">
+        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+        <div class="profile-info">
+            <div class="profile-pic-container">
+                <img src="https://via.placeholder.com/150" id="userImg">
+                <div class="edit-badge"><i class="fas fa-camera"></i></div>
+            </div>
+            <h2 id="profileName" style="margin-top: 15px; color: #1c1e21;">Commander CM</h2>
+            <p id="profileUser" style="color: #65676b; font-size: 14px;">@commander_pro</p>
+        </div>
+    </div>
+
+    <div class="stats-card">
+        <div class="stat-item">
+            <span class="stat-value" id="countPosts">0</span>
+            <span class="stat-label">Posts</span>
+        </div>
+        <div class="stat-item" style="border-left: 1px solid #eee; border-right: 1px solid #eee; padding: 0 20px;">
+            <span class="stat-value" id="countFollowers">0</span>
+            <span class="stat-label">Followers</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value" id="countXP">0</span>
+            <span class="stat-label">XP Rank</span>
+        </div>
+    </div>
+
+    <div class="settings-container">
+        <div class="section-title">Account Settings</div>
+        <div class="menu-list">
+            <a href="#" class="menu-item">
+                <i class="fas fa-user-edit icon-blue"></i>
+                <span>Edit Personal Info</span>
+                <i class="fas fa-chevron-right" style="margin-left: auto; color: #ccc; font-size: 12px;"></i>
+            </a>
+            <a href="wallet.html" class="menu-item">
+                <i class="fas fa-wallet icon-green"></i>
+                <span>Payment & Payouts</span>
+                <i class="fas fa-chevron-right" style="margin-left: auto; color: #ccc; font-size: 12px;"></i>
+            </a>
+        </div>
+
+        <div class="section-title">Security & Privacy</div>
+        <div class="menu-list">
+            <div class="menu-item">
+                <i class="fas fa-shield-alt icon-gold"></i>
+                <div>
+                    <span style="display:block;">Two-Factor Auth</span>
+                    <small style="color:#65676b; font-size:10px;">Protect with SMS/Email</small>
+                </div>
+                <div class="toggle-btn active" onclick="this.classList.toggle('active')"></div>
+            </div>
+            <a href="#" class="menu-item">
+                <i class="fas fa-key icon-blue"></i>
+                <span>Change Password</span>
+            </a>
+            <div class="menu-item">
+                <i class="fas fa-user-lock icon-red"></i>
+                <span>Profile Locking</span>
+                <div class="toggle-btn" onclick="this.classList.toggle('active')"></div>
+            </div>
+        </div>
+
+        <div class="section-title">Community</div>
+        <div class="menu-list" style="margin-bottom: 30px;">
+            <a href="CM-Arena.html" class="menu-item">
+                <i class="fas fa-trophy icon-gold"></i>
+                <span>CM Arena Achievement</span>
+            </a>
+            <a href="#" class="menu-item" style="color: #fa5252;">
+                <i class="fas fa-sign-out-alt icon-red"></i>
+                <span style="font-weight: 700;">Logout Account</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // FIREBASE SYNC FOR PROFILE
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            authDomain: "cmchat-pro.firebaseapp.com",
+            projectId: "cmchat-pro",
+            storageBucket: "cmchat-pro.firebasestorage.app",
+            messagingSenderId: "227572132170",
+            appId: "1:227572132170:web:cc39de4627d4da01c7f9b3"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        function loadUserProfile(userId) {
+            db.collection('users').doc(userId).onSnapshot(doc => {
+                if(doc.exists) {
+                    const data = doc.data();
+                    document.getElementById('profileName').innerText = data.fullName || "Commander CM";
+                    document.getElementById('profileUser').innerText = "@" + (data.username || "user");
+                    document.getElementById('countXP').innerText = (data.xp || 0).toLocaleString();
+                    document.getElementById('countFollowers').innerText = (data.followers || 0).toLocaleString();
+                    if(data.profilePic) document.getElementById('userImg').src = data.profilePic;
+                }
+            });
+        }
+
+        // Example trigger (replace with logged in user ID)
+        // loadUserProfile('current_user_id');
+    </script>
+</body>
+</html>

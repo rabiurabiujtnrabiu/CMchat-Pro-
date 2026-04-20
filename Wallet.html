@@ -32,10 +32,10 @@
         .trans-info { flex: 1; }
         .trans-info b { font-size: 14px; display: block; }
         .trans-amt { font-weight: 800; font-size: 14px; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--white); display: flex; justify-content: space-around; padding: 15px 0 25px; border-top-left-radius: 35px; border-top-right-radius: 35px; box-shadow: 0 -5px 25px rgba(0,0,0,0.05); z-index: 1000; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--white); display: flex; justify-content: space-around; padding: 15px 0 25px; border-top-left-radius: 35px; border-top-right-radius: 35px; box-shadow: 0 -5px 25px rgba(0,0,0,0.05); z-Dashboard: 1000; }
         .nav-item { color: #BBB; font-size: 22px; cursor: pointer; transition: 0.3s; }
         .nav-item.active { color: var(--primary); }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 2000; display: none; align-items: flex-end; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-dashboard: 2000; display: none; align-items: flex-end; }
         .modal-content { background: var(--bg); width: 100%; border-radius: 40px 40px 0 0; padding: 30px 20px; box-sizing: border-box; max-height: 85vh; overflow-y: auto; }
         .bank-box { background: var(--grad); color: white; padding: 20px; border-radius: 25px; margin: 20px 0; }
         .input-group input { width: 100%; padding: 18px; border-radius: 18px; border: none; margin-bottom: 15px; background: white; font-weight: bold; }
@@ -49,7 +49,7 @@
             <span>Welcome back,</span>
             <b id="walletUser">User Name</b>
         </div>
-        <div class="icon-circle" style="width:40px; height:40px; cursor:pointer" onclick="location.href='index.html'"><i class="fas fa-home"></i></div>
+        <div class="icon-circle" style="width:40px; height:40px; cursor:pointer" onclick="location.href='Dashboard.html'"><i class="fas fa-home"></i></div>
     </header>
 
     <div class="wallet-card animate__animated animate__fadeInDown">
@@ -86,7 +86,7 @@
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-item" onclick="location.href='index.html'"><i class="fas fa-home"></i></div>
+        <div class="nav-item" onclick="location.href='Dashboard.html'"><i class="fas fa-home"></i></div>
         <div class="nav-item" onclick="location.href='friends.html'"><i class="fas fa-user-plus"></i></div>
         <div class="nav-item" onclick="location.href='Shopping.html'"><i class="fas fa-shopping-bag"></i></div>
         <div class="nav-item active" onclick="location.href='Wallet.html'"><i class="fas fa-wallet"></i></div>

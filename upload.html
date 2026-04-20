@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Post | CMchat PRO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+    <style>
+        :root { --primary: #1877f2; --bg: #ffffff; --text: #050505; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--text); }
+
+        /* HEADER */
+        .post-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 15px; border-bottom: 1px solid #e4e6eb; position: sticky; top: 0; background: white; z-index: 100;
+        }
+        .back-btn { font-size: 20px; color: var(--text); text-decoration: none; }
+        .post-title { font-size: 18px; font-weight: 700; }
+        .submit-btn {
+            background: #e4e6eb; color: #bcc0c4; padding: 8px 20px; border-radius: 6px;
+            border: none; font-weight: 700; cursor: not-allowed; transition: 0.3s;
+        }
+        .submit-btn.active { background: var(--primary); color: white; cursor: pointer; }
+
+        /* USER INFO */
+        .user-section { display: flex; align-items: center; gap: 12px; padding: 15px; }
+        .avatar { width: 45px; height: 45px; border-radius: 50%; background: #e4e6eb; object-fit: cover; }
+        .user-meta h4 { font-size: 15px; font-weight: 600; }
+        .privacy-badge {
+            background: #e4e6eb; font-size: 11px; padding: 2px 8px; border-radius: 4px;
+            display: flex; align-items: center; gap: 4px; margin-top: 2px;
+        }
+
+        /* INPUT AREA */
+        .input-wrapper { padding: 10px 15px; }
+        textarea {
+            width: 100%; border: none; outline: none; font-size: 18px;
+            resize: none; min-height: 150px; color: var(--text);
+        }
+
+        /* MEDIA PREVIEW */
+        #preview-container { padding: 0 15px; display: none; position: relative; }
+        #preview-img { width: 100%; border-radius: 8px; max-height: 300px; object-fit: cover; }
+        .remove-preview {
+            position: absolute; top: 10px; right: 25px; background: white;
+            width: 25px; height: 25px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* ACTION BAR */
+        .action-bar {
+            position: fixed; bottom: 0; width: 100%; padding: 15px;
+            border-top: 1px solid #e4e6eb; background: white;
+        }
+        .action-box {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 15px; border: 1px solid #e4e6eb; border-radius: 8px;
+        }
+        .action-icons { display: flex; gap: 20px; }
+        .action-icons i { font-size: 22px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="post-header">
+        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+        <span class="post-title">Create Post</span>
+        <button id="postBtn" class="submit-btn" disabled>POST</button>
+    </div>
+
+    <div class="user-section">
+        <img src="https://via.placeholder.com/45" class="avatar" id="userAvatar">
+        <div class="user-meta">
+            <h4 id="userName">Commander CM</h4>
+            <div class="privacy-badge"><i class="fas fa-globe-americas"></i> Public <i class="fas fa-caret-down"></i></div>
+        </div>
+    </div>
+
+    <div class="input-wrapper">
+        <textarea id="postText" placeholder="What's on your mind, CM...?"></textarea>
+    </div>
+
+    <div id="preview-container">
+        <div class="remove-preview" onclick="removeMedia()"><i class="fas fa-times"></i></div>
+        <img id="preview-img" src="">
+    </div>
+
+    <div class="action-bar">
+        <div class="action-box">
+            <span style="font-weight: 600; font-size: 14px;">Add to your post</span>
+            <div class="action-icons">
+                <label for="fileInput"><i class="fas fa-images" style="color: #45bd62;"></i></label>
+                <i class="fas fa-user-tag" style="color: #1877f2;"></i>
+                <i class="fas fa-laugh" style="color: #f7b928;"></i>
+                <i class="fas fa-map-marker-alt" style="color: #f5533d;"></i>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" hidden accept="image/*">
+
+    <script>
+        // FIREBASE INITIALIZATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            authDomain: "cmchat-pro.firebaseapp.com",
+            projectId: "cmchat-pro",
+            storageBucket: "cmchat-pro.firebasestorage.app",
+            messagingSenderId: "227572132170",
+            appId: "1:227572132170:web:cc39de4627d4da01c7f9b3"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        const postText = document.getElementById('postText');
+        const postBtn = document.getElementById('postBtn');
+        const fileInput = document.getElementById('fileInput');
+        const previewImg = document.getElementById('preview-img');
+        const previewContainer = document.getElementById('preview-container');
+
+        // ENABLE/DISABLE BUTTON
+        postText.addEventListener('input', () => {
+            if (postText.value.trim() !== "") {
+                postBtn.disabled = false;
+                postBtn.classList.add('active');
+            } else {
+                postBtn.disabled = true;
+                postBtn.classList.remove('active');
+            }
+        });
+
+        // HANDLE IMAGE PREVIEW
+        fileInput.onchange = e => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    previewImg.src = reader.result;
+                    previewContainer.style.display = 'block';
+                    postBtn.disabled = false;
+                    postBtn.classList.add('active');
+                }
+                reader.readAsDataURL(file);
+            }
+        };
+
+        function removeMedia() {
+            fileInput.value = "";
+            previewContainer.style.display = 'none';
+        }
+
+        // SUBMIT POST TO FIREBASE
+        postBtn.onclick = async () => {
+            const text = postText.value;
+            postBtn.innerText = "Posting...";
+            postBtn.disabled = true;
+
+            try {
+                await db.collection('posts').add({
+                    text: text,
+                    username: "Commander CM",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    postImg: previewImg.src || null
+                });
+                window.location.href = "index.html";
+            } catch (error) {
+                alert("Error: " + error.message);
+                postBtn.innerText = "POST";
+                postBtn.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>
