@@ -30,7 +30,7 @@
         <button class="reg-btn" id="regBtn" onclick="handleRegister()">Sign Up</button>
         
         <div style="margin-top:20px; font-size:14px;">
-            Already have an account? <span style="color:var(--primary); font-weight:bold; cursor:pointer;" onclick="location.href='login.html'">Login</span>
+            Already have an account? <span style="color:var(--primary); font-weight:bold; cursor:pointer;" onclick="location.href='index.html'">index</span>
         </div>
     </div>
 
@@ -89,10 +89,10 @@
 
             db.ref('users/' + name).set(userData)
             .then(() => {
-                // Adana session na wucin gadi don login ya zama smooth
+                // Adana session na wucin gadi don index ya zama smooth
                 localStorage.setItem('temp_user', name);
-                alert("Registration Successful! Now please login.");
-                location.href = 'login.html';
+                alert("Registration Successful! Now please index.");
+                location.href = 'index.html';
             })
             .catch(err => {
                 alert("Error: " + err.message);
