@@ -49,7 +49,6 @@
             transition: 0.3s; position: relative;
         }
         
-        /* THE ANIMATED BORDER (Gurin da ka yi alama) */
         .product-img {
             width: 100%; height: 130px; background: #f8f9fa;
             border-radius: 20px; margin-bottom: 12px;
@@ -81,14 +80,13 @@
         }
         .add-btn:active { background: var(--p); color: white; transform: scale(0.9); }
 
-        /* Labels & Ads */
         .section-label { font-size: 11px; font-weight: 800; color: #A4B0BE; margin: 25px 0 10px 30px; text-transform: uppercase; letter-spacing: 1.2px; }
         .ad-box {
             margin: 0 20px 25px; padding: 25px; background: #ffffff;
             border-radius: 25px; border: 2px dashed #D1D8E0;
             text-align: center; color: #7F8C8D; font-size: 13px; font-weight: 600;
         }
-        .swal2-popup { border-radius: 25px !important; }
+        .swal2-popup { border-radius: 25px !important; background: var(--white) !important; color: var(--text) !important; }
     </style>
 </head>
 <body>
@@ -107,95 +105,20 @@
     <div class="search-container animate__animated animate__fadeInUp">
         <div class="search-box">
             <i class="fas fa-search" style="color: #b2bec3;"></i>
-            <input type="text" placeholder="Search premium courses...">
+            <input type="text" id="marketSearch" onkeyup="filterProducts()" placeholder="Search premium courses...">
         </div>
     </div>
 
-    <p class="section-label">Most Popular</p>
-    <div class="product-grid">
-        <div class="product-card animate__animated animate__zoomIn">
-            <div class="product-img" style="background: #E3F2FD;"><i class="fas fa-robot"></i></div>
-            <div class="product-info">
-                <p>Artificial Intelligence</p>
-                <h3>AI Prompt Engineering Mastery</h3>
-                <div class="price-row">
-                    <span class="price">₦10,000</span>
-                    <div class="add-btn" onclick="buyItem(10000, 'AI Prompt Mastery')"><i class="fas fa-plus"></i></div>
-                </div>
+    <div id="product-list-container">
+        <p class="section-label">Premium Catalog</p>
+        <div class="product-grid" id="main-grid">
             </div>
-        </div>
-
-        <div class="product-card animate__animated animate__zoomIn" style="animation-delay: 0.1s;">
-            <div class="product-img" style="background: #FFEBEE;"><i class="fas fa-user-secret"></i></div>
-            <div class="product-info">
-                <p>Cybersecurity</p>
-                <h3>Cyber Ghost Security Protocol</h3>
-                <div class="price-row">
-                    <span class="price">₦15,000</span>
-                    <div class="add-btn" onclick="buyItem(15000, 'Cyber Ghost Protocol')"><i class="fas fa-plus"></i></div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <p class="section-label">Sponsored Content</p>
     <div class="ad-box animate__animated animate__fadeIn">
         <i class="fas fa-bullhorn" style="margin-bottom: 8px; display: block; font-size: 24px; color: var(--accent);"></i>
         Promote Your Global Product Here
-    </div>
-
-    <p class="section-label">Trending Now</p>
-    <div class="product-grid">
-        <div class="product-card animate__animated animate__zoomIn">
-            <div class="product-img" style="background: #FFF8E1;"><i class="fas fa-chart-line"></i></div>
-            <div class="product-info">
-                <p>Trading</p>
-                <h3>Crypto King Trading Strategy</h3>
-                <div class="price-row">
-                    <span class="price">₦12,500</span>
-                    <div class="add-btn" onclick="buyItem(12500, 'Crypto Trading Strategy')"><i class="fas fa-plus"></i></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="product-card animate__animated animate__zoomIn">
-            <div class="product-img" style="background: #E8EAF6;"><i class="fas fa-code"></i></div>
-            <div class="product-info">
-                <p>Development</p>
-                <h3>Elite Web App Development</h3>
-                <div class="price-row">
-                    <span class="price">₦20,000</span>
-                    <div class="add-btn" onclick="buyItem(20000, 'Elite Web Development')"><i class="fas fa-plus"></i></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <p class="section-label">New Arrivals</p>
-    <div class="product-grid">
-        <div class="product-card animate__animated animate__zoomIn">
-            <div class="product-img" style="background: #F3E5F5;"><i class="fas fa-paint-brush"></i></div>
-            <div class="product-info">
-                <p>Creative</p>
-                <h3>Pro Graphics Design Master</h3>
-                <div class="price-row">
-                    <span class="price">₦8,000</span>
-                    <div class="add-btn" onclick="buyItem(8000, 'Graphics Design Pro')"><i class="fas fa-plus"></i></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="product-card animate__animated animate__zoomIn">
-            <div class="product-img" style="background: #E0F2F1;"><i class="fab fa-tiktok"></i></div>
-            <div class="product-info">
-                <p>Social Media</p>
-                <h3>TikTok Marketing Secrets</h3>
-                <div class="price-row">
-                    <span class="price">₦5,000</span>
-                    <div class="add-btn" onclick="buyItem(5000, 'TikTok Secrets')"><i class="fas fa-plus"></i></div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -210,42 +133,98 @@
         
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
-        const user = localStorage.getItem('username') || "Guest";
+        const userName = localStorage.getItem('username') || "Guest_User";
 
-        // Live Balance Sync
-        db.ref('users/' + user + '/wallet').on('value', snap => {
+        // 1. Live Wallet Sync
+        db.ref('users/' + userName + '/wallet').on('value', snap => {
             const bal = snap.val() || 0;
             document.getElementById('marketBalDisplay').innerText = "₦" + bal.toLocaleString();
         });
 
-        // Professional Purchase Handler
+        // 2. Sample Product Data (Za ka iya maida wannan Firebase daga baya)
+        const products = [
+            { id: 1, cat: 'Artificial Intelligence', name: 'AI Prompt Engineering Mastery', price: 10000, icon: 'fa-robot', bg: '#E3F2FD' },
+            { id: 2, cat: 'Cybersecurity', name: 'Cyber Ghost Security Protocol', price: 15000, icon: 'fa-user-secret', bg: '#FFEBEE' },
+            { id: 3, cat: 'Trading', name: 'Crypto King Trading Strategy', price: 12500, icon: 'fa-chart-line', bg: '#FFF8E1' },
+            { id: 4, cat: 'Development', name: 'Elite Web App Development', price: 20000, icon: 'fa-code', bg: '#E8EAF6' },
+            { id: 5, cat: 'Creative', name: 'Pro Graphics Design Master', price: 8000, icon: 'fa-paint-brush', bg: '#F3E5F5' },
+            { id: 6, cat: 'Social Media', name: 'TikTok Marketing Secrets', price: 5000, icon: 'fa-tiktok', bg: '#E0F2F1' }
+        ];
+
+        function displayProducts(filtered) {
+            const grid = document.getElementById('main-grid');
+            grid.innerHTML = filtered.map(p => `
+                <div class="product-card animate__animated animate__zoomIn">
+                    <div class="product-img" style="background: ${p.bg};"><i class="fas ${p.icon}"></i></div>
+                    <div class="product-info">
+                        <p>${p.cat}</p>
+                        <h3>${p.name}</h3>
+                        <div class="price-row">
+                            <span class="price">₦${p.price.toLocaleString()}</span>
+                            <div class="add-btn" onclick="buyItem(${p.price}, '${p.name}')"><i class="fas fa-plus"></i></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 3. Live Search Filter
+        function filterProducts() {
+            const term = document.getElementById('marketSearch').value.toLowerCase();
+            const filtered = products.filter(p => p.name.toLowerCase().includes(term) || p.cat.toLowerCase().includes(term));
+            displayProducts(filtered);
+        }
+
+        // 4. Secure Purchase System
         function buyItem(amt, name) {
             Swal.fire({
                 title: 'Confirm Purchase',
-                text: `Purchase "${name}" for ₦${amt.toLocaleString()}?`,
+                text: `Unlock "${name}" for ₦${amt.toLocaleString()}?`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#1A237E',
-                confirmButtonText: 'Yes, Buy Now'
+                confirmButtonText: 'Confirm Payment',
+                cancelButtonText: 'Cancel'
             }).then((res) => {
                 if (res.isConfirmed) {
-                    const ref = db.ref('users/' + user + '/wallet');
-                    ref.once('value', s => {
-                        const current = s.val() || 0;
-                        if (current >= amt) {
-                            ref.set(current - amt).then(() => {
-                                db.ref('transactions/' + user).push({
-                                    item: name, amount: amt, date: Date.now(), status: 'Success'
+                    const walletRef = db.ref('users/' + userName + '/wallet');
+                    
+                    walletRef.once('value').then(s => {
+                        const currentBal = s.val() || 0;
+                        
+                        if (currentBal >= amt) {
+                            // Deduct balance and record transaction
+                            const newBal = currentBal - amt;
+                            walletRef.set(newBal).then(() => {
+                                db.ref('orders/' + userName).push({
+                                    product: name,
+                                    amount: amt,
+                                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                                    status: 'unlocked'
                                 });
-                                Swal.fire('Success!', `You have unlocked ${name}.`, 'success');
+                                
+                                Swal.fire({
+                                    title: 'Purchase Successful!',
+                                    text: `You now have access to ${name}.`,
+                                    icon: 'success',
+                                    confirmButtonColor: '#00E676'
+                                });
                             });
                         } else {
-                            Swal.fire('Insufficient Funds', 'Please top up your wallet.', 'error');
+                            Swal.fire({
+                                title: 'Insufficient Balance',
+                                text: 'You do not have enough funds. Please top up your wallet.',
+                                icon: 'error',
+                                confirmButtonColor: '#FF3D00'
+                            });
                         }
                     });
                 }
             });
         }
+
+        // Initial Load
+        displayProducts(products);
     </script>
 </body>
 </html>

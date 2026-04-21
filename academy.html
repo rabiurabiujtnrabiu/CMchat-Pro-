@@ -6,6 +6,8 @@
     <title>CM Academy Pro - Elite Learning</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
         :root {
             --p: #1A237E; --g: #FFD600; --danger: #FF5252;
@@ -23,11 +25,11 @@
             box-shadow: 0 10px 30px rgba(26, 35, 126, 0.2);
         }
         .header-flex { display: flex; justify-content: space-between; align-items: center; }
-        .user-profile { display: flex; align-items: center; gap: 15px; }
         .avatar-main { 
             width: 45px; height: 45px; background: rgba(255,255,255,0.2); 
             border-radius: 14px; display: flex; align-items: center; 
             justify-content: center; font-weight: 800; border: 1px solid rgba(255,255,255,0.3);
+            text-transform: uppercase;
         }
 
         .instructor-nexus {
@@ -43,9 +45,9 @@
 
         .section-title { padding: 0 25px; margin: 20px 0 12px; font-size: 13px; font-weight: 800; color: var(--p); letter-spacing: 0.5px; }
 
-        .course-scroll { display: flex; gap: 15px; padding: 0 20px 5px; overflow-x: auto; scrollbar-width: none; }
+        .course-scroll { display: flex; gap: 15px; padding: 0 20px 10px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .course-card {
-            min-width: 150px; background: white; padding: 15px; border-radius: 25px;
+            min-width: 160px; background: white; padding: 15px; border-radius: 25px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.02); text-align: center; border: 1px solid #f1f2f6;
         }
 
@@ -62,18 +64,22 @@
         .full-width-card {
             grid-column: span 2; display: flex !important; align-items: center;
             justify-content: flex-start; gap: 18px; padding: 18px 25px !important;
-            text-align: left !important; background: #ffffff; margin-top: 5px;
+            text-align: left !important;
         }
-        .full-width-card i { margin-bottom: 0 !important; font-size: 32px !important; }
 
-        .student-nexus { padding: 0 25px; margin: 25px 0; }
-        .avatar-stack { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
-        .stack-item { min-width: 40px; height: 40px; border-radius: 12px; background: #DDE1F8; color: var(--p); display: flex; align-items: center; justify-content: center; font-weight: 800; border: 2px solid white; }
+        .avatar-stack { display: flex; gap: 8px; overflow-x: auto; padding: 5px 25px; scrollbar-width: none; }
+        .stack-item { 
+            min-width: 42px; height: 42px; border-radius: 12px; 
+            background: #DDE1F8; color: var(--p); display: flex; 
+            align-items: center; justify-content: center; font-weight: 800; 
+            border: 2px solid white; text-transform: uppercase;
+        }
 
         .btn-hand-elite {
-            margin: 0 20px 20px; padding: 16px; border: none; border-radius: 20px;
+            margin: 20px; padding: 16px; border: none; border-radius: 20px;
             background: var(--danger); color: white; font-weight: 800; font-size: 15px;
             display: flex; align-items: center; justify-content: center; gap: 10px; width: calc(100% - 40px);
+            box-shadow: 0 10px 20px rgba(255, 82, 82, 0.2); cursor: pointer;
         }
     </style>
 </head>
@@ -81,12 +87,12 @@
 
     <div class="elite-header">
         <div class="header-flex">
-            <i class="fas fa-chevron-left" onclick="window.history.back()"></i>
-            <div class="user-profile">
-                <div class="avatar-main" id="initial">S</div>
+            <i class="fas fa-chevron-left" onclick="history.back()"></i>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="avatar-main" id="initial">-</div>
                 <div style="text-align: right;">
                     <small style="opacity: 0.8; font-size: 10px;">Elite Academy</small>
-                    <div style="font-weight: 700; font-size: 16px;" id="uName">Student</div>
+                    <div style="font-weight: 700; font-size: 16px;" id="uName">Loading...</div>
                 </div>
             </div>
         </div>
@@ -96,7 +102,7 @@
         <div style="display:flex; align-items:center; gap:12px;">
             <i class="fas fa-user-shield" style="color:var(--p); font-size:24px;"></i>
             <div>
-                <b id="teacherName" style="font-size: 14px;">Instructor</b>
+                <b id="teacherName">...</b>
                 <p style="margin:0; font-size: 11px; color:#888;">Live Classroom</p>
             </div>
         </div>
@@ -105,7 +111,7 @@
 
     <div class="section-title">MY ENROLLED COURSES</div>
     <div class="course-scroll" id="myCoursesList">
-        <p style="font-size: 11px; color: #999; padding-left: 5px;">Syncing library...</p>
+        <p style="font-size: 11px; color: #999; padding-left: 25px;">Connecting to library...</p>
     </div>
 
     <div class="section-title">QUICK ACCESS</div>
@@ -132,21 +138,19 @@
         </a>
         <a href="CM-market.html" class="grid-card full-width-card">
             <i class="fas fa-store-alt" style="color: var(--g);"></i>
-            <div style="display:flex; flex-direction:column;">
+            <div>
                 <b>CM Market</b>
-                <span style="color: #A4B0BE;">Browse and buy elite global courses</span>
+                <span>Browse and buy elite global courses</span>
             </div>
             <i class="fas fa-angle-right" style="margin-left: auto; color: #ccc;"></i>
         </a>
     </div>
 
-    <div class="student-nexus">
-        <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:800; color:#7F8C8D; margin-bottom:12px;">
-            <span>STUDENTS ATTENDING</span>
-            <span id="activeCount" style="color: var(--p);">0 Active</span>
-        </div>
-        <div class="avatar-stack" id="studentList"></div>
+    <div style="padding: 25px 25px 10px; display:flex; justify-content:space-between; font-size:11px; font-weight:800; color:#7F8C8D;">
+        <span>STUDENTS ATTENDING</span>
+        <span id="activeCount" style="color: var(--p);">0 ACTIVE</span>
     </div>
+    <div class="avatar-stack" id="studentList"></div>
 
     <button class="btn-hand-elite" onclick="raiseHand()">
         <i class="fas fa-hand-sparkles"></i> RAISE HAND
@@ -161,54 +165,94 @@
             databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
             projectId: "cmchat-pro"
         };
+        
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
-        const myName = localStorage.getItem('username') || "Student";
-
+        
+        const myName = localStorage.getItem('username') || "Elite Member";
         document.getElementById('uName').innerText = myName;
-        document.getElementById('initial').innerText = myName.charAt(0).toUpperCase();
+        document.getElementById('initial').innerText = myName.charAt(0);
 
+        // SYNC ENROLLED COURSES (From Transactions)
         db.ref('transactions/' + myName).on('value', snap => {
             const list = document.getElementById('myCoursesList');
-            list.innerHTML = ""; let count = 0;
+            list.innerHTML = "";
+            let count = 0;
+            
+            if(!snap.exists()) {
+                list.innerHTML = `<p style="font-size: 11px; color: #999; padding-left: 25px;">No courses purchased yet.</p>`;
+                return;
+            }
+
             snap.forEach(child => {
                 const t = child.val();
-                if (t.service && (t.service.startsWith("Market: ") || t.service.startsWith("Purchase: "))) {
+                if (t.service && (t.service.includes("Market:") || t.service.includes("Purchase:"))) {
                     count++;
-                    const name = t.service.replace("Market: ", "").replace("Purchase: ", "");
-                    list.innerHTML += `<div class="course-card">
-                        <div style="width:45px; height:45px; border-radius:15px; background:var(--soft); margin:0 auto 10px; display:flex; align-items:center; justify-content:center; color:var(--p);"><i class="fas fa-graduation-cap"></i></div>
-                        <b style="font-size:11px; display:block; height:32px; overflow:hidden;">${name}</b>
-                        <button style="border:none; background:var(--p); color:white; border-radius:10px; font-size:10px; padding:6px; margin-top:8px; width:100%" onclick="alert('Opening ${name}...')">Study</button>
+                    const courseTitle = t.service.split(":").pop().trim();
+                    list.innerHTML += `
+                    <div class="course-card animate__animated animate__fadeIn">
+                        <div style="width:40px; height:40px; border-radius:12px; background:var(--soft); margin:0 auto 10px; display:flex; align-items:center; justify-content:center; color:var(--p);">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <b style="font-size:11px; display:block; height:32px; overflow:hidden;">${courseTitle}</b>
+                        <button style="border:none; background:var(--p); color:white; border-radius:8px; font-size:10px; padding:7px; margin-top:8px; width:100%; font-weight:bold;" 
+                            onclick="openCourse('${courseTitle}')">STUDY</button>
                     </div>`;
                 }
             });
-            if (count === 0) { list.innerHTML = `<p style="font-size: 11px; color: #999; padding-left: 5px;">No courses purchased yet.</p>`; }
         });
 
-        const statusRef = db.ref('academy/attendance/' + myName);
-        statusRef.set({ status: 'online', time: Date.now() });
-        statusRef.onDisconnect().remove();
+        // ATTENDANCE & LIVE STATUS
+        const attendanceRef = db.ref('academy/attendance/' + myName);
+        attendanceRef.set({ status: 'online', lastSeen: Date.now() });
+        attendanceRef.onDisconnect().remove();
 
         db.ref('academy/attendance').on('value', snap => {
             const list = document.getElementById('studentList');
-            const count = document.getElementById('activeCount');
-            list.innerHTML = ""; let online = 0;
+            const countEl = document.getElementById('activeCount');
+            list.innerHTML = "";
+            let online = 0;
             snap.forEach(child => {
                 online++;
-                list.innerHTML += `<div class="stack-item">${child.key.charAt(0).toUpperCase()}</div>`;
+                list.innerHTML += `<div class="stack-item">${child.key.charAt(0)}</div>`;
             });
-            count.innerText = online + " ACTIVE";
+            countEl.innerText = online + " ACTIVE";
         });
 
-        db.ref('academy/config').on('value', snap => {
-            const data = snap.val() || { teacher: "Senior Instructor" };
-            document.getElementById('teacherName').innerText = data.teacher;
+        // INSTRUCTOR NAME SYNC
+        db.ref('academy/config/teacher').on('value', snap => {
+            document.getElementById('teacherName').innerText = snap.val() || "Senior Instructor";
         });
+
+        // ACTIONS
+        function openCourse(title) {
+            Swal.fire({
+                title: 'Loading Course',
+                text: `Opening: ${title}`,
+                icon: 'info',
+                timer: 1500,
+                showConfirmButton: false,
+                background: '#1e293b',
+                color: '#fff'
+            });
+            // window.location.href = `Study-Player.html?course=${title}`;
+        }
 
         function raiseHand() {
-            db.ref('academy/notifications').push({ user: myName, type: 'hand_raise', time: Date.now() });
-            alert("Success! Your instructor has been notified.");
+            db.ref('academy/notifications').push({
+                user: myName,
+                type: 'hand_raise',
+                timestamp: Date.now()
+            }).then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Hand Raised',
+                    text: 'Your instructor has been notified!',
+                    background: '#1e293b',
+                    color: '#fff',
+                    confirmButtonColor: '#1A237E'
+                });
+            });
         }
     </script>
 </body>

@@ -12,8 +12,8 @@
 
         header { background: var(--p); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         
-        #board-container { flex: 1; position: relative; overflow-y: auto; background: var(--white); scroll-behavior: smooth; }
-        canvas { display: block; width: 100%; height: 8000px; touch-action: none; position: absolute; top: 0; left: 0; z-index: 10; }
+        #board-container { flex: 1; position: relative; overflow-y: auto; background: var(--white); scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+        canvas { display: block; width: 100%; height: 5000px; touch-action: none; position: absolute; top: 0; left: 0; z-index: 10; }
 
         #pencil-cursor { 
             position: absolute; width: 35px; height: 35px; z-index: 100; 
@@ -112,19 +112,31 @@
         };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        const boardID = "academy_live_board"; // Unique ID for the classroom board
 
         let tool = 'pen', inkColor = "#1A237E", isDrawing = false;
-        let curX = 60, curY = 100, lastX, lastY;
-        let textHistory = [];
+        let curX = 60, curY = 100;
 
         function init() {
             canvas.width = wrapper.clientWidth;
-            canvas.height = 8000;
+            canvas.height = 5000;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.font = "600 28px 'Poppins'";
         }
         init();
+
+        // --- FIREBASE SYNC: Saurari canje-canje daga wasu ---
+        db.ref('boards/' + boardID).on('child_added', snap => {
+            const data = snap.val();
+            if (data.type === 'line') {
+                drawLine(data.x1, data.y1, data.x2, data.y2, data.color, data.width, data.isEraser);
+            } else if (data.type === 'text') {
+                drawText(data.char, data.x, data.y, data.color);
+            } else if (data.type === 'clear') {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        });
 
         function toggleSidebar() { sidebar.classList.toggle('active'); }
 
@@ -142,79 +154,82 @@
             el.classList.add('active');
         }
 
-        // --- DRAWING LOGIC ---
-        function getPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            return {
-                x: (e.clientX || e.touches[0].clientX) - rect.left,
-                y: (e.clientY || e.touches[0].clientY) - rect.top + wrapper.scrollTop
-            };
+        // Helper Drawing Functions
+        function drawLine(x1, y1, x2, y2, color, width, isEraser) {
+            ctx.beginPath();
+            ctx.globalCompositeOperation = isEraser ? 'destination-out' : 'source-over';
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            ctx.closePath();
         }
 
+        function drawText(char, x, y, color) {
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.fillStyle = color;
+            ctx.fillText(char, x, y);
+        }
+
+        // --- INTERACTION LOGIC ---
+        let lastX, lastY;
         canvas.addEventListener('touchstart', (e) => {
             if(tool === 'text') return;
             isDrawing = true;
             const pos = getPos(e);
             lastX = pos.x; lastY = pos.y;
-            ctx.beginPath(); ctx.moveTo(lastX, lastY);
         });
 
         canvas.addEventListener('touchmove', (e) => {
             if(!isDrawing || tool === 'text') return;
             e.preventDefault();
             const pos = getPos(e);
-            ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over';
-            ctx.strokeStyle = inkColor;
-            ctx.lineWidth = tool === 'eraser' ? 50 : 4;
-            ctx.lineTo(pos.x, pos.y); ctx.stroke();
+            const isEraser = (tool === 'eraser');
+            const width = isEraser ? 50 : 4;
+            
+            // Draw Locally
+            drawLine(lastX, lastY, pos.x, pos.y, inkColor, width, isEraser);
+            
+            // Push to Firebase
+            db.ref('boards/' + boardID).push({
+                type: 'line', x1: lastX, y1: lastY, x2: pos.x, y2: pos.y,
+                color: inkColor, width: width, isEraser: isEraser
+            });
+
             lastX = pos.x; lastY = pos.y;
         });
 
         canvas.addEventListener('touchend', () => isDrawing = false);
 
-        // --- FIXED SCROLLING & TYPING LOGIC ---
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: (e.touches[0].clientX) - rect.left,
+                y: (e.touches[0].clientY) - rect.top + wrapper.scrollTop
+            };
+        }
+
+        // --- TYPING LOGIC ---
         pencilInput.addEventListener('input', (e) => {
-            if (e.inputType === 'deleteContentBackward') {
-                if (textHistory.length > 0) {
-                    const last = textHistory.pop();
-                    ctx.clearRect(last.x - 2, last.y - 35, last.w + 6, 50);
-                    curX = last.x; curY = last.y;
-                }
-                return;
-            }
             const char = e.data;
             if (!char) return;
 
             const textWidth = ctx.measureText(char).width;
             if (curX + textWidth > canvas.width - 60) { curX = 60; curY += 60; }
 
-            pencil.style.display = 'block';
-            pencil.style.left = curX + 'px';
-            pencil.style.top = (curY - 35) + 'px';
-
-            textHistory.push({ x: curX, y: curY, w: textWidth });
-            
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.fillStyle = inkColor;
-            ctx.fillText(char, curX, curY);
+            // Locally and Globally
+            drawText(char, curX, curY, inkColor);
+            db.ref('boards/' + boardID).push({ type: 'text', char: char, x: curX, y: curY, color: inkColor });
 
             curX += textWidth + 4;
-
-            // GYARA: Tabbatar allon yana bin rubutun zuwa KASA
-            const visibleBottom = wrapper.scrollTop + wrapper.clientHeight;
-            if (curY > visibleBottom - 100) {
-                wrapper.scrollTo({ top: curY - 200, behavior: 'smooth' });
-            }
-
-            clearTimeout(window.pTimeout);
-            window.pTimeout = setTimeout(() => { pencil.style.display = 'none'; }, 800);
+            wrapper.scrollTo({ top: curY - 200, behavior: 'smooth' });
         });
 
         pencilInput.addEventListener('keydown', (e) => {
             if(e.key === 'Enter') { 
                 curY += 60; curX = 60; 
-                pencilInput.value = ""; textHistory = [];
-                // Tabbatar allon ya yi kasa idan an danna Enter a karshen allo
+                pencilInput.value = "";
                 wrapper.scrollTo({ top: curY - 200, behavior: 'smooth' });
             }
         });
@@ -222,15 +237,16 @@
         function clearBoard() {
             Swal.fire({
                 title: 'Clear Board?',
-                text: "This will permanently erase all content!",
+                text: "This will erase content for EVERYONE!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#1A237E',
-                confirmButtonText: 'Yes, Clear it'
+                confirmButtonText: 'Yes, Clear All'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    curX = 60; curY = 100; textHistory = [];
+                    db.ref('boards/' + boardID).remove();
+                    db.ref('boards/' + boardID).push({ type: 'clear' });
+                    curX = 60; curY = 100;
                     wrapper.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             });

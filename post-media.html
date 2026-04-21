@@ -5,74 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Post - CMchat Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
-        :root { --primary: #1a73e8; --bg: #ffffff; }
+        :root { --primary: #1a73e8; --bg: #f0f2f5; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: #1c1e21; }
 
-        /* Modern Header */
         .post-header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 20px; border-bottom: 1px solid #ddd;
+            padding: 12px 20px; border-bottom: 1px solid #ddd;
             position: sticky; top: 0; background: white; z-index: 100;
         }
         .header-title { font-size: 18px; font-weight: 700; }
-        .close-btn { font-size: 22px; color: #606770; cursor: pointer; }
         .post-button {
             background: var(--primary); color: white; border: none;
-            padding: 8px 20px; border-radius: 8px; font-weight: 700;
-            font-size: 14px; cursor: pointer; transition: 0.3s;
+            padding: 8px 22px; border-radius: 8px; font-weight: 700;
+            cursor: pointer; transition: 0.3s;
         }
         .post-button:disabled { background: #e4e6eb; color: #bcc0c4; }
 
-        /* User Info Section */
-        .user-section { display: flex; align-items: center; gap: 12px; padding: 20px; }
-        .user-avatar { width: 45px; height: 45px; border-radius: 50%; background: #eee; }
-        .user-details b { display: block; font-size: 15px; }
-        .privacy-pill {
-            background: #e4e6eb; font-size: 11px; padding: 2px 8px;
-            border-radius: 5px; display: inline-flex; align-items: center; gap: 4px;
-        }
-
-        /* Input Area */
-        .content-area { padding: 0 20px; }
+        .user-section { display: flex; align-items: center; gap: 12px; padding: 15px 20px; background: white; }
+        .user-avatar { width: 45px; height: 45px; border-radius: 50%; background: #ddd; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .user-avatar i { font-size: 24px; color: #fff; }
+        
+        .content-area { padding: 10px 20px; background: white; }
         textarea {
-            width: 100%; border: none; outline: none; font-size: 20px;
+            width: 100%; border: none; outline: none; font-size: 18px;
             min-height: 150px; resize: none; font-family: inherit;
         }
 
-        /* Preview Display */
         .media-preview {
-            margin: 15px 20px; border-radius: 12px; overflow: hidden;
-            position: relative; display: none; background: #f0f2f5;
+            margin: 10px 20px; border-radius: 12px; overflow: hidden;
+            position: relative; display: none; background: #000;
         }
-        .media-preview img, .media-preview video { width: 100%; display: block; max-height: 400px; object-fit: contain; }
-        .remove-media {
-            position: absolute; top: 10px; right: 10px;
-            background: rgba(0,0,0,0.6); color: white; width: 30px;
-            height: 30px; border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; cursor: pointer;
-        }
-
-        /* Floating Bottom Menu */
+        .media-preview img, .media-preview video { width: 100%; display: block; max-height: 300px; object-fit: contain; }
+        
         .bottom-tools {
             position: fixed; bottom: 0; width: 100%;
             background: white; border-top: 1px solid #ddd;
             padding: 15px 0; border-radius: 20px 20px 0 0;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
         }
-        .tool-label { padding: 0 20px 10px; font-size: 13px; color: #606770; font-weight: 600; }
         .tool-grid { display: flex; justify-content: space-around; }
-        .tool-item {
-            display: flex; flex-direction: column; align-items: center;
-            gap: 5px; cursor: pointer; font-size: 12px; font-weight: 500;
-        }
-        .tool-item i { font-size: 24px; }
+        .tool-item { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; font-size: 12px; }
+        .tool-item i { font-size: 22px; }
 
-        /* Upload Progress */
-        .progress-bar {
-            position: fixed; top: 55px; left: 0; width: 0%;
-            height: 3px; background: var(--primary); transition: 0.3s;
-        }
+        .progress-bar { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: var(--primary); z-index: 1001; }
     </style>
 </head>
 <body>
@@ -80,16 +58,16 @@
     <div class="progress-bar" id="uploadBar"></div>
 
     <div class="post-header">
-        <i class="fas fa-arrow-left close-btn" onclick="history.back()"></i>
+        <i class="fas fa-arrow-left" style="cursor:pointer" onclick="history.back()"></i>
         <div class="header-title">Create Post</div>
         <button class="post-button" id="submitPost" disabled onclick="handleUpload()">Post</button>
     </div>
 
     <div class="user-section">
-        <div class="user-avatar" id="currentAvatar"></div>
+        <div class="user-avatar" id="currentAvatar" style="background: #1a73e8;"><i class="fas fa-user"></i></div>
         <div class="user-details">
-            <b id="currentName">CM Member</b>
-            <div class="privacy-pill"><i class="fas fa-globe-africa"></i> Public</div>
+            <b id="currentName">Commander CM</b>
+            <div style="font-size: 12px; color: #606770;"><i class="fas fa-globe-africa"></i> Public</div>
         </div>
     </div>
 
@@ -97,13 +75,11 @@
         <textarea id="postInput" placeholder="What's on your mind, CM...?" oninput="validate()"></textarea>
     </div>
 
-    <div class="media-preview" id="mediaPreview">
-        <div class="remove-media" onclick="clearMedia()"><i class="fas fa-times"></i></div>
+    <div id="mediaPreview" class="media-preview">
         <div id="previewContainer"></div>
     </div>
 
     <div class="bottom-tools">
-        <div class="tool-label">Add to your post</div>
         <div class="tool-grid">
             <label class="tool-item">
                 <i class="fas fa-images" style="color: #45bd62;"></i>
@@ -115,18 +91,27 @@
                 <span>Video</span>
                 <input type="file" hidden accept="video/*" onchange="previewFile(this, 'video')">
             </label>
-            <div class="tool-item">
-                <i class="fas fa-user-tag" style="color: #1877f2;"></i>
-                <span>Tag</span>
-            </div>
-            <div class="tool-item">
-                <i class="fas fa-location-dot" style="color: #f5533d;"></i>
-                <span>Location</span>
-            </div>
+            <div class="tool-item"><i class="fas fa-user-tag" style="color: #1877f2;"></i><span>Tag</span></div>
+            <div class="tool-item"><i class="fas fa-location-dot" style="color: #f5533d;"></i><span>Location</span></div>
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            authDomain: "cmchat-pro.firebaseapp.com",
+            projectId: "cmchat-pro",
+            storageBucket: "cmchat-pro.appspot.com"
+        };
+        
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
         let selectedFile = null;
         let selectedType = '';
 
@@ -143,9 +128,8 @@
                 selectedType = type;
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const container = document.getElementById('previewContainer');
                     document.getElementById('mediaPreview').style.display = 'block';
-                    container.innerHTML = type === 'image' 
+                    document.getElementById('previewContainer').innerHTML = type === 'image' 
                         ? `<img src="${e.target.result}">` 
                         : `<video src="${e.target.result}" controls></video>`;
                     validate();
@@ -154,18 +138,39 @@
             }
         }
 
-        function clearMedia() {
-            selectedFile = null;
-            document.getElementById('mediaPreview').style.display = 'none';
-            validate();
-        }
-
-        // Nan ne zaka sanya Firebase Upload Logic dinka
-        function handleUpload() {
+        async function handleUpload() {
             const btn = document.getElementById('submitPost');
+            const text = document.getElementById('postInput').value.trim();
             btn.disabled = true;
             btn.innerText = "Posting...";
-            // Upload code...
+
+            try {
+                let fileUrl = "";
+                if (selectedFile) {
+                    const ref = storage.ref(`posts/${Date.now()}_${selectedFile.name}`);
+                    await ref.put(selectedFile);
+                    fileUrl = await ref.getDownloadURL();
+                }
+
+                await db.collection('posts').add({
+                    text: text,
+                    media: fileUrl,
+                    type: selectedType || 'text',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    username: localStorage.getItem('username') || "CM Member"
+                });
+
+                Swal.fire({ icon: 'success', title: 'Success!', text: 'Post uploaded successfully!', timer: 2000, showConfirmButton: false });
+                setTimeout(() => location.reload(), 2000);
+
+            } catch (err) {
+                let msg = err.message;
+                if(msg.includes("permissions")) msg = "Kuna bukatar saita 'Rules' a Firebase dinka don samun izini.";
+                
+                Swal.fire({ icon: 'error', title: 'Failed', text: msg });
+                btn.disabled = false;
+                btn.innerText = "Post";
+            }
         }
     </script>
 </body>
