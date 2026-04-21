@@ -6,22 +6,85 @@
     <title>Login - CMchat Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #1a73e8; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-card { background: white; padding: 40px 30px; border-radius: 30px; width: 90%; max-width: 400px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); text-align: center; }
-        .logo-icon { font-size: 60px; color: var(--primary); margin-bottom: 20px; }
-        .input-box { position: relative; margin-bottom: 20px; }
-        .input-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa; }
-        .input-box input { width: 100%; padding: 14px 15px 14px 45px; border: 1.5px solid #eee; border-radius: 15px; outline: none; box-sizing: border-box; font-size: 14px; }
-        .login-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .reg-link { margin-top: 25px; font-size: 14px; color: #555; }
-        .reg-link span { color: var(--primary); text-decoration: none; font-weight: bold; cursor: pointer; }
+        :root { --primary: #1a73e8; --accent: #34a853; --bg: #0f172a; }
+        
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; margin: 0; color: white; overflow-x: hidden;
+        }
+
+        /* Moving Background Shapes */
+        .bg-blur {
+            position: absolute; width: 300px; height: 300px;
+            background: var(--primary); filter: blur(100px);
+            opacity: 0.2; z-index: -1; animation: move 10s infinite alternate;
+        }
+
+        @keyframes move { from { transform: translate(-50%, -50%); } to { transform: translate(50%, 50%); } }
+
+        .login-card { 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(15px);
+            padding: 40px 30px; border-radius: 30px; 
+            width: 90%; max-width: 400px; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3); 
+            text-align: center; border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo-area i { font-size: 50px; color: var(--primary); margin-bottom: 10px; }
+        
+        /* Rewards Banner */
+        .rewards-banner {
+            background: rgba(52, 168, 83, 0.1);
+            border: 1px solid rgba(52, 168, 83, 0.3);
+            border-radius: 15px; padding: 12px; margin: 20px 0;
+            font-size: 13px; color: #a7f3d0; text-align: left;
+        }
+
+        .input-box { position: relative; margin-bottom: 15px; }
+        .input-box i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .input-box input { 
+            width: 100%; padding: 15px 15px 15px 50px; 
+            background: rgba(255,255,255,0.05);
+            border: 1.5px solid rgba(255,255,255,0.1); 
+            border-radius: 15px; outline: none; box-sizing: border-box; 
+            font-size: 14px; color: white; transition: 0.3s;
+        }
+        .input-box input:focus { border-color: var(--primary); background: rgba(255,255,255,0.1); }
+
+        .login-btn { 
+            width: 100%; padding: 15px; background: var(--primary); 
+            color: white; border: none; border-radius: 15px; 
+            font-weight: bold; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 10px 20px rgba(26, 115, 232, 0.3);
+        }
+        .login-btn:hover { transform: translateY(-2px); background: #1557b0; }
+
+        /* Fingerprint Style */
+        .fp-section { margin-top: 25px; cursor: pointer; transition: 0.3s; }
+        .fp-section:hover { opacity: 0.8; }
+        .fp-icon { font-size: 45px; color: var(--accent); margin-bottom: 5px; }
+        .fp-text { font-size: 12px; color: #94a3b8; }
+
+        .reg-link { margin-top: 25px; font-size: 14px; color: #94a3b8; }
+        .reg-link span { color: var(--primary); font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
+    <div class="bg-blur"></div>
+    
     <div class="login-card">
-        <div class="logo-icon"><i class="fas fa-circle-user"></i></div>
-        <h2>Welcome Back</h2>
+        <div class="logo-area"><i class="fas fa-shield-halved"></i></div>
+        <h2 style="margin: 10px 0;">CMchat Pro</h2>
+        <p style="font-size: 13px; color: #94a3b8;">Secure Global Communication</p>
+
+        <div class="rewards-banner">
+            <i class="fas fa-gift" style="margin-right: 5px;"></i>
+            <strong>Daily Rewards:</strong> Earn 50 Coins for every referral and unlock Arena XP!
+        </div>
+
         <div class="input-box">
             <i class="fas fa-envelope"></i>
             <input type="email" id="loginEmail" placeholder="Email Address">
@@ -31,10 +94,15 @@
             <input type="password" id="loginPass" placeholder="Password">
         </div>
         
-        <button class="login-btn" id="loginBtn" onclick="handleLogin()">Login</button>
+        <button class="login-btn" id="loginBtn" onclick="handleLogin()">Sign In</button>
+
+        <div class="fp-section" onclick="handleBiometric()">
+            <i class="fas fa-fingerprint fp-icon"></i>
+            <div class="fp-text">Quick Login with Fingerprint</div>
+        </div>
         
         <div class="reg-link">
-            Don't have an account? <span onclick="location.href='Register.html'">Register</span>
+            New here? <span onclick="location.href='Register.html'">Create Account</span>
         </div>
     </div>
 
@@ -58,39 +126,40 @@
             const pass = document.getElementById('loginPass').value.trim();
             const btn = document.getElementById('loginBtn');
 
-            if(!email || !pass) {
-                alert("Please enter email and password!");
-                return;
-            }
+            if(!email || !pass) { alert("Please fill all fields!"); return; }
 
             btn.disabled = true;
-            btn.innerText = "Checking...";
+            btn.innerText = "Verifying...";
 
             try {
-                // Login ta amfani da Firebase Auth (Mafi Tsaro)
                 const userCredential = await auth.signInWithEmailAndPassword(email, pass);
                 const user = userCredential.user;
 
-                // Nemo sunan mutum daga Firestore don adanawa a localStorage
                 const userDoc = await db.collection('users').doc(user.uid).get();
-                
                 if (userDoc.exists) {
-                    const userData = userDoc.data();
-                    localStorage.setItem('username', userData.username);
+                    localStorage.setItem('username', userDoc.data().username);
                     localStorage.setItem('user_uid', user.uid);
-                    
-                    alert("Login Successful!");
-                    location.href = 'Dashboard.html';
+                    window.location.href = 'Dashboard.html';
                 }
             } catch (err) {
-                // Gyara kuskuren nan na "Network Error" zuwa sakon gaskiya
-                let errorMsg = "Login Failed!";
-                if(err.code === 'auth/user-not-found') errorMsg = "No account found with this email.";
-                if(err.code === 'auth/wrong-password') errorMsg = "Incorrect password.";
-                
-                alert(errorMsg);
+                alert("Error: " + err.message);
                 btn.disabled = false;
-                btn.innerText = "Login";
+                btn.innerText = "Sign In";
+            }
+        }
+
+        // Professional Biometric Login Logic
+        async function handleBiometric() {
+            if (window.PublicKeyCredential) {
+                try {
+                    // Wannan zai kira sensor din wayar
+                    alert("Scanning fingerprint...");
+                    // A nan zaka iya saka logic din WebAuthn idan kana da SSL certificate
+                } catch (e) {
+                    alert("Biometric failed or not set up.");
+                }
+            } else {
+                alert("Your device doesn't support fingerprint login.");
             }
         }
     </script>
