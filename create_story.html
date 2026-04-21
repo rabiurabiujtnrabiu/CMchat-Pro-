@@ -18,7 +18,6 @@
         .story-header { position: relative; z-index: 20; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
         .publish-btn { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 30px; font-weight: 800; cursor: pointer; }
 
-        /* TSARIN RUBUTUN DA AKE JA */
         #draggable-caption {
             position: absolute; z-index: 15; top: 40%; left: 10%;
             cursor: move; padding: 10px; width: 80%; text-align: center;
@@ -33,11 +32,6 @@
         .story-tools { position: absolute; bottom: 0; width: 100%; z-index: 20; padding: 30px; display: flex; justify-content: space-around; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); }
         .tool-item { text-align: center; cursor: pointer; }
         .tool-circle { width: 55px; height: 55px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2); }
-
-        /* LOADING SCREEN */
-        .uploading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; display: none; flex-direction: column; justify-content: center; align-items: center; }
-        .loader { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -66,11 +60,6 @@
 
     <input type="file" id="mediaInput" hidden accept="image/*">
 
-    <div class="uploading-overlay" id="loading">
-        <div class="loader"></div>
-        <p style="margin-top: 15px; font-weight: 700; letter-spacing: 1px;">OPTIMIZING & UPLOADING...</p>
-    </div>
-
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
@@ -86,7 +75,6 @@
 
         let compressedImageBase64 = "";
 
-        // 1. COMPRESSION LOGIC (GYARAN ERROR NA 1MB)
         mediaInput.onchange = e => {
             const file = e.target.files[0];
             if (file) {
@@ -97,17 +85,11 @@
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
-                        
-                        // Rage fadin hoto zuwa 720px don yayi sauki
                         const targetWidth = 720;
                         const targetHeight = (img.height * targetWidth) / img.width;
-                        
                         canvas.width = targetWidth;
                         canvas.height = targetHeight;
-                        
                         ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-                        
-                        // Nan ne muke rage nauyin hoton (Quality = 0.6)
                         compressedImageBase64 = canvas.toDataURL('image/jpeg', 0.6);
                         storyPreview.src = compressedImageBase64;
                         storyPreview.style.opacity = "1";
@@ -117,7 +99,6 @@
             }
         };
 
-        // 2. TOUCH DRAG LOGIC (DOMIN JAN RUBUTU A WAYA)
         captionBox.addEventListener('touchmove', function(e) {
             e.preventDefault();
             let touch = e.touches[0];
@@ -125,28 +106,20 @@
             captionBox.style.top = (touch.clientY - (captionBox.offsetHeight/2)) + 'px';
         }, {passive: false});
 
-        // 3. SHARE TO FIREBASE
-        publishBtn.onclick = async () => {
-            if(!compressedImageBase64) return alert("Select a photo first!");
+        // GYARAN DA KA BUKATA (SILENT & FAST UPLOAD)
+        publishBtn.onclick = () => {
+            if(!compressedImageBase64) return;
 
-            document.getElementById('loading').style.display = 'flex';
-            
-            try {
-                // Tura bayanan zuwa 'stories' collection
-                await db.collection('stories').add({
-                    imageUrl: compressedImageBase64,
-                    caption: document.getElementById('caption').value,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    owner: localStorage.getItem('username') || "Anonymous"
-                });
+            // Tura sako Firebase a boye (Background)
+            db.collection('stories').add({
+                imageUrl: compressedImageBase64,
+                caption: document.getElementById('caption').value,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                owner: localStorage.getItem('username') || "Anonymous"
+            });
 
-                alert("Story shared successfully!");
-                window.history.back();
-            } catch (err) {
-                console.error(err);
-                alert("Upload failed! Check your internet or Firebase Rules.");
-                document.getElementById('loading').style.display = 'none';
-            }
+            // Komawa baya nan take ba tare da nuna wani sako ba
+            window.history.back();
         };
     </script>
 </body>

@@ -10,85 +10,50 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <style>
-        /* KEEPING YOUR EXACT STYLES */
+        /* BASE STYLES */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-        
-        /* GYARA NA 2: SMOOTH SCROLLING */
         html { scroll-behavior: smooth; }
         body { background-color: #f0f2f5; padding-bottom: 100px; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
 
-        .fb-header {
-            background: white; padding: 10px 15px; position: sticky; top: 0;
-            z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-        }
+        /* HEADER */
+        .fb-header { background: white; padding: 10px 15px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .logo { color: #1877f2; font-size: 24px; font-weight: 800; letter-spacing: -1px; }
         .header-icons { display: flex; gap: 8px; align-items: center; }
-        .icon-circle {
-            background: #f0f2f5; width: 38px; height: 38px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px; color: #050505; text-decoration: none;
-        }
+        .icon-circle { background: #f0f2f5; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #050505; text-decoration: none; }
+        .balance-badge { background: #e7f3ff; color: #1877f2; padding: 4px 12px; border-radius: 15px; font-size: 11px; font-weight: 800; border: 1px solid #d0e7ff; }
 
-        /* GYARA NA 1: SIDEBAR STYLES */
-        .sidebar {
-            position: fixed; top: 0; left: -280px; width: 280px; height: 100%;
-            background: white; z-index: 3000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 10px 0 30px rgba(0,0,0,0.1); padding: 20px;
-        }
+        /* SIDEBAR */
+        .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: white; z-index: 3000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 10px 0 30px rgba(0,0,0,0.1); padding: 20px; }
         .sidebar.active { left: 0; }
-        .sidebar-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-            z-index: 2500; display: none; backdrop-filter: blur(3px);
-        }
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2500; display: none; backdrop-filter: blur(3px); }
         .sidebar-header { border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
 
-        .balance-badge {
-            background: #e7f3ff; color: #1877f2; padding: 4px 12px;
-            border-radius: 15px; font-size: 11px; font-weight: 800; border: 1px solid #d0e7ff;
-        }
-
-        .post-input-container {
-            display: flex; align-items: center; gap: 10px; padding-top: 8px; border-top: 1px solid #f0f2f5;
-        }
+        /* POST INPUT & ACTIONS */
+        .post-input-container { display: flex; align-items: center; gap: 10px; padding-top: 8px; border-top: 1px solid #f0f2f5; }
         .user-avatar { width: 38px; height: 38px; border-radius: 50%; background: #e4e6eb; flex-shrink: 0; }
-        .fake-input {
-            background: #f0f2f5; flex-grow: 1; padding: 9px 15px;
-            border-radius: 20px; color: #65676b; font-size: 14px;
-        }
-
-        .quick-actions {
-            background: white; display: flex; justify-content: space-around;
-            padding: 15px 0; margin-bottom: 10px; border-bottom: 1px solid #e4e6eb;
-        }
+        .fake-input { background: #f0f2f5; flex-grow: 1; padding: 9px 15px; border-radius: 20px; color: #65676b; font-size: 14px; }
+        .quick-actions { background: white; display: flex; justify-content: space-around; padding: 15px 0; margin-bottom: 10px; border-bottom: 1px solid #e4e6eb; }
         .action-btn { text-align: center; color: #65676b; font-size: 11px; font-weight: 700; text-decoration: none; }
         .action-btn i { font-size: 20px; margin-bottom: 4px; display: block; }
 
-        .stories-wrapper {
-            background: white; padding: 15px; display: flex; gap: 10px;
-            overflow-x: auto; margin-bottom: 10px;
-        }
+        /* STORIES */
+        .stories-wrapper { background: white; padding: 15px; display: flex; gap: 10px; overflow-x: auto; margin-bottom: 10px; }
         .stories-wrapper::-webkit-scrollbar { display: none; }
-        .story-card {
-            width: 105px; height: 175px; border-radius: 12px;
-            position: relative; flex-shrink: 0; overflow: hidden;
-            background: #e4e6eb; border: 1px solid #ddd;
-            background-size: cover; background-position: center;
-        }
-        .story-name {
-            position: absolute; bottom: 8px; left: 8px;
-            color: white; font-size: 11px; font-weight: 700;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.6);
-        }
+        .story-card { width: 105px; height: 175px; border-radius: 12px; position: relative; flex-shrink: 0; overflow: hidden; background: #e4e6eb; border: 1px solid #ddd; background-size: cover; background-position: center; cursor: pointer; }
+        .story-name { position: absolute; bottom: 8px; left: 8px; color: white; font-size: 11px; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
 
+        /* STORY MODAL (PREVIEW) */
+        .story-modal { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .modal-image { width: 100%; max-height: 85vh; object-fit: contain; }
+        .modal-close { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; cursor: pointer; }
+
+        /* FEED & CARDS */
         .container { padding: 0 10px; }
-        .card {
-            background: white; border-radius: 10px; padding: 15px;
-            margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-        }
+        .card { background: white; border-radius: 10px; padding: 15px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .sponsored-label { background: #f0f2f5; font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: bold; color: #65676b; }
 
-        /* GYARA NA 3: PROFESSIONAL BOTTOM NAV */
+        /* GYARA: BOTTOM NAVIGATION BAR (RETURNING ALL 5 ICONS) */
         .bottom-nav { 
             position: fixed; bottom: 15px; left: 15px; right: 15px; 
             background: rgba(255, 255, 255, 0.95); display: flex; justify-content: space-around; 
@@ -96,11 +61,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 2000;
             backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3);
         }
-        .nav-item { 
-            display: flex; flex-direction: column; align-items: center; 
-            text-decoration: none; color: #65676b; width: 18%; 
-            transition: 0.3s;
-        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #65676b; width: 18%; transition: 0.3s; }
         .nav-item i { font-size: 22px; transition: 0.3s; }
         .nav-item span { font-size: 9px; margin-top: 4px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; }
         .nav-item.active { color: #1877f2; }
@@ -109,6 +70,12 @@
 </head>
 <body>
 
+    <div class="story-modal" id="storyModal">
+        <span class="modal-close" onclick="closeStory()">&times;</span>
+        <img id="modalImg" class="modal-image">
+        <p id="modalCaption" style="color:white; margin-top:15px; font-weight:bold;"></p>
+    </div>
+
     <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -116,9 +83,9 @@
             <p style="font-size:12px; color:#65676b;">Professional Menu</p>
         </div>
         <div style="display:flex; flex-direction:column; gap:20px;">
-            <a href="profile.html" style="text-decoration:none; color:#050505; font-weight:600;"><i class="fas fa-user" style="margin-right:15px; color:#1877f2;"></i> My Profile</a>
-            <a href="wallet.html" style="text-decoration:none; color:#050505; font-weight:600;"><i class="fas fa-wallet" style="margin-right:15px; color:#10b981;"></i> My Wallet</a>
-            <a href="settings.html" style="text-decoration:none; color:#050505; font-weight:600;"><i class="fas fa-cog" style="margin-right:15px; color:#65676b;"></i> Settings</a>
+            <a href="Profile.html" style="text-decoration:none; color:#050505; font-weight:600;"><i class="fas fa-user" style="margin-right:15px; color:#1877f2;"></i> My Profile</a>
+            <a href="Wallet.html" style="text-decoration:none; color:#050505; font-weight:600;"><i class="fas fa-wallet" style="margin-right:15px; color:#10b981;"></i> My Wallet</a>
+            <a href="Settings.html" style="text-decoration:none; color:#050505; font-weight:600;"><i class="fas fa-cog" style="margin-right:15px; color:#65676b;"></i> Settings</a>
             <hr style="border:0; border-top:1px solid #eee;">
             <a href="logout.html" style="text-decoration:none; color:red; font-weight:600;"><i class="fas fa-sign-out-alt" style="margin-right:15px;"></i> Logout</a>
         </div>
@@ -129,13 +96,12 @@
             <div class="icon-circle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
             <div class="logo" style="flex:1; margin-left:15px;">CMchat PRO</div>
             <div class="header-icons">
-                <a href="Shopping.html" class="icon-circle"><i class="fas fa-Shopping-cart"></i></a>
+                <a href="Shopping.html" class="icon-circle"><i class="fas fa-shopping-cart"></i></a>
                 <a href="search.html" class="icon-circle"><i class="fas fa-search"></i></a>
                 <a href="messenger.html" class="icon-circle"><i class="fab fa-facebook-messenger"></i></a>
                 <div id="userBalance" class="balance-badge">₦0.00</div>
             </div>
         </div>
-        
         <div class="post-input-container">
             <div class="user-avatar" id="headerAvatar"></div>
             <div class="fake-input" onclick="window.location.href='upload.html'">What's on your mind, CM...?</div>
@@ -180,7 +146,6 @@
     </nav>
 
     <script>
-        // SIDEBAR TOGGLE LOGIC
         function toggleSidebar() {
             const sb = document.getElementById('sidebar');
             const ov = document.getElementById('overlay');
@@ -193,71 +158,59 @@
             }
         }
 
-        // FIREBASE INTEGRATION LOGIC
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
-            authDomain: "cmchat-pro.firebaseapp.com",
-            projectId: "cmchat-pro",
-            storageBucket: "cmchat-pro.firebasestorage.app",
-            messagingSenderId: "227572132170",
-            appId: "1:227572132170:web:cc39de4627d4da01c7f9b3"
+            projectId: "cmchat-pro"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 1. DYNAMIC BALANCE
-        function loadBalance(userId) {
-            db.collection('wallets').doc(userId).onSnapshot(doc => {
-                if (doc.exists) {
-                    document.getElementById('userBalance').innerText = "₦" + Number(doc.data().balance).toLocaleString();
-                }
-            });
+        // STORY LOGIC
+        function openStory(url, caption) {
+            document.getElementById('modalImg').src = url;
+            document.getElementById('modalCaption').innerText = caption || "";
+            document.getElementById('storyModal').style.display = 'flex';
         }
+        function closeStory() { document.getElementById('storyModal').style.display = 'none'; }
 
-        // 2. DYNAMIC STORIES
-        db.collection('stories').orderBy('timestamp', 'desc').limit(10).onSnapshot(snap => {
+        // DYNAMIC STORIES
+        db.collection('stories').orderBy('timestamp', 'desc').limit(15).onSnapshot(snap => {
             const container = document.getElementById('storiesContainer');
-            const createBtn = container.querySelector('a');
+            const firstChild = container.firstElementChild;
             container.innerHTML = '';
-            container.appendChild(createBtn);
-
+            container.appendChild(firstChild);
             snap.forEach(doc => {
                 const s = doc.data();
-                container.innerHTML += `
-                    <div class="story-card" style="background-image: url('${s.imageUrl}')">
-                        <span class="story-name">${s.username}</span>
-                    </div>
-                `;
+                const card = document.createElement('div');
+                card.className = 'story-card';
+                card.style.backgroundImage = `url('${s.imageUrl}')`;
+                card.onclick = () => openStory(s.imageUrl, s.caption);
+                card.innerHTML = `<span class="story-name">${s.owner || 'User'}</span>`;
+                container.appendChild(card);
             });
         });
 
-        // 3. DYNAMIC POSTS (FEED)
+        // DYNAMIC FEED
         db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snap => {
             const feed = document.getElementById('feedContainer');
             const sponsored = document.getElementById('sponsoredCard');
             feed.innerHTML = '';
             feed.appendChild(sponsored);
-
             snap.forEach(doc => {
                 const p = doc.data();
                 const postDate = p.timestamp ? new Date(p.timestamp.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just Now';
-                
                 feed.innerHTML += `
                     <div class="card">
                         <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-                            <div class="user-avatar" style="background:#1877f2; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">
-                                ${p.username ? p.username[0].toUpperCase() : 'U'}
-                            </div>
+                            <div class="user-avatar" style="background:#1877f2; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">${p.username ? p.username[0].toUpperCase() : 'U'}</div>
                             <div>
                                 <h4 style="font-size:14px; font-weight:700;">${p.username || 'User'}</h4>
                                 <p style="font-size:11px; color:#65676b;">${postDate} · <i class="fas fa-globe-americas"></i></p>
                             </div>
                         </div>
-                        <p style="font-size:14px; color:#050505; line-height: 1.5;">${p.text}</p>
+                        <p style="font-size:14px; color:#050505; line-height: 1.5;">${p.text || ''}</p>
                         ${p.postImg ? `<img src="${p.postImg}" style="width:100%; border-radius:10px; margin-top:10px; max-height:300px; object-fit:cover;">` : ''}
-                    </div>
-                `;
+                    </div>`;
             });
         });
     </script>
