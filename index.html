@@ -14,7 +14,6 @@
         .input-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa; }
         .input-box input { width: 100%; padding: 14px 15px 14px 45px; border: 1.5px solid #eee; border-radius: 15px; outline: none; box-sizing: border-box; font-size: 14px; }
         .login-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .login-btn:active { transform: scale(0.98); }
         .reg-link { margin-top: 25px; font-size: 14px; color: #555; }
         .reg-link span { color: var(--primary); text-decoration: none; font-weight: bold; cursor: pointer; }
     </style>
@@ -24,8 +23,8 @@
         <div class="logo-icon"><i class="fas fa-circle-user"></i></div>
         <h2>Welcome Back</h2>
         <div class="input-box">
-            <i class="fas fa-user"></i>
-            <input type="text" id="loginUser" placeholder="Full Name (Username)">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="loginEmail" placeholder="Email Address">
         </div>
         <div class="input-box">
             <i class="fas fa-lock"></i>
@@ -40,33 +39,27 @@
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <script>
-        // Saita Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
             authDomain: "cmchat-pro.firebaseapp.com",
-            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
             projectId: "cmchat-pro"
         };
         
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-        const db = firebase.database();
-
-        // Cika sunan mutum idan ya fito daga Register
-        window.onload = () => {
-            const savedName = localStorage.getItem('temp_user');
-            if(savedName) document.getElementById('loginUser').value = savedName;
-        };
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
         async function handleLogin() {
-            const user = document.getElementById('loginUser').value.trim();
+            const email = document.getElementById('loginEmail').value.trim();
             const pass = document.getElementById('loginPass').value.trim();
             const btn = document.getElementById('loginBtn');
 
-            if(!user || !pass) {
-                alert("Enter username and password!");
+            if(!email || !pass) {
+                alert("Please enter email and password!");
                 return;
             }
 
@@ -74,33 +67,28 @@
             btn.innerText = "Checking...";
 
             try {
-                // Nemo mamba a database ta sunansa
-                const snapshot = await db.ref('users/' + user).once('value');
-                
-                if(snapshot.exists()) {
-                    const data = snapshot.val();
-                    
-                    // Tabbatar password yayi daidai
-                    if(data.password === pass) {
-                        // Ajiye zaman login a waya (Session)
-                        localStorage.setItem('username', data.username);
-                        localStorage.setItem('user_uid', data.uid);
-                        localStorage.removeItem('temp_user');
+                // Login ta amfani da Firebase Auth (Mafi Tsaro)
+                const userCredential = await auth.signInWithEmailAndPassword(email, pass);
+                const user = userCredential.user;
 
-                        // Kai mutum zuwa Dashboard
-                        location.href = 'Dashboard.html';
-                    } else {
-                        alert("Invalid Password!");
-                        btn.disabled = false;
-                        btn.innerText = "Login";
-                    }
-                } else {
-                    alert("User not found!");
-                    btn.disabled = false;
-                    btn.innerText = "Login";
+                // Nemo sunan mutum daga Firestore don adanawa a localStorage
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    localStorage.setItem('username', userData.username);
+                    localStorage.setItem('user_uid', user.uid);
+                    
+                    alert("Login Successful!");
+                    location.href = 'Dashboard.html';
                 }
             } catch (err) {
-                alert("Network Error!");
+                // Gyara kuskuren nan na "Network Error" zuwa sakon gaskiya
+                let errorMsg = "Login Failed!";
+                if(err.code === 'auth/user-not-found') errorMsg = "No account found with this email.";
+                if(err.code === 'auth/wrong-password') errorMsg = "Incorrect password.";
+                
+                alert(errorMsg);
                 btn.disabled = false;
                 btn.innerText = "Login";
             }
