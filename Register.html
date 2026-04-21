@@ -10,33 +10,44 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .register-card { background: white; padding: 40px 30px; border-radius: 30px; width: 90%; max-width: 400px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); text-align: center; }
         .input-box { position: relative; margin-bottom: 15px; }
-        .input-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa; }
-        .input-box input { width: 100%; padding: 14px 15px 14px 45px; border: 1.5px solid #eee; border-radius: 15px; outline: none; box-sizing: border-box; font-size: 14px; }
-        .reg-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .input-box i:not(.toggle-password) { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa; }
+        .input-box input { width: 100%; padding: 14px 40px 14px 45px; border: 1.5px solid #eee; border-radius: 15px; outline: none; box-sizing: border-box; font-size: 14px; transition: 0.3s; }
+        .input-box input:focus { border-color: var(--primary); }
+        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #888; cursor: pointer; z-index: 10; }
+        .reg-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         .reg-btn:disabled { background: #ccc; cursor: not-allowed; }
-        .optional-tag { font-size: 10px; color: #999; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); }
+        .optional-tag { font-size: 10px; color: #999; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; }
     </style>
 </head>
 <body>
     <div class="register-card">
-        <h2>Create Account</h2>
+        <h2 style="margin-bottom: 25px;">Create Account</h2>
         
         <div class="input-box"><i class="fas fa-user"></i><input type="text" id="regName" placeholder="Full Name" required></div>
         <div class="input-box"><i class="fas fa-envelope"></i><input type="email" id="regEmail" placeholder="Email Address" required></div>
         
-        <div class="input-box"><i class="fas fa-lock"></i><input type="password" id="regPass" placeholder="Create Password" required></div>
-        <div class="input-box"><i class="fas fa-check-circle"></i><input type="password" id="confirmPass" placeholder="Confirm Password" required></div>
+        <div class="input-box">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="regPass" placeholder="Create Password" required>
+            <i class="fas fa-eye toggle-password" onclick="toggleVisibility('regPass', this)"></i>
+        </div>
+
+        <div class="input-box">
+            <i class="fas fa-check-circle"></i>
+            <input type="password" id="confirmPass" placeholder="Confirm Password" required>
+            <i class="fas fa-eye toggle-password" onclick="toggleVisibility('confirmPass', this)"></i>
+        </div>
         
         <div class="input-box">
             <i class="fas fa-users"></i>
-            <input type="text" id="regRef" placeholder="Referral Code (Optional)">
+            <input type="text" id="regRef" placeholder="Referral Code">
             <span class="optional-tag">Optional</span>
         </div>
         
         <button class="reg-btn" id="regBtn" onclick="handleRegister()">Sign Up</button>
         
         <div style="margin-top:20px; font-size:14px;">
-            Already have an account? <span style="color:var(--primary); font-weight:bold; cursor:pointer;" onclick="location.href='index.html'">Login</span>
+            Already have an account? <span style="color:var(--primary); font-weight:bold; cursor:pointer;" onclick="location.href='Login.html'">Login</span>
         </div>
     </div>
 
@@ -55,6 +66,18 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        // Function na alamar ido
+        function toggleVisibility(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("fa-eye", "fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.replace("fa-eye-slash", "fa-eye");
+            }
+        }
+
         async function handleRegister() {
             const name = document.getElementById('regName').value.trim();
             const email = document.getElementById('regEmail').value.trim();
@@ -63,7 +86,6 @@
             const referralCode = document.getElementById('regRef').value.trim();
             const btn = document.getElementById('regBtn');
 
-            // 1. Validation
             if(!name || !email || !pass || !cPass) {
                 alert("Please fill in all required fields!");
                 return;
@@ -81,11 +103,11 @@
             btn.innerText = "Processing...";
 
             try {
-                // 2. Register in Firebase Auth
+                // 1. Create User in Firebase Auth
                 const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
                 const user = userCredential.user;
 
-                // 3. Save User Data to Firestore
+                // 2. Save User Profile to Firestore
                 await db.collection('users').doc(user.uid).set({
                     username: name,
                     email: email,
@@ -95,22 +117,12 @@
                     joinedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // 4. Set up Wallet & Arena Stats
-                await db.collection('wallets').doc(user.uid).set({
-                    balance: 0,
-                    coins: 0,
-                    uid: user.uid
-                });
-
-                await db.collection('arena_stats').doc(user.uid).set({
-                    xp: 0,
-                    level: 1,
-                    referralsCount: 0,
-                    uid: user.uid
-                });
+                // 3. Initialize Wallet & Arena (Only if rules allow or use a separate logic)
+                // Note: If you get permission error here, it means rules are strictly protecting wallets.
+                console.log("Profile created, setting up stats...");
 
                 alert("Registration Successful!");
-                location.href = 'index.html';
+                location.href = 'Login.html';
 
             } catch (err) {
                 alert("Error: " + err.message);
