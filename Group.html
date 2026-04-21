@@ -3,192 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMchat Pro - Group Chat</title>
+    <title>CMchat Pro - Group Chat System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --p: #075E54; --s: #128C7E; --bg: #E5DDD5; --white: #ffffff; --my-msg: #DCF8C6; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); height: 725px; display: flex; flex-direction: column; overflow: hidden; }
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* Header */
-        header { background: var(--p); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; z-index: 10; flex-shrink: 0; }
-        .group-details { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-        .group-details img { width: 40px; height: 40px; border-radius: 50%; background: #eee; }
+        /* HEADER */
+        header { background: var(--p); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .group-info { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .group-info img { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); }
 
-        /* Sidebar Settings */
-        .sidebar { position: fixed; right: -300px; top: 0; width: 290px; height: 100%; background: #f0f2f5; z-index: 100; transition: 0.3s; box-shadow: -2px 0 10px rgba(0,0,0,0.2); overflow-y: auto; }
-        .sidebar.active { right: 0; }
-        .side-head { background: var(--p); color: white; padding: 20px; display: flex; align-items: center; gap: 15px; }
-        
-        .side-section { background: white; margin-bottom: 10px; padding: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .side-section h4 { margin: 0 0 10px 0; color: var(--s); font-size: 14px; }
-        .side-item { display: flex; align-items: center; gap: 15px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer; color: #333; }
-        
-        /* Chat View */
-        .chat-view { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .bubble { max-width: 75%; padding: 8px 12px; border-radius: 8px; font-size: 14.5px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); position: relative; }
-        .sent { background: var(--my-msg); align-self: flex-end; }
-        .received { background: white; align-self: flex-start; }
-        .stamp { font-size: 9px; color: #888; text-align: right; margin-top: 4px; }
+        /* CHAT AREA */
+        .chat-view { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-attachment: fixed; }
+        .bubble { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 14px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.15); line-height: 1.4; }
+        .sent { background: var(--my-msg); align-self: flex-end; border-top-right-radius: 0; }
+        .received { background: white; align-self: flex-start; border-top-left-radius: 0; }
+        .sender-name { font-size: 11px; font-weight: bold; color: #128C7E; margin-bottom: 3px; display: block; }
+        .stamp { font-size: 10px; color: #888; text-align: right; margin-top: 4px; display: block; }
 
-        /* Input Bar */
-        .input-bar { background: #f0f0f0; padding: 10px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-        .field-container { flex: 1; background: white; border-radius: 25px; padding: 8px 15px; display: flex; align-items: center; }
+        /* INPUT BAR */
+        .input-bar { background: #f0f0f0; padding: 10px; display: flex; align-items: center; gap: 10px; }
+        .input-box { flex: 1; background: white; border-radius: 25px; padding: 10px 15px; display: flex; align-items: center; }
         #msgInp { border: none; outline: none; flex: 1; font-size: 15px; }
-        .action-btn { width: 45px; height: 45px; background: var(--s); border: none; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .send-btn { width: 45px; height: 45px; background: var(--s); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
 
-        /* Modal Contact */
-        #contactModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:200; }
-        .modal-content { background:white; width:85%; max-width:400px; margin:15% auto; border-radius:15px; padding:20px; max-height:60vh; overflow-y:auto; }
+        /* SIDEBAR & MODAL */
+        .sidebar { position: fixed; right: -300px; top: 0; width: 300px; height: 100%; background: #f0f2f5; z-index: 200; transition: 0.4s ease; box-shadow: -2px 0 10px rgba(0,0,0,0.3); }
+        .sidebar.active { right: 0; }
+        .sidebar-header { background: var(--p); color: white; padding: 20px; display: flex; align-items: center; gap: 15px; }
+        .side-content { padding: 15px; overflow-y: auto; height: calc(100% - 80px); }
+        .admin-box { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #ddd; }
+        
+        #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 300; justify-content: center; align-items: center; }
+        .modal-body { background: white; width: 90%; max-width: 400px; border-radius: 15px; padding: 20px; max-height: 70vh; overflow-y: auto; }
+        .user-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="group-details" onclick="toggleSettings()">
-            <i class="fas fa-arrow-left" onclick="event.stopPropagation(); window.location.href='Dashboard.html'"></i>
-            <img src="https://via.placeholder.com/40" alt="Group Icon">
+        <div class="group-info" onclick="toggleSidebar()">
+            <i class="fas fa-arrow-left" onclick="event.stopPropagation(); window.history.back()"></i>
+            <img src="https://ui-avatars.com/api/?name=CM+Group&background=075E54&color=fff" id="groupIcon">
             <div>
-                <div style="font-weight: bold;">Community Group</div>
-                <small id="mCount">0 members</small>
+                <b style="display: block;">CMchat Community</b>
+                <small id="memberCount">Updating...</small>
             </div>
         </div>
-        <i class="fas fa-ellipsis-v" onclick="toggleSettings()" style="cursor:pointer; padding:5px;"></i>
+        <i class="fas fa-ellipsis-v" onclick="toggleSidebar()"></i>
     </header>
-
-    <div id="sideMenu" class="sidebar">
-        <div class="side-head">
-            <i class="fas fa-times" onclick="toggleSettings()" style="cursor:pointer;"></i>
-            <span>Group Info</span>
-        </div>
-
-        <div id="admTools" class="side-section" style="display:none; text-align: center;">
-            <h4>Admin Controls</h4>
-            <button onclick="showContactList()" style="width:100%; background:var(--s); color:white; border:none; padding:10px; border-radius:20px; cursor:pointer; margin-bottom:10px;">
-                <i class="fas fa-user-plus"></i> Add Friends from Contacts
-            </button>
-            <button onclick="wipeChat()" style="width:100%; background:#ffebee; color:#d32f2f; border:none; padding:10px; border-radius:20px; cursor:pointer;">
-                <i class="fas fa-trash"></i> Clear All Messages
-            </button>
-        </div>
-
-        <div class="side-section">
-            <h4 id="partTitle">0 Participants</h4>
-            <div id="pList"></div>
-        </div>
-    </div>
-
-    <div id="contactModal">
-        <div class="modal-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h3 style="margin:0;">Select Contacts</h3>
-                <i class="fas fa-times" onclick="closeContactList()" style="cursor:pointer; font-size:20px;"></i>
-            </div>
-            <div id="allUsersList"></div>
-        </div>
-    </div>
 
     <div class="chat-view" id="chatContainer"></div>
 
     <div class="input-bar">
-        <div class="field-container">
+        <div class="input-box">
             <i class="far fa-smile" style="color:#888; margin-right:10px;"></i>
-            <input type="text" id="msgInp" placeholder="Type a message..." oninput="toggleIcons()">
-            <i class="fas fa-paperclip" style="color:#888;"></i>
+            <input type="text" id="msgInp" placeholder="Type a message..." autocomplete="off">
         </div>
-        <button id="actionBtn" class="action-btn" onclick="handleAction()">
-            <i id="actionIcon" class="fas fa-microphone"></i>
+        <button class="send-btn" onclick="sendMessage()">
+            <i class="fas fa-paper-plane" id="sendIcon"></i>
         </button>
+    </div>
+
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-times" onclick="toggleSidebar()"></i>
+            <span>Group Details</span>
+        </div>
+        <div class="side-content">
+            <div id="adminPanel" class="admin-box" style="display:none;">
+                <h4 style="margin:0 0 10px 0; color:var(--p);">Admin Tools</h4>
+                <button onclick="openAddModal()" style="width:100%; padding:10px; background:var(--s); color:white; border:none; border-radius:5px; margin-bottom:10px;">Add New Members</button>
+                <button onclick="clearChat()" style="width:100%; padding:10px; background:#f44336; color:white; border:none; border-radius:5px;">Clear Chat History</button>
+            </div>
+            <h4>Participants</h4>
+            <div id="memberList"></div>
+        </div>
+    </div>
+
+    <div id="modal">
+        <div class="modal-body">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                <h3 style="margin:0;">Add Friends</h3>
+                <i class="fas fa-times" onclick="closeAddModal()" style="cursor:pointer;"></i>
+            </div>
+            <div id="potentialUsers"></div>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
+        // FIREBASE CONFIGURATION
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
             authDomain: "cmchat-pro.firebaseapp.com",
             databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
             projectId: "cmchat-pro"
         };
+        firebase.initializeApp(firebaseConfig);
+        const rtdb = firebase.database();
 
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        
-        // Sunan mutum daga LocalStorage
-        const user = localStorage.getItem('username') || "User_" + Math.floor(Math.random()*1000);
-        const isAdmin = user === "Abubakar"; 
+        // USER SETTINGS
+        const currentUserName = localStorage.getItem('username') || "Guest_" + Math.random().toString(36).substr(2, 5);
+        const isAdmin = currentUserName === "Abubakar"; // Sanya sunanka na gaskiya a nan
 
-        if(isAdmin) document.getElementById('admTools').style.display = 'block';
+        if(isAdmin) document.getElementById('adminPanel').style.display = 'block';
 
-        function toggleSettings() { document.getElementById('sideMenu').classList.toggle('active'); }
-
-        function toggleIcons() {
-            const inp = document.getElementById('msgInp').value.trim();
-            document.getElementById('actionIcon').className = inp === "" ? "fas fa-microphone" : "fas fa-paper-plane";
+        // FUNCTIONS
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+        function openAddModal() { 
+            document.getElementById('modal').style.display = 'flex'; 
+            loadPotentialFriends();
         }
+        function closeAddModal() { document.getElementById('modal').style.display = 'none'; }
 
-        // Tura Sako
-        function handleAction() {
+        // 1. TURA SAKO
+        function sendMessage() {
             const inp = document.getElementById('msgInp');
-            if (inp.value.trim() !== "") {
-                db.ref('group_pro_chat').push({ 
-                    sender: user, 
-                    body: inp.value, 
-                    stamp: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) 
-                });
-                inp.value = ""; toggleIcons();
-            } else {
-                alert("Voice feature is not yet enabled");
-            }
+            if(inp.value.trim() === "") return;
+
+            rtdb.ref('group_pro_chat').push({
+                sender: currentUserName,
+                message: inp.value,
+                timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            });
+            inp.value = "";
         }
 
-        // Dauko Sakonni
-        db.ref('group_pro_chat').on('value', (s) => {
-            const c = document.getElementById('chatContainer');
-            c.innerHTML = "";
-            s.forEach((child) => {
-                const d = child.val();
-                const isMe = d.sender === user;
-                c.innerHTML += `
+        // 2. DAUKO SAKONNI (LIVE)
+        rtdb.ref('group_pro_chat').on('value', (snapshot) => {
+            const container = document.getElementById('chatContainer');
+            container.innerHTML = "";
+            snapshot.forEach((child) => {
+                const data = child.val();
+                const isMe = data.sender === currentUserName;
+                container.innerHTML += `
                     <div class="bubble ${isMe ? 'sent' : 'received'}">
-                        <div style="font-size:10px; font-weight:bold; color:${isMe ? 'green' : '#128C7E'};">
-                            ${isMe ? 'You' : d.sender}
-                        </div>
-                        <div style="margin-top:2px;">${d.body}</div>
-                        <div class="stamp">${d.stamp}</div>
+                        <span class="sender-name">${isMe ? 'You' : data.sender}</span>
+                        ${data.message}
+                        <span class="stamp">${data.timestamp}</span>
                     </div>`;
             });
-            c.scrollTop = c.scrollHeight;
+            container.scrollTop = container.scrollHeight;
         });
 
-        // Dauko Members
-        db.ref('group_list').on('value', (s) => {
-            const l = document.getElementById('pList');
-            l.innerHTML = "";
+        // 3. DAUKO MAMBOBI (LIVE)
+        rtdb.ref('group_list').on('value', (snapshot) => {
+            const list = document.getElementById('memberList');
             let count = 0;
-            s.forEach((child) => {
+            list.innerHTML = "";
+            snapshot.forEach((child) => {
                 count++;
-                l.innerHTML += `<div class="side-item"><i class="fas fa-user-circle" style="color:#888;"></i> ${child.key}</div>`;
+                list.innerHTML += `
+                    <div class="user-item">
+                        <span><i class="fas fa-user-circle"></i> ${child.key}</span>
+                        ${child.key === "Abubakar" ? '<small style="color:var(--s)">Admin</small>' : ''}
+                    </div>`;
             });
-            document.getElementById('mCount').innerText = count + " members";
-            document.getElementById('partTitle').innerText = count + " Participants";
+            document.getElementById('memberCount').innerText = count + " members";
         });
 
-        // Add Friends From Contacts Logic
-        function showContactList() {
-            document.getElementById('contactModal').style.display = 'block';
-            const listDiv = document.getElementById('allUsersList');
-            listDiv.innerHTML = "<p style='text-align:center;'>Searching...</p>";
-
-            db.ref('users').once('value', (snapshot) => {
-                listDiv.innerHTML = "";
+        // 4. NEMO FRIENDS DON KARAWA
+        function loadPotentialFriends() {
+            const list = document.getElementById('potentialUsers');
+            list.innerHTML = "Loading...";
+            // Muna duba bangaren 'users' dinka na Firebase
+            rtdb.ref('users').once('value', (snapshot) => {
+                list.innerHTML = "";
                 snapshot.forEach((child) => {
-                    const u = child.val().username;
-                    if (u !== user) {
-                        listDiv.innerHTML += `
-                            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #eee;">
-                                <span><i class="fas fa-user"></i> ${u}</span>
-                                <button onclick="addToGroup('${u}')" style="background:var(--s); color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer;">Add</button>
+                    const name = child.val().username || child.key;
+                    if(name !== currentUserName) {
+                        list.innerHTML += `
+                            <div class="user-item">
+                                <span>${name}</span>
+                                <button onclick="addToGroup('${name}')" style="background:var(--p); color:white; border:none; padding:5px 10px; border-radius:5px;">Add</button>
                             </div>`;
                     }
                 });
@@ -196,12 +187,18 @@
         }
 
         function addToGroup(name) {
-            db.ref('group_list').child(name).set({ joined: true });
-            alert(name + " added!");
+            rtdb.ref('group_list').child(name).set({ status: "active" });
+            alert(name + " added to community!");
         }
 
-        function closeContactList() { document.getElementById('contactModal').style.display = 'none'; }
-        function wipeChat() { if(confirm("Wipe all group messages?")) db.ref('group_pro_chat').remove(); }
+        function clearChat() {
+            if(confirm("Duk sakonnin group zasu goge. Shin kana so?")) {
+                rtdb.ref('group_pro_chat').remove();
+            }
+        }
+
+        // Enter key to send
+        document.getElementById("msgInp").addEventListener("keyup", (e) => { if(e.key === "Enter") sendMessage(); });
     </script>
 </body>
 </html>

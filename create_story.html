@@ -2,109 +2,65 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Create Special Story | CMchat PRO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 
     <style>
-        :root { --glass: rgba(255, 255, 255, 0.1); --primary: #1877f2; }
+        :root { --primary: #1877f2; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        
-        body { 
-            background: #000; 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            color: white; 
-            overflow: hidden;
-        }
+        body { background: #000; height: 100vh; color: white; overflow: hidden; position: relative; }
 
-        /* LIVE PREVIEW BACKGROUND */
-        #storyPreview {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; z-index: 1; opacity: 0.6;
-        }
+        #storyPreview { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.6; transition: 0.3s; }
 
-        /* HEADER */
-        .story-header {
-            position: relative; z-index: 10; padding: 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-        }
-        .close-btn { font-size: 24px; color: white; text-decoration: none; }
-        .publish-btn {
-            background: var(--primary); color: white; border: none;
-            padding: 10px 25px; border-radius: 30px; font-weight: 800;
-            box-shadow: 0 4px 15px rgba(24, 119, 242, 0.4);
-        }
+        .story-header { position: relative; z-index: 20; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .publish-btn { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 30px; font-weight: 800; cursor: pointer; }
 
-        /* UI CONTROLS */
-        .content-area {
-            flex-grow: 1; position: relative; z-index: 10;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        /* TSARIN RUBUTUN DA AKE JA */
+        #draggable-caption {
+            position: absolute; z-index: 15; top: 40%; left: 10%;
+            cursor: move; padding: 10px; width: 80%; text-align: center;
         }
         .caption-input {
             background: transparent; border: none; outline: none;
-            color: white; font-size: 24px; text-align: center;
-            font-weight: 700; width: 80%; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            color: white; font-size: 26px; text-align: center;
+            font-weight: 900; text-shadow: 2px 2px 12px rgba(0,0,0,1);
+            width: 100%; pointer-events: auto;
         }
 
-        /* BOTTOM TOOLS */
-        .story-tools {
-            position: relative; z-index: 10; padding: 30px;
-            display: flex; justify-content: space-around;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-        }
+        .story-tools { position: absolute; bottom: 0; width: 100%; z-index: 20; padding: 30px; display: flex; justify-content: space-around; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); }
         .tool-item { text-align: center; cursor: pointer; }
-        .tool-circle {
-            width: 50px; height: 50px; background: rgba(255,255,255,0.2);
-            border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; margin-bottom: 8px; backdrop-filter: blur(10px);
-        }
+        .tool-circle { width: 55px; height: 55px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2); }
 
-        /* ANIMATION */
-        .uploading-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-            z-index: 100; display: none; flex-direction: column;
-            justify-content: center; align-items: center;
-        }
-        .loader {
-            width: 40px; height: 40px; border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary); border-radius: 50%;
-            animation: spin 1s linear infinite; margin-bottom: 15px;
-        }
+        /* LOADING SCREEN */
+        .uploading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        .loader { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <img id="storyPreview" src="https://via.placeholder.com/1080x1920/222/555?text=Select+Media">
+    <img id="storyPreview" src="https://via.placeholder.com/1080x1920/111/444?text=Select+Photo">
 
     <div class="story-header">
-        <a href="index.html" class="close-btn"><i class="fas fa-times"></i></a>
+        <i class="fas fa-times" onclick="window.history.back()" style="font-size: 24px; cursor:pointer;"></i>
         <button id="publishBtn" class="publish-btn">Share Story</button>
     </div>
 
-    <div class="content-area">
-        <input type="text" id="caption" class="caption-input" placeholder="Type a caption...">
+    <div id="draggable-caption">
+        <input type="text" id="caption" class="caption-input" placeholder="Type a caption..." autofocus>
     </div>
 
     <div class="story-tools">
         <label for="mediaInput" class="tool-item">
-            <div class="tool-circle"><i class="fas fa-image"></i></div>
-            <span style="font-size: 11px; font-weight: 600;">Gallery</span>
+            <div class="tool-circle"><i class="fas fa-image" style="font-size: 20px;"></i></div>
+            <span style="font-size: 11px;">Gallery</span>
         </label>
-        <div class="tool-item">
-            <div class="tool-circle"><i class="fas fa-font"></i></div>
-            <span style="font-size: 11px; font-weight: 600;">Text</span>
-        </div>
-        <div class="tool-item">
-            <div class="tool-circle"><i class="fas fa-music"></i></div>
-            <span style="font-size: 11px; font-weight: 600;">Music</span>
+        <div class="tool-item" onclick="document.getElementById('caption').focus()">
+            <div class="tool-circle"><i class="fas fa-font" style="font-size: 20px;"></i></div>
+            <span style="font-size: 11px;">Add Text</span>
         </div>
     </div>
 
@@ -112,18 +68,13 @@
 
     <div class="uploading-overlay" id="loading">
         <div class="loader"></div>
-        <p style="font-weight: 700;">Sharing your story...</p>
+        <p style="margin-top: 15px; font-weight: 700; letter-spacing: 1px;">OPTIMIZING & UPLOADING...</p>
     </div>
 
     <script>
-        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
-            authDomain: "cmchat-pro.firebaseapp.com",
-            projectId: "cmchat-pro",
-            storageBucket: "cmchat-pro.firebasestorage.app",
-            messagingSenderId: "227572132170",
-            appId: "1:227572132170:web:cc39de4627d4da01c7f9b3"
+            projectId: "cmchat-pro"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -131,38 +82,69 @@
         const mediaInput = document.getElementById('mediaInput');
         const storyPreview = document.getElementById('storyPreview');
         const publishBtn = document.getElementById('publishBtn');
+        const captionBox = document.getElementById('draggable-caption');
 
-        // HANDLE PREVIEW
+        let compressedImageBase64 = "";
+
+        // 1. COMPRESSION LOGIC (GYARAN ERROR NA 1MB)
         mediaInput.onchange = e => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = () => {
-                    storyPreview.src = reader.result;
-                    storyPreview.style.opacity = "1";
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Rage fadin hoto zuwa 720px don yayi sauki
+                        const targetWidth = 720;
+                        const targetHeight = (img.height * targetWidth) / img.width;
+                        
+                        canvas.width = targetWidth;
+                        canvas.height = targetHeight;
+                        
+                        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+                        
+                        // Nan ne muke rage nauyin hoton (Quality = 0.6)
+                        compressedImageBase64 = canvas.toDataURL('image/jpeg', 0.6);
+                        storyPreview.src = compressedImageBase64;
+                        storyPreview.style.opacity = "1";
+                    }
                 }
                 reader.readAsDataURL(file);
             }
         };
 
-        // PUBLISH TO FIREBASE (LIVE)
+        // 2. TOUCH DRAG LOGIC (DOMIN JAN RUBUTU A WAYA)
+        captionBox.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            let touch = e.touches[0];
+            captionBox.style.left = (touch.clientX - (captionBox.offsetWidth/2)) + 'px';
+            captionBox.style.top = (touch.clientY - (captionBox.offsetHeight/2)) + 'px';
+        }, {passive: false});
+
+        // 3. SHARE TO FIREBASE
         publishBtn.onclick = async () => {
-            if(storyPreview.src.includes('placeholder')) return alert("Please select a photo first!");
+            if(!compressedImageBase64) return alert("Select a photo first!");
 
             document.getElementById('loading').style.display = 'flex';
             
             try {
+                // Tura bayanan zuwa 'stories' collection
                 await db.collection('stories').add({
-                    imageUrl: storyPreview.src, // Normally you'd upload to Storage first, this is Base64 for demo
+                    imageUrl: compressedImageBase64,
                     caption: document.getElementById('caption').value,
-                    username: "Commander CM",
                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 Hours
+                    owner: localStorage.getItem('username') || "Anonymous"
                 });
-                
-                window.location.href = "index.html";
+
+                alert("Story shared successfully!");
+                window.history.back();
             } catch (err) {
-                alert("Error: " + err.message);
+                console.error(err);
+                alert("Upload failed! Check your internet or Firebase Rules.");
                 document.getElementById('loading').style.display = 'none';
             }
         };
