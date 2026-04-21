@@ -68,8 +68,7 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
         
-        // Tabbatar akwai UID a ajiye
-        const myUid = localStorage.getItem('user_uid') || "USER_" + Math.floor(Math.random() * 100000);
+        const myUid = localStorage.getItem('user_uid') || "USER_ANON";
         const myName = localStorage.getItem('username') || "CM Member";
 
         let currentTab = 'explore';
@@ -81,44 +80,54 @@
             renderView();
         }
 
-        // Duba idan an riga an tura request
-        async function checkStatus(targetUid) {
-            const snap = await db.ref(`requests/${targetUid}/${myUid}`).once('value');
-            return snap.exists();
-        }
-
-        async function renderView() {
+        function renderView() {
             const display = document.getElementById('mainDisplay');
-            display.innerHTML = '<div class="empty"><i class="fas fa-sync fa-spin"></i><p>Loading...</p></div>';
+            
+            // Cire duk wani listener da yake kai kafin a fara sabo
+            db.ref('users').off();
+            db.ref('requests/' + myUid).off();
+            db.ref('friends/' + myUid).off();
 
             if (currentTab === 'explore') {
-                db.ref('users').limitToLast(50).once('value', async snap => {
+                // GYARA: Mun koma amfani da .on domin ya dauko sabon user nan take ba tare da refresh ba
+                db.ref('users').on('value', async snap => {
                     display.innerHTML = "";
-                    let users = [];
-                    snap.forEach(child => { if(child.key !== myUid) users.push({id: child.key, ...child.val()}); });
-                    
-                    if(users.length === 0) {
-                        display.innerHTML = '<div class="empty"><i class="fas fa-users-slash"></i><p>No members found.</p></div>';
-                        return;
-                    }
+                    let usersFound = false;
 
-                    for(let u of users) {
-                        const isPending = await checkStatus(u.id);
-                        display.innerHTML += `
-                        <div class="user-card">
-                            <div class="user-info">
-                                <div class="avatar">${u.username ? u.username[0].toUpperCase() : 'M'}</div>
-                                <div class="details"><b>${u.username || 'Member'}</b><span>Available to connect</span></div>
-                            </div>
-                            <button class="btn ${isPending ? 'btn-sent' : 'btn-add'}" 
-                                id="btn-${u.id}" 
-                                ${isPending ? 'disabled' : ''} 
-                                onclick="sendReq('${u.id}', '${u.username}')">
-                                ${isPending ? 'PENDING' : 'CONNECT'}
-                            </button>
-                        </div>`;
+                    // Dauko bayanan requests don sanin wanda aka tura mawa
+                    const reqSnap = await db.ref(`requests`).once('value');
+                    
+                    snap.forEach(child => {
+                        const u = child.val();
+                        const uid = child.key;
+
+                        if(uid !== myUid) {
+                            usersFound = true;
+                            // Duba idan na riga na tura request ga wannan user din
+                            let isPending = false;
+                            if(reqSnap.hasChild(`${uid}/${myUid}`)) isPending = true;
+
+                            display.innerHTML += `
+                            <div class="user-card">
+                                <div class="user-info">
+                                    <div class="avatar">${u.username ? u.username[0].toUpperCase() : 'M'}</div>
+                                    <div class="details"><b>${u.username || 'Member'}</b><span>Available to connect</span></div>
+                                </div>
+                                <button class="btn ${isPending ? 'btn-sent' : 'btn-add'}" 
+                                    id="btn-${uid}" 
+                                    ${isPending ? 'disabled' : ''} 
+                                    onclick="sendReq('${uid}', '${u.username || 'Member'}')">
+                                    ${isPending ? 'PENDING' : 'CONNECT'}
+                                </button>
+                            </div>`;
+                        }
+                    });
+
+                    if(!usersFound) {
+                        display.innerHTML = '<div class="empty"><i class="fas fa-users-slash"></i><p>No new members yet.</p></div>';
                     }
                 });
+
             } else if (currentTab === 'requests') {
                 db.ref('requests/' + myUid).on('value', snap => {
                     display.innerHTML = "";
@@ -131,13 +140,14 @@
                         display.innerHTML += `
                         <div class="user-card">
                             <div class="user-info">
-                                <div class="avatar" style="background:#00E676">${r.senderName[0]}</div>
-                                <div class="details"><b>${r.senderName}</b><span>Wants to be friends</span></div>
+                                <div class="avatar" style="background:#00E676">${r.senderName ? r.senderName[0] : 'U'}</div>
+                                <div class="details"><b>${r.senderName || 'Unknown User'}</b><span>Wants to be friends</span></div>
                             </div>
                             <button class="btn btn-accept" onclick="acceptFriend('${child.key}', '${r.senderName}')">ACCEPT</button>
                         </div>`;
                     });
                 });
+
             } else if (currentTab === 'friends') {
                 db.ref('friends/' + myUid).on('value', snap => {
                     display.innerHTML = "";
@@ -146,11 +156,12 @@
                         return;
                     }
                     snap.forEach(child => {
+                        const f = child.val();
                         display.innerHTML += `
                         <div class="user-card">
                             <div class="user-info">
-                                <div class="avatar" style="background:var(--g); color:var(--p)">${child.val().name[0]}</div>
-                                <div class="details"><b>${child.val().name}</b><span>Connected</span></div>
+                                <div class="avatar" style="background:var(--g); color:var(--p)">${f.name ? f.name[0] : 'F'}</div>
+                                <div class="details"><b>${f.name || 'Friend'}</b><span>Connected</span></div>
                             </div>
                             <button class="btn btn-friends">FRIENDS</button>
                         </div>`;
@@ -172,17 +183,14 @@
         };
 
         window.acceptFriend = (senderId, senderName) => {
-            // Add to my friends
             db.ref(`friends/${myUid}/${senderId}`).set({ name: senderName });
-            // Add to their friends
             db.ref(`friends/${senderId}/${myUid}`).set({ name: myName });
-            // Delete the request
             db.ref(`requests/${myUid}/${senderId}`).remove().then(() => {
                 switchTab('friends');
             });
         };
 
-        // Real-time badge update
+        // Badge listener na Requests
         db.ref('requests/' + myUid).on('value', snap => {
             const badge = document.getElementById('reqBadge');
             if (snap.exists()) {
