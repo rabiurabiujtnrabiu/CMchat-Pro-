@@ -9,19 +9,15 @@
     <style>
         :root { --primary: #1a73e8; --bg: #0a0e27; --card: rgba(255,255,255,0.08); --g: #FFD600; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; }
-        
         .register-card { background: var(--card); padding: 40px 30px; border-radius: 25px; width: 90%; max-width: 400px; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
         h2 { color: var(--g); margin-bottom: 30px; font-weight: 800; letter-spacing: 1px; }
-
         .input-group { position: relative; margin-bottom: 20px; }
         .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--g); font-size: 14px; }
         .input-group input { width: 100%; padding: 15px 15px 15px 45px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; outline: none; box-sizing: border-box; font-size: 14px; background: rgba(255,255,255,0.05); color: white; transition: 0.3s; }
         .input-group input:focus { border-color: var(--g); background: rgba(255,255,255,0.1); }
-        
         .reg-btn { width: 100%; padding: 16px; background: var(--g); color: #0a0e27; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; margin-top: 10px; }
         .reg-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255, 214, 0, 0.2); }
         .reg-btn:disabled { background: #555; cursor: not-allowed; }
-
         .footer-link { margin-top: 25px; font-size: 13px; color: #aaa; }
         .footer-link a { color: var(--g); text-decoration: none; font-weight: bold; }
     </style>
@@ -65,10 +61,11 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
+        // GYARARREN CONFIGURATION
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
             authDomain: "cmchat-pro.firebaseapp.com",
-            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com/", 
             projectId: "cmchat-pro"
         };
         
@@ -98,7 +95,18 @@
                 const userCred = await auth.createUserWithEmailAndPassword(email, pass);
                 const uid = userCred.user.uid;
 
-                // 2. Save to Firestore (Professional Storage)
+                // 2. Save to Realtime Database (Muhimmi ga Explore Page)
+                // Mun tura shi karkashin "users" folder
+                await rtdb.ref('users/' + uid).set({
+                    username: name,
+                    email: email,
+                    uid: uid,
+                    avatar: name[0].toUpperCase(),
+                    status: "online",
+                    joinedAt: Date.now()
+                });
+
+                // 3. Save to Firestore (Professional Storage)
                 await firestore.collection('users').doc(uid).set({
                     username: name,
                     email: email,
@@ -107,17 +115,7 @@
                     joinedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // 3. Save to Realtime Database (FOR EXPLORE/NETWORK PAGE)
-                // Wannan shi ne zai sa mutane su bayyana a "Add Friend"
-                await rtdb.ref('users/' + uid).set({
-                    username: name,
-                    email: email,
-                    uid: uid,
-                    avatar: name[0].toUpperCase(),
-                    status: "online"
-                });
-
-                // 4. Save to LocalStorage (To fix 'undefined' name in posts)
+                // 4. Save to LocalStorage
                 localStorage.setItem('user_uid', uid);
                 localStorage.setItem('username', name);
 
@@ -128,7 +126,8 @@
                     timer: 2000,
                     showConfirmButton: false
                 }).then(() => {
-                    window.location.href = 'index.html';
+                    // Bayan register, zai koma login ko kuma shafin network
+                    window.location.href = 'index.html'; 
                 });
 
             } catch (err) {
