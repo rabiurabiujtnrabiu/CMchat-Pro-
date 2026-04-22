@@ -4,169 +4,137 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - CMchat Pro</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root { --primary: #1a73e8; --error: #d93025; --success: #28a745; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        :root { --primary: #1a73e8; --bg: #0a0e27; --card: rgba(255,255,255,0.08); --g: #FFD600; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; }
         
-        .register-card { background: white; padding: 40px 30px; border-radius: 25px; width: 90%; max-width: 420px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); text-align: center; }
-        h2 { color: #333; margin-bottom: 25px; font-weight: 700; }
+        .register-card { background: var(--card); padding: 40px 30px; border-radius: 25px; width: 90%; max-width: 400px; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        h2 { color: var(--g); margin-bottom: 30px; font-weight: 800; letter-spacing: 1px; }
 
-        .input-box { position: relative; margin-bottom: 18px; text-align: left; }
-        .input-box i:not(.toggle-password) { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #888; transition: 0.3s; }
-        .input-box input { width: 100%; padding: 15px 45px 15px 50px; border: 2px solid #f1f1f1; border-radius: 15px; outline: none; box-sizing: border-box; font-size: 15px; transition: 0.3s; background: #fafafa; }
-        .input-box input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 10px rgba(26, 115, 232, 0.1); }
+        .input-group { position: relative; margin-bottom: 20px; }
+        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--g); font-size: 14px; }
+        .input-group input { width: 100%; padding: 15px 15px 15px 45px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; outline: none; box-sizing: border-box; font-size: 14px; background: rgba(255,255,255,0.05); color: white; transition: 0.3s; }
+        .input-group input:focus { border-color: var(--g); background: rgba(255,255,255,0.1); }
         
-        .toggle-password { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: #aaa; cursor: pointer; padding: 5px; }
-        
-        /* Referral Box Styling */
-        .ref-container { background: #eef5ff; border-radius: 15px; padding: 12px; margin-bottom: 20px; border: 1px dashed var(--primary); }
-        .ref-label { font-size: 11px; color: var(--primary); font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 5px; }
-        .ref-input { border: none !important; background: transparent !important; padding: 5px 10px !important; text-align: center; font-weight: bold; color: #333; letter-spacing: 1px; }
+        .reg-btn { width: 100%; padding: 16px; background: var(--g); color: #0a0e27; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; margin-top: 10px; }
+        .reg-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255, 214, 0, 0.2); }
+        .reg-btn:disabled { background: #555; cursor: not-allowed; }
 
-        .error-msg { color: var(--error); font-size: 12px; display: none; margin-top: 5px; font-weight: 500; }
-        
-        .reg-btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 15px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3); }
-        .reg-btn:hover { background: #1557b0; transform: translateY(-2px); }
-        .reg-btn:disabled { background: #ccc; box-shadow: none; transform: none; }
-
-        /* Success Modal */
-        #successModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); justify-content: center; align-items: center; z-index: 9999; }
-        .modal-content { background: white; padding: 40px; border-radius: 30px; text-align: center; width: 320px; animation: slideUp 0.4s ease; }
-        .modal-content i { font-size: 60px; color: var(--success); margin-bottom: 20px; }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .footer-link { margin-top: 25px; font-size: 13px; color: #aaa; }
+        .footer-link a { color: var(--g); text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="register-card">
-        <h2>Create Account</h2>
+        <h2>CMchat Pro</h2>
+        <p style="color: #888; font-size: 12px; margin-top: -20px; margin-bottom: 30px;">Create your professional account</p>
 
-        <div class="input-box">
+        <div class="input-group">
             <i class="fas fa-user"></i>
             <input type="text" id="regName" placeholder="Full Name">
         </div>
 
-        <div class="input-box">
+        <div class="input-group">
             <i class="fas fa-envelope"></i>
             <input type="email" id="regEmail" placeholder="Email Address">
         </div>
 
-        <div class="input-box">
+        <div class="input-group">
             <i class="fas fa-lock"></i>
             <input type="password" id="regPass" placeholder="Password">
-            <i class="fas fa-eye toggle-password" onclick="toggleVisibility('regPass', this)"></i>
         </div>
 
-        <div class="input-box">
-            <i class="fas fa-check-circle"></i>
-            <input type="password" id="confirmPass" placeholder="Confirm Password">
-            <i class="fas fa-eye toggle-password" onclick="toggleVisibility('confirmPass', this)"></i>
-            <span id="passError" class="error-msg"><i class="fas fa-exclamation-circle"></i> Passwords do not match!</span>
+        <div class="input-group">
+            <i class="fas fa-gift"></i>
+            <input type="text" id="regRef" placeholder="Referral Code (Optional)">
         </div>
 
-        <div class="ref-container">
-            <span class="ref-label">Referral Program</span>
-            <div class="input-box" style="margin-bottom: 0;">
-                <i class="fas fa-gift" style="color: var(--primary);"></i>
-                <input type="text" id="regRef" class="ref-input" placeholder="Enter Code (Optional)">
-            </div>
-        </div>
-
-        <button class="reg-btn" id="regBtn" onclick="handleRegister()">Sign Up</button>
+        <button class="reg-btn" id="regBtn" onclick="handleRegister()">Sign Up Now</button>
         
-        <p style="font-size: 14px; color: #666; margin-top: 20px;">
-            Already have an account? <a href="index.html" style="color: var(--primary); text-decoration: none; font-weight: bold;">index</a>
-        </p>
-    </div>
-
-    <div id="successModal">
-        <div class="modal-content">
-            <i class="fas fa-check-circle"></i>
-            <h2 style="margin: 0;">Awesome!</h2>
-            <p style="color: #666; margin: 15px 0 25px;">Your account has been created successfully.</p>
-            <button class="reg-btn" onclick="window.location.href='index.html'">Continue to login</button>
+        <div class="footer-link">
+            Already have an account? <a href="index.html">Login</a>
         </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
             authDomain: "cmchat-pro.firebaseapp.com",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
             projectId: "cmchat-pro"
         };
+        
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        
         const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        // 1. AUTO-FILL REFERRAL FROM URL (?ref=CODE)
-        window.onload = () => {
-            const params = new URLSearchParams(window.location.search);
-            const refCode = params.get('ref');
-            if (refCode) {
-                const refInput = document.getElementById('regRef');
-                refInput.value = refCode;
-                refInput.readOnly = true; // Make it read-only if it came from a link
-                refInput.style.color = "var(--primary)";
-            }
-        };
-
-        function toggleVisibility(id, icon) {
-            const el = document.getElementById(id);
-            if(el.type === "password") {
-                el.type = "text";
-                icon.classList.replace("fa-eye", "fa-eye-slash");
-            } else {
-                el.type = "password";
-                icon.classList.replace("fa-eye-slash", "fa-eye");
-            }
-        }
+        const firestore = firebase.firestore();
+        const rtdb = firebase.database();
 
         async function handleRegister() {
             const name = document.getElementById('regName').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const pass = document.getElementById('regPass').value;
-            const cPass = document.getElementById('confirmPass').value;
             const ref = document.getElementById('regRef').value.trim();
             const btn = document.getElementById('regBtn');
-            const passError = document.getElementById('passError');
 
-            // Reset UI
-            passError.style.display = "none";
-            
-            if(!name || !email || !pass) { alert("Please fill all fields!"); return; }
-            if(pass !== cPass) { passError.style.display = "block"; return; }
-            if(pass.length < 6) { alert("Password too short!"); return; }
+            if(!name || !email || !pass) {
+                Swal.fire('Error', 'Please fill all required fields!', 'error');
+                return;
+            }
 
             btn.disabled = true;
-            btn.innerText = "Creating Account...";
+            btn.innerText = "Processing...";
 
             try {
+                // 1. Create User in Authentication
                 const userCred = await auth.createUserWithEmailAndPassword(email, pass);
                 const uid = userCred.user.uid;
 
-                // Save to Firestore
-                await db.collection('users').doc(uid).set({
+                // 2. Save to Firestore (Professional Storage)
+                await firestore.collection('users').doc(uid).set({
                     username: name,
                     email: email,
                     uid: uid,
                     referredBy: ref || "Direct",
-                    profilePic: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
                     joinedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // Show Success Modal
-                document.getElementById('successModal').style.display = 'flex';
+                // 3. Save to Realtime Database (FOR EXPLORE/NETWORK PAGE)
+                // Wannan shi ne zai sa mutane su bayyana a "Add Friend"
+                await rtdb.ref('users/' + uid).set({
+                    username: name,
+                    email: email,
+                    uid: uid,
+                    avatar: name[0].toUpperCase(),
+                    status: "online"
+                });
+
+                // 4. Save to LocalStorage (To fix 'undefined' name in posts)
+                localStorage.setItem('user_uid', uid);
+                localStorage.setItem('username', name);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Welcome!',
+                    text: 'Account created successfully.',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = 'index.html';
+                });
 
             } catch (err) {
-                alert(err.message);
+                Swal.fire('Registration Failed', err.message, 'error');
                 btn.disabled = false;
-                btn.innerText = "Sign Up";
+                btn.innerText = "Sign Up Now";
             }
         }
     </script>
