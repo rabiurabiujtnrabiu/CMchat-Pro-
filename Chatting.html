@@ -8,7 +8,7 @@
     <style>
         :root { --p: #075E54; --s: #128C7E; --bg: #E5DDD5; --white: #ffffff; --my-msg: #DCF8C6; }
         
-        body { margin: 0; font-family: 'Segoe UI', Helvetica, sans-serif; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-attachment: fixed; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { margin: 0; font-family: 'Segoe UI', Helvetica, sans-serif; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-attachment: fixed; display: flex; flex-direction: column; height: autovh; overflow: hidden; }
         
         /* Professional Header */
         .chat-header { background: var(--p); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; height: 50px; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -16,10 +16,10 @@
         .user-info { display: flex; align-items: center; gap: 10px; flex: 1; cursor: pointer; }
         .user-info img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: #eee; }
         
-        /* ALAMAR SELECTING MAI SHAWAGI (Floating/Pulse Effect) */
+        /* ALAMAR SELECTING MAI SHAWAGI */
         .selector-trigger { 
             animation: pulse-animation 2s infinite; 
-            color: #00ffcc; /* Launi mai haske */
+            color: #00ffcc;
             margin-right: 15px;
             cursor: pointer;
             font-size: 20px;
@@ -41,7 +41,7 @@
         .sent { background: var(--my-msg); align-self: flex-end; border-top-right-radius: 0; }
         .time { font-size: 10px; color: #888; text-align: right; margin-top: 3px; }
 
-        /* Input Area - Voice & Send Logic */
+        /* Input Area */
         .input-area { padding: 8px; display: flex; align-items: center; gap: 5px; background: transparent; }
         .input-box { flex: 1; background: white; border-radius: 25px; padding: 5px 15px; display: flex; align-items: center; min-height: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         #messageInput { border: none; outline: none; flex: 1; font-size: 16px; background: transparent; }
@@ -55,6 +55,8 @@
         .friend-item { display: flex; align-items: center; padding: 15px 20px; gap: 15px; border-bottom: 1px solid #f9f9f9; cursor: pointer; }
         .friend-item .avatar { width: 45px; height: 45px; border-radius: 50%; background: var(--p); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 1500; }
+        
+        .status-dot { font-size: 8px; margin-left: 5px; }
     </style>
 </head>
 <body>
@@ -67,7 +69,7 @@
             <img src="https://via.placeholder.com/40" id="chatAvatar">
             <div onclick="toggleSelector()">
                 <b id="chatWith">Select Contact</b>
-                <div style="font-size: 10px; color: #cfd8dc;">online</div>
+                <div id="topStatus" style="font-size: 10px; color: #cfd8dc;">Tap to chat</div>
             </div>
         </div>
         
@@ -117,19 +119,27 @@
         let myUID = "";
         let currentFriendUID = "";
 
+        // --- TRACKING ONLINE/OFFLINE ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 myUID = user.uid;
+                
+                // Saita kai a matsayin Online
+                const myStatusRef = database.ref('users/' + myUID + '/status');
+                myStatusRef.set('online');
+                
+                // Idan ka fita, Firebase ya sa ka Offline kai tsaye
+                myStatusRef.onDisconnect().set('offline');
+
                 loadFriendsOnly();
             } else {
                 window.location.href = "index.html";
             }
         });
 
-        // 1. GYARA: Loda 'Friends' kadai (Connected ones)
+        // --- LOAD FRIENDS ONLY WITH STATUS ---
         function loadFriendsOnly() {
             const listDiv = document.getElementById('friendsList');
-            // Muna duba folder 'friends' dinka (cite: 14640.jpg)
             database.ref('friends/' + myUID).on('value', snap => {
                 listDiv.innerHTML = "";
                 if(!snap.exists()) {
@@ -138,11 +148,28 @@
                 }
                 snap.forEach(child => {
                     const f = child.val();
-                    listDiv.innerHTML += `
-                        <div class="friend-item" onclick="selectFriend('${child.key}', '${f.name}')">
-                            <div class="avatar">${f.name[0].toUpperCase()}</div>
-                            <div><b>${f.name}</b><br><small style="color:green">Connected</small></div>
-                        </div>`;
+                    const friendID = child.key;
+
+                    // Bibiyar Online status na kowane aboki
+                    database.ref('users/' + friendID + '/status').on('value', stSnap => {
+                        const status = stSnap.val() || 'offline';
+                        const color = status === 'online' ? '#00ff00' : '#888';
+                        
+                        let friendDiv = document.getElementById('f-' + friendID);
+                        if (friendDiv) {
+                            friendDiv.querySelector('.st-txt').innerText = status;
+                            friendDiv.querySelector('.st-txt').style.color = color;
+                        } else {
+                            listDiv.innerHTML += `
+                                <div class="friend-item" id="f-${friendID}" onclick="selectFriend('${friendID}', '${f.name}')">
+                                    <div class="avatar">${f.name[0].toUpperCase()}</div>
+                                    <div>
+                                        <b>${f.name}</b><br>
+                                        <small class="st-txt" style="color:${color}">${status}</small>
+                                    </div>
+                                </div>`;
+                        }
+                    });
                 });
             });
         }
@@ -150,6 +177,12 @@
         function selectFriend(uid, name) {
             currentFriendUID = uid;
             document.getElementById('chatWith').innerText = name;
+            
+            // Sabunta status a saman header
+            database.ref('users/' + uid + '/status').on('value', s => {
+                document.getElementById('topStatus').innerText = s.val() || 'offline';
+            });
+
             toggleSelector();
             startChat();
         }
@@ -159,8 +192,13 @@
             document.getElementById('overlay').style.display = document.getElementById('userSelector').classList.contains('active') ? 'block' : 'none';
         }
 
+        // --- CHAT LOGIC (UNIFORM ID) ---
+        function getChatID(u1, u2) {
+            return u1 < u2 ? u1 + "_" + u2 : u2 + "_" + u1;
+        }
+
         function startChat() {
-            const chatId = myUID < currentFriendUID ? `${myUID}_${currentFriendUID}` : `${currentFriendUID}_${myUID}`;
+            const chatId = getChatID(myUID, currentFriendUID);
             database.ref('private_chats/' + chatId).on('value', snap => {
                 chatBox.innerHTML = "";
                 snap.forEach(child => {
@@ -176,7 +214,6 @@
             });
         }
 
-        // 2. GYARA: Voice/Send Switching Logic
         messageInput.addEventListener('input', () => {
             btnIcon.className = messageInput.value.trim() !== "" ? "fas fa-paper-plane" : "fas fa-microphone";
         });
@@ -184,23 +221,18 @@
         function handleAction() {
             const text = messageInput.value.trim();
             if (text !== "" && currentFriendUID) {
-                const chatId = myUID < currentFriendUID ? `${myUID}_${currentFriendUID}` : `${currentFriendUID}_${myUID}`;
+                const chatId = getChatID(myUID, currentFriendUID);
                 database.ref('private_chats/' + chatId).push({
                     sender: myUID,
+                    receiver: currentFriendUID,
                     msg: text,
                     time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
                     timestamp: firebase.database.ServerValue.TIMESTAMP
                 });
                 messageInput.value = "";
                 btnIcon.className = "fas fa-microphone";
-                chatBox.scrollTop = chatBox.scrollHeight;
-            } else {
-                // Voice Recording Simulation
-                console.log("Voice mode active");
             }
         }
-
-        function getChatID() { return myUID < currentFriendUID ? myUID + "_" + currentFriendUID : currentFriendUID + "_" + myUID; }
     </script>
 </body>
 </html>
