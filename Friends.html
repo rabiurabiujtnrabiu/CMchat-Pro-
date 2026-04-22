@@ -9,40 +9,26 @@
     <style>
         :root { --p: #1A237E; --g: #FFD600; --bg: #0a0e27; --card: rgba(255,255,255,0.08); --accent: #00E676; }
         body { margin: 0; font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: white; overflow-x: hidden; }
-        
-        /* Header & Search */
         header { background: var(--p); padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .search-bar { background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 25px; display: flex; align-items: center; gap: 10px; width: 85%; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
-        .search-bar:focus-within { background: rgba(255,255,255,0.2); border-color: var(--g); }
         .search-bar input { background: transparent; border: none; color: white; outline: none; width: 100%; font-size: 14px; }
-        
-        /* Professional Tabs */
         .tabs { display: flex; background: #12183d; position: sticky; top: 65px; z-index: 999; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .tab { flex: 1; text-align: center; padding: 16px 0; font-weight: 700; color: #888; cursor: pointer; font-size: 12px; letter-spacing: 1px; position: relative; transition: 0.3s; }
+        .tab { flex: 1; text-align: center; padding: 16px 0; font-weight: 700; color: #888; cursor: pointer; font-size: 12px; position: relative; }
         .tab.active { color: var(--g); }
-        .tab.active::after { content: ''; position: absolute; bottom: 0; left: 25%; width: 50%; height: 3px; background: var(--g); border-radius: 10px 10px 0 0; }
-        .badge { background: #ff3d00; color: white; font-size: 10px; padding: 2px 7px; border-radius: 20px; position: absolute; top: 10px; right: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-
-        /* User Cards */
-        .content { padding: 15px; min-height: 85vh; padding-bottom: 40px; }
-        .user-card { background: var(--card); border-radius: 20px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.05); animation: slideIn 0.4s ease-out; backdrop-filter: blur(10px); }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
+        .tab.active::after { content: ''; position: absolute; bottom: 0; left: 25%; width: 50%; height: 3px; background: var(--g); }
+        .badge { background: #ff3d00; color: white; font-size: 10px; padding: 2px 7px; border-radius: 20px; position: absolute; top: 10px; right: 10px; }
+        .content { padding: 15px; min-height: 85vh; }
+        .user-card { background: var(--card); border-radius: 20px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.05); }
         .user-info { display: flex; align-items: center; gap: 15px; }
-        .avatar { width: 50px; height: 50px; border-radius: 15px; background: linear-gradient(45deg, var(--p), #3949ab); display: flex; align-items: center; justify-content: center; font-size: 22px; color: white; font-weight: bold; border: 2px solid rgba(255,255,255,0.1); }
-        .details b { display: block; font-size: 15px; color: #fff; margin-bottom: 2px; }
+        .avatar { width: 50px; height: 50px; border-radius: 15px; background: linear-gradient(45deg, var(--p), #3949ab); display: flex; align-items: center; justify-content: center; font-size: 22px; color: white; font-weight: bold; }
+        .details b { display: block; font-size: 15px; color: #fff; }
         .details span { font-size: 11px; color: #aaa; display: flex; align-items: center; gap: 5px; }
-
-        /* Action Buttons */
-        .btn { padding: 10px 18px; border-radius: 12px; font-weight: 800; font-size: 11px; border: none; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
-        .btn-add { background: var(--g); color: var(--p); box-shadow: 0 4px 10px rgba(255, 214, 0, 0.2); }
-        .btn-add:active { transform: scale(0.95); }
-        .btn-sent { background: rgba(255,255,255,0.1); color: #888; cursor: default; border: 1px solid rgba(255,255,255,0.1); }
-        .btn-accept { background: var(--accent); color: white; box-shadow: 0 4px 10px rgba(0, 230, 118, 0.2); }
+        .btn { padding: 10px 18px; border-radius: 12px; font-weight: 800; font-size: 11px; border: none; cursor: pointer; text-transform: uppercase; }
+        .btn-add { background: var(--g); color: var(--p); }
+        .btn-sent { background: rgba(255,255,255,0.1); color: #888; cursor: default; }
+        .btn-accept { background: var(--accent); color: white; }
         .btn-friends { background: transparent; border: 1.5px solid var(--accent); color: var(--accent); cursor: default; padding: 8px 15px; }
-        
         .empty { text-align: center; padding: 120px 20px; color: #555; }
-        .empty i { font-size: 50px; margin-bottom: 15px; color: var(--p); opacity: 0.5; }
     </style>
 </head>
 <body>
@@ -68,18 +54,18 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
+        // GYARARREN DATABASE URL
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
             authDomain: "cmchat-pro.firebaseapp.com",
-            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com/", 
             projectId: "cmchat-pro"
         };
         
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
         
-        // UID da Username daga LocalStorage
-        const myUid = localStorage.getItem('user_uid') || "USER_ANON";
+        const myUid = localStorage.getItem('user_uid');
         const myName = localStorage.getItem('username') || "CM Member";
 
         let currentTab = 'explore';
@@ -93,24 +79,27 @@
 
         async function renderView() {
             const display = document.getElementById('mainDisplay');
+            if (!myUid) {
+                display.innerHTML = '<div class="empty"><p>Please Login first.</p></div>';
+                return;
+            }
             
-            // Kashe listeners domin gudun nauyi
+            // Cire tsofaffin listeners
             db.ref('users').off();
             db.ref('requests/' + myUid).off();
             db.ref('friends/' + myUid).off();
 
             if (currentTab === 'explore') {
-                // Dauko bayanan mambobi kai-tsaye (Real-time)
                 db.ref('users').on('value', async snap => {
                     display.innerHTML = "";
                     if (!snap.exists()) {
-                        display.innerHTML = '<div class="empty"><i class="fas fa-user-slash"></i><p>No members found in database.</p></div>';
+                        display.innerHTML = '<div class="empty"><p>No members found.</p></div>';
                         return;
                     }
 
-                    // Duba wa muke dashi a requests da friends domin gyara button
-                    const requestsSnap = await db.ref(`requests`).once('value');
-                    const friendsSnap = await db.ref(`friends/${myUid}`).once('value');
+                    // Samun jerin wanda ka tura mawa request tuni
+                    const sentReqsSnap = await db.ref('requests').once('value');
+                    const myFriendsSnap = await db.ref('friends/' + myUid).once('value');
 
                     snap.forEach(child => {
                         const u = child.val();
@@ -119,12 +108,9 @@
                         if (uid !== myUid) {
                             let btnHtml = `<button class="btn btn-add" id="btn-${uid}" onclick="sendReq('${uid}', '${u.username}')">CONNECT</button>`;
                             
-                            // Duba idan kun zama abokai
-                            if (friendsSnap.hasChild(uid)) {
+                            if (myFriendsSnap.hasChild(uid)) {
                                 btnHtml = `<button class="btn btn-friends"><i class="fas fa-check"></i> FRIENDS</button>`;
-                            } 
-                            // Duba idan ka tura masa request
-                            else if (requestsSnap.hasChild(`${uid}/${myUid}`)) {
+                            } else if (sentReqsSnap.child(uid).hasChild(myUid)) {
                                 btnHtml = `<button class="btn btn-sent" disabled>PENDING</button>`;
                             }
 
@@ -132,10 +118,7 @@
                             <div class="user-card">
                                 <div class="user-info">
                                     <div class="avatar">${u.username ? u.username[0].toUpperCase() : 'M'}</div>
-                                    <div class="details">
-                                        <b>${u.username || 'Member'}</b>
-                                        <span><i class="fas fa-circle" style="color:var(--accent); font-size:6px;"></i> Active now</span>
-                                    </div>
+                                    <div class="details"><b>${u.username}</b><span>Active Now</span></div>
                                 </div>
                                 ${btnHtml}
                             </div>`;
@@ -147,7 +130,7 @@
                 db.ref('requests/' + myUid).on('value', snap => {
                     display.innerHTML = "";
                     if (!snap.exists()) {
-                        display.innerHTML = '<div class="empty"><i class="fas fa-bell-slash"></i><p>No pending friend requests.</p></div>';
+                        display.innerHTML = '<div class="empty"><p>No requests.</p></div>';
                         return;
                     }
                     snap.forEach(child => {
@@ -155,8 +138,8 @@
                         display.innerHTML += `
                         <div class="user-card">
                             <div class="user-info">
-                                <div class="avatar" style="background:var(--accent)">${r.senderName ? r.senderName[0] : 'U'}</div>
-                                <div class="details"><b>${r.senderName || 'Unknown'}</b><span>Wants to connect</span></div>
+                                <div class="avatar" style="background:var(--accent)">${r.senderName[0]}</div>
+                                <div class="details"><b>${r.senderName}</b><span>Wants to connect</span></div>
                             </div>
                             <button class="btn btn-accept" onclick="acceptFriend('${child.key}', '${r.senderName}')">ACCEPT</button>
                         </div>`;
@@ -167,18 +150,17 @@
                 db.ref('friends/' + myUid).on('value', snap => {
                     display.innerHTML = "";
                     if (!snap.exists()) {
-                        display.innerHTML = '<div class="empty"><i class="fas fa-user-friends"></i><p>You haven\'t added any friends yet.</p></div>';
+                        display.innerHTML = '<div class="empty"><p>No friends yet.</p></div>';
                         return;
                     }
                     snap.forEach(child => {
-                        const f = child.val();
                         display.innerHTML += `
                         <div class="user-card">
                             <div class="user-info">
-                                <div class="avatar" style="background:var(--g); color:var(--p)">${f.name ? f.name[0] : 'F'}</div>
-                                <div class="details"><b>${f.name || 'Friend'}</b><span>Online</span></div>
+                                <div class="avatar" style="background:var(--g); color:var(--p)">${child.val().name[0]}</div>
+                                <div class="details"><b>${child.val().name}</b><span>Friend</span></div>
                             </div>
-                            <button class="btn btn-friends" style="border-color:rgba(255,255,255,0.2); color:#888;">CHAT</button>
+                            <button class="btn btn-friends" style="color:#888; border-color:#333;">CHAT</button>
                         </div>`;
                     });
                 });
@@ -186,44 +168,33 @@
         }
 
         window.sendReq = (targetUid, targetName) => {
-            const btn = document.getElementById('btn-' + targetUid);
             db.ref(`requests/${targetUid}/${myUid}`).set({
                 senderName: myName,
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             }).then(() => {
-                btn.className = "btn btn-sent";
-                btn.innerText = "PENDING";
-                btn.disabled = true;
-                Swal.fire({ icon: 'success', title: 'Request Sent', text: 'Friend request sent to ' + targetName, timer: 1500, showConfirmButton: false });
+                Swal.fire({ icon: 'success', title: 'Sent!', timer: 1000, showConfirmButton: false });
             });
         };
 
         window.acceptFriend = (senderId, senderName) => {
-            // Add to both sides
             db.ref(`friends/${myUid}/${senderId}`).set({ name: senderName });
             db.ref(`friends/${senderId}/${myUid}`).set({ name: myName });
-            // Remove request
             db.ref(`requests/${myUid}/${senderId}`).remove().then(() => {
-                Swal.fire({ icon: 'success', title: 'Connected!', text: 'You are now friends with ' + senderName, timer: 1500, showConfirmButton: false });
                 switchTab('friends');
             });
         };
 
-        // Real-time Badge
+        // Badge a kowane lokaci
         db.ref('requests/' + myUid).on('value', snap => {
-            const badge = document.getElementById('reqBadge');
-            if (snap.exists()) {
-                badge.style.display = 'block';
-                badge.innerText = snap.numChildren();
-            } else { badge.style.display = 'none'; }
+            const b = document.getElementById('reqBadge');
+            if (snap.exists()) { b.style.display = 'block'; b.innerText = snap.numChildren(); }
+            else { b.style.display = 'none'; }
         });
 
         window.filterUsers = () => {
             const q = document.getElementById('searchBox').value.toLowerCase();
-            const cards = document.querySelectorAll('.user-card');
-            cards.forEach(card => {
-                const name = card.querySelector('b').innerText.toLowerCase();
-                card.style.display = name.includes(q) ? 'flex' : 'none';
+            document.querySelectorAll('.user-card').forEach(c => {
+                c.style.display = c.querySelector('b').innerText.toLowerCase().includes(q) ? 'flex' : 'none';
             });
         };
 
