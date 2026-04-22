@@ -6,50 +6,74 @@
     <title>CMchat Pro - Messenger</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Style dinka na asali - Ba a taba shi ba */
         :root { --p: #075E54; --s: #128C7E; --bg: #E5DDD5; --white: #ffffff; --my-msg: #DCF8C6; }
-        body { margin: 0; font-family: 'Segoe UI', Helvetica, sans-serif; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-attachment: fixed; display: flex; flex-direction: column; height: 100vh; }
-        .chat-header { background: var(--p); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; height: 50px; }
-        .user-info { display: flex; align-items: center; gap: 10px; flex: 1; }
-        .user-info i { font-size: 18px; cursor: pointer; padding: 5px; }
-        .user-info img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.2); }
-        .chat-names b { font-size: 16px; display: block; }
-        .status-text { font-size: 11px; color: #cfd8dc; }
+        
+        body { margin: 0; font-family: 'Segoe UI', Helvetica, sans-serif; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-attachment: fixed; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* Professional Header */
+        .chat-header { background: var(--p); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; height: 50px; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        .user-info { display: flex; align-items: center; gap: 10px; flex: 1; cursor: pointer; }
+        .user-info img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: #eee; }
+        
+        /* ALAMAR SELECTING MAI SHAWAGI (Floating/Pulse Effect) */
+        .selector-trigger { 
+            animation: pulse-animation 2s infinite; 
+            color: #00ffcc; /* Launi mai haske */
+            margin-right: 15px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        @keyframes pulse-animation {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .header-right-icons { display: flex; align-items: center; gap: 18px; }
+        .header-right-icons i { font-size: 18px; cursor: pointer; color: white; }
+
+        /* Chat Area */
         .chat-container { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; scroll-behavior: smooth; }
-        .message { max-width: 75%; padding: 6px 10px; border-radius: 10px; font-size: 14.5px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.15); line-height: 1.4; }
+        .message { max-width: 75%; padding: 6px 12px; border-radius: 10px; font-size: 14.5px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .received { background: var(--white); align-self: flex-start; border-top-left-radius: 0; }
         .sent { background: var(--my-msg); align-self: flex-end; border-top-right-radius: 0; }
         .time { font-size: 10px; color: #888; text-align: right; margin-top: 3px; }
-        .input-area { padding: 8px; display: flex; align-items: flex-end; gap: 5px; background: transparent; }
-        .input-box { flex: 1; background: white; border-radius: 25px; padding: 5px 12px; display: flex; align-items: center; min-height: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        #messageInput { border: none; outline: none; flex: 1; font-size: 16px; background: transparent; padding: 8px 5px; max-height: 100px; overflow-y: auto; }
-        #sendBtn { width: 48px; height: 48px; background: var(--s); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: 0.2s; }
-        .custom-alert { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(5px); }
-        .alert-card { background: white; width: 85%; padding: 25px; border-radius: 20px; text-align: center; }
-        .alert-btn { background: var(--p); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; width: 100%; cursor: pointer; }
+
+        /* Input Area - Voice & Send Logic */
+        .input-area { padding: 8px; display: flex; align-items: center; gap: 5px; background: transparent; }
+        .input-box { flex: 1; background: white; border-radius: 25px; padding: 5px 15px; display: flex; align-items: center; min-height: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        #messageInput { border: none; outline: none; flex: 1; font-size: 16px; background: transparent; }
+        
+        #sendBtn { width: 48px; height: 48px; background: var(--s); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+
+        /* User Selector Slide-up */
+        .user-selector { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top-left-radius: 25px; border-top-right-radius: 25px; transform: translateY(100%); transition: 0.4s; z-index: 2000; max-height: 70vh; overflow-y: auto; box-shadow: 0 -5px 20px rgba(0,0,0,0.2); }
+        .user-selector.active { transform: translateY(0); }
+        .selector-header { padding: 20px; border-bottom: 1px solid #eee; text-align: center; color: var(--p); font-weight: bold; position: sticky; top: 0; background: white; }
+        .friend-item { display: flex; align-items: center; padding: 15px 20px; gap: 15px; border-bottom: 1px solid #f9f9f9; cursor: pointer; }
+        .friend-item .avatar { width: 45px; height: 45px; border-radius: 50%; background: var(--p); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 1500; }
     </style>
 </head>
 <body>
 
-    <div id="alertBox" class="custom-alert">
-        <div class="alert-card">
-            <b>No Friend Selected</b>
-            <p>Please go back to the Dashboard and select a friend to start chatting.</p>
-            <button class="alert-btn" onclick="window.location.href='Dashboard.html'">Go Back</button>
-        </div>
-    </div>
+    <div id="overlay" class="overlay" onclick="toggleSelector()"></div>
 
     <header class="chat-header">
         <div class="user-info">
-            <i class="fas fa-arrow-left" onclick="window.location.href='Dashboard.html'"></i>
+            <i class="fas fa-arrow-left" onclick="location.href='Dashboard.html'"></i>
             <img src="https://via.placeholder.com/40" id="chatAvatar">
-            <div class="chat-names">
-                <b id="chatWith">Loading...</b>
-                <div class="status-text">online</div>
+            <div onclick="toggleSelector()">
+                <b id="chatWith">Select Contact</b>
+                <div style="font-size: 10px; color: #cfd8dc;">online</div>
             </div>
         </div>
-        <div class="header-icons">
-            <i class="fas fa-video" style="margin-right: 15px;"></i>
+        
+        <div class="header-right-icons">
+            <i class="fas fa-user-plus selector-trigger" onclick="toggleSelector()"></i>
+            <i class="fas fa-video"></i>
             <i class="fas fa-phone-alt"></i>
         </div>
     </header>
@@ -62,7 +86,14 @@
             <input type="text" id="messageInput" placeholder="Message" autocomplete="off">
             <i class="fas fa-paperclip" style="color: #8696a0; font-size: 20px; margin-left: 10px;"></i>
         </div>
-        <button id="sendBtn"><i id="btnIcon" class="fas fa-microphone"></i></button>
+        <button id="sendBtn" onclick="handleAction()">
+            <i id="btnIcon" class="fas fa-microphone"></i>
+        </button>
+    </div>
+
+    <div id="userSelector" class="user-selector">
+        <div class="selector-header">Select a Friend to Chat</div>
+        <div id="friendsList"></div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -72,52 +103,67 @@
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
-            authDomain: "cmchat-pro.firebaseapp.com",
             databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
             projectId: "cmchat-pro"
         };
-
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const auth = firebase.auth();
 
         const chatBox = document.getElementById('chatBox');
         const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
         const btnIcon = document.getElementById('btnIcon');
-
-        // GYARA: Dauko bayanan aboki daga URL (Mafi aminci)
-        const urlParams = new URLSearchParams(window.location.search);
-        let friendUID = urlParams.get('uid') || localStorage.getItem('chattingWithUID'); 
-        let friendName = urlParams.get('name') || localStorage.getItem('chattingWithName') || "Chat";
+        
         let myUID = "";
-
-        document.getElementById('chatWith').innerText = friendName;
+        let currentFriendUID = "";
 
         auth.onAuthStateChanged(user => {
             if (user) {
                 myUID = user.uid;
-                if (friendUID) {
-                    startChat();
-                } else {
-                    document.getElementById('alertBox').style.display = 'flex';
-                }
+                loadFriendsOnly();
             } else {
                 window.location.href = "index.html";
             }
         });
 
-        // GYARA: Chat ID tsakanin mutum biyu kawai
-        function getChatID() {
-            return myUID < friendUID ? myUID + "_" + friendUID : friendUID + "_" + myUID;
+        // 1. GYARA: Loda 'Friends' kadai (Connected ones)
+        function loadFriendsOnly() {
+            const listDiv = document.getElementById('friendsList');
+            // Muna duba folder 'friends' dinka (cite: 14640.jpg)
+            database.ref('friends/' + myUID).on('value', snap => {
+                listDiv.innerHTML = "";
+                if(!snap.exists()) {
+                    listDiv.innerHTML = "<p style='text-align:center; padding:20px;'>No friends found.</p>";
+                    return;
+                }
+                snap.forEach(child => {
+                    const f = child.val();
+                    listDiv.innerHTML += `
+                        <div class="friend-item" onclick="selectFriend('${child.key}', '${f.name}')">
+                            <div class="avatar">${f.name[0].toUpperCase()}</div>
+                            <div><b>${f.name}</b><br><small style="color:green">Connected</small></div>
+                        </div>`;
+                });
+            });
+        }
+
+        function selectFriend(uid, name) {
+            currentFriendUID = uid;
+            document.getElementById('chatWith').innerText = name;
+            toggleSelector();
+            startChat();
+        }
+
+        function toggleSelector() {
+            document.getElementById('userSelector').classList.toggle('active');
+            document.getElementById('overlay').style.display = document.getElementById('userSelector').classList.contains('active') ? 'block' : 'none';
         }
 
         function startChat() {
-            const chatID = getChatID();
-            // GYARA: Amfani da 'private_chats' folder (cite: 14640.jpg)
-            database.ref('private_chats/' + chatID).on('value', (snapshot) => {
+            const chatId = myUID < currentFriendUID ? `${myUID}_${currentFriendUID}` : `${currentFriendUID}_${myUID}`;
+            database.ref('private_chats/' + chatId).on('value', snap => {
                 chatBox.innerHTML = "";
-                snapshot.forEach((child) => {
+                snap.forEach(child => {
                     const data = child.val();
                     const isMe = data.sender === myUID;
                     chatBox.innerHTML += `
@@ -130,15 +176,16 @@
             });
         }
 
+        // 2. GYARA: Voice/Send Switching Logic
         messageInput.addEventListener('input', () => {
             btnIcon.className = messageInput.value.trim() !== "" ? "fas fa-paper-plane" : "fas fa-microphone";
         });
 
-        function sendMessage() {
+        function handleAction() {
             const text = messageInput.value.trim();
-            if (text !== "" && myUID && friendUID) {
-                const chatID = getChatID();
-                database.ref('private_chats/' + chatID).push({
+            if (text !== "" && currentFriendUID) {
+                const chatId = myUID < currentFriendUID ? `${myUID}_${currentFriendUID}` : `${currentFriendUID}_${myUID}`;
+                database.ref('private_chats/' + chatId).push({
                     sender: myUID,
                     msg: text,
                     time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
@@ -147,11 +194,13 @@
                 messageInput.value = "";
                 btnIcon.className = "fas fa-microphone";
                 chatBox.scrollTop = chatBox.scrollHeight;
+            } else {
+                // Voice Recording Simulation
+                console.log("Voice mode active");
             }
         }
 
-        sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
+        function getChatID() { return myUID < currentFriendUID ? myUID + "_" + currentFriendUID : currentFriendUID + "_" + myUID; }
     </script>
 </body>
 </html>
