@@ -2,93 +2,150 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMchat Pro - Group Chat System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CMchat Pro - Elite Final</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --p: #075E54; --s: #128C7E; --bg: #E5DDD5; --white: #ffffff; --my-msg: #DCF8C6; }
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        :root { 
+            --cm-blue: #0056b3; 
+            --cm-dark: #1e293b;
+            --white: #ffffff;
+            --bg-chat: #f1f5f9;
+        }
+
+        body { 
+            margin: 0; font-family: 'Inter', -apple-system, sans-serif; 
+            background: var(--bg-chat); height: 100vh; 
+            display: flex; flex-direction: column; overflow: hidden; 
+        }
 
         /* HEADER */
-        header { background: var(--p); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .group-info { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-        .group-info img { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); }
+        header { 
+            background: var(--white); color: var(--cm-dark); padding: 12px 18px; 
+            display: flex; align-items: center; justify-content: space-between; 
+            z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 60px;
+        }
+        .group-profile { display: flex; align-items: center; gap: 12px; }
+        .group-profile img { width: 42px; height: 42px; border-radius: 12px; border: 2px solid var(--cm-blue); object-fit: cover; }
+        
+        #pinBox { 
+            display: none; background: #fffbe6; border-bottom: 1px solid #ffe58f; 
+            padding: 10px 15px; position: sticky; top: 0; z-index: 900; 
+            align-items: center; justify-content: space-between; font-size: 13px;
+        }
 
-        /* CHAT AREA */
-        .chat-view { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-attachment: fixed; }
-        .bubble { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 14px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.15); line-height: 1.4; }
-        .sent { background: var(--my-msg); align-self: flex-end; border-top-right-radius: 0; }
-        .received { background: white; align-self: flex-start; border-top-left-radius: 0; }
-        .sender-name { font-size: 11px; font-weight: bold; color: #128C7E; margin-bottom: 3px; display: block; }
-        .stamp { font-size: 10px; color: #888; text-align: right; margin-top: 4px; display: block; }
+        /* CHAT AREA - OPTIMIZED */
+        .chat-view { 
+            flex: 1; padding: 20px; overflow-y: auto; display: flex; 
+            flex-direction: column; gap: 15px; 
+            background-image: radial-gradient(#cbd5e1 0.7px, transparent 0.7px);
+            background-size: 25px 25px;
+        }
+
+        .bubble { 
+            max-width: 80%; padding: 12px 16px; border-radius: 18px; 
+            font-size: 14.5px; position: relative; line-height: 1.5;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.03); word-wrap: break-word;
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .sent { background: var(--cm-blue); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .received { background: var(--white); color: var(--cm-dark); align-self: flex-start; border-bottom-left-radius: 4px; }
+
+        .sender-info { font-size: 11px; font-weight: bold; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+        .xp-tag { background: #ffd700; color: #333; padding: 1px 7px; border-radius: 20px; font-size: 9px; font-weight: 800; }
 
         /* INPUT BAR */
-        .input-bar { background: #f0f0f0; padding: 10px; display: flex; align-items: center; gap: 10px; }
-        .input-box { flex: 1; background: white; border-radius: 25px; padding: 10px 15px; display: flex; align-items: center; }
-        #msgInp { border: none; outline: none; flex: 1; font-size: 15px; }
-        .send-btn { width: 45px; height: 45px; background: var(--s); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-
-        /* SIDEBAR & MODAL */
-        .sidebar { position: fixed; right: -300px; top: 0; width: 300px; height: 100%; background: #f0f2f5; z-index: 200; transition: 0.4s ease; box-shadow: -2px 0 10px rgba(0,0,0,0.3); }
-        .sidebar.active { right: 0; }
-        .sidebar-header { background: var(--p); color: white; padding: 20px; display: flex; align-items: center; gap: 15px; }
-        .side-content { padding: 15px; overflow-y: auto; height: calc(100% - 80px); }
-        .admin-box { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #ddd; }
+        .input-container { padding: 12px; background: var(--white); border-top: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
+        .input-wrapper { flex: 1; background: #f1f5f9; border-radius: 30px; padding: 5px 18px; display: flex; align-items: center; gap: 10px; }
+        #msgInp { border: none; background: none; outline: none; flex: 1; font-size: 15px; height: 42px; }
         
-        #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 300; justify-content: center; align-items: center; }
-        .modal-body { background: white; width: 90%; max-width: 400px; border-radius: 15px; padding: 20px; max-height: 70vh; overflow-y: auto; }
-        .user-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .send-btn { 
+            width: 48px; height: 48px; background: var(--cm-blue); 
+            border: none; border-radius: 50%; color: white; 
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 86, 179, 0.3); transition: 0.3s;
+        }
+        .send-btn:active { transform: scale(0.85); }
+
+        /* SIDEBAR MODERN */
+        .sidebar { 
+            position: fixed; right: -320px; top: 0; width: 310px; 
+            height: 100%; background: var(--white); z-index: 2000; 
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -10px 0 30px rgba(0,0,0,0.1); 
+        }
+        .sidebar.active { right: 0; }
+        .nav-item { 
+            display: flex; align-items: center; gap: 15px; padding: 14px; 
+            margin: 5px 15px; border-radius: 12px; cursor: pointer;
+            color: var(--cm-dark); font-weight: 500; font-size: 14.5px;
+        }
+        .nav-item i { width: 20px; font-size: 18px; }
+        .nav-item:hover { background: #f1f5f9; color: var(--cm-blue); }
+
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1900; }
     </style>
 </head>
 <body>
 
+    <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
+
+    <div id="pinBox">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <i class="fas fa-thumbtack" style="color: #faad14;"></i>
+            <span id="pinText" style="color: #856404; font-weight: 600;"></span>
+        </div>
+        <i class="fas fa-times-circle" id="closePin" style="display:none; cursor:pointer; color:#999;" onclick="removePin()"></i>
+    </div>
+
     <header>
-        <div class="group-info" onclick="toggleSidebar()">
-            <i class="fas fa-arrow-left" onclick="event.stopPropagation(); window.history.back()"></i>
-            <img src="https://ui-avatars.com/api/?name=CM+Group&background=075E54&color=fff" id="groupIcon">
+        <div class="group-profile" onclick="toggleSidebar()" style="cursor:pointer">
+            <img src="https://ui-avatars.com/api/?name=CM+Pro&background=0056b3&color=fff">
             <div>
-                <b style="display: block;">CMchat Community</b>
-                <small id="memberCount">Updating...</small>
+                <b style="font-size:16px">CMchat Community</b>
+                <div style="font-size: 11px; color: #22c55e; font-weight: 600;" id="typingText">Active Members...</div>
             </div>
         </div>
-        <i class="fas fa-ellipsis-v" onclick="toggleSidebar()"></i>
+        <div style="display: flex; gap: 18px; align-items: center;">
+            <i class="fas fa-search" style="color: #64748b; cursor:pointer"></i>
+            <i class="fas fa-ellipsis-v" onclick="toggleSidebar()" style="color: #64748b; cursor:pointer"></i>
+        </div>
     </header>
 
     <div class="chat-view" id="chatContainer"></div>
 
-    <div class="input-bar">
-        <div class="input-box">
-            <i class="far fa-smile" style="color:#888; margin-right:10px;"></i>
-            <input type="text" id="msgInp" placeholder="Type a message..." autocomplete="off">
+    <div class="input-container">
+        <div class="input-wrapper">
+            <i class="far fa-smile" style="color: #64748b; font-size: 20px; cursor:pointer"></i>
+            <input type="text" id="msgInp" placeholder="Rubuta saƙo..." autocomplete="off">
+            <i class="fas fa-paperclip" style="color: #64748b; cursor:pointer"></i>
         </div>
         <button class="send-btn" onclick="sendMessage()">
-            <i class="fas fa-paper-plane" id="sendIcon"></i>
+            <i class="fas fa-paper-plane"></i>
         </button>
     </div>
 
     <div id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-times" onclick="toggleSidebar()"></i>
-            <span>Group Details</span>
+        <div style="background: var(--cm-blue); padding: 35px 25px; color: white;">
+            <h2 style="margin: 0; font-size: 20px;">CMchat Pro</h2>
+            <p style="margin: 5px 0 0; opacity: 0.8; font-size: 12px;">Elite Digital Ecosystem</p>
         </div>
-        <div class="side-content">
-            <div id="adminPanel" class="admin-box" style="display:none;">
-                <h4 style="margin:0 0 10px 0; color:var(--p);">Admin Tools</h4>
-                <button onclick="openAddModal()" style="width:100%; padding:10px; background:var(--s); color:white; border:none; border-radius:5px; margin-bottom:10px;">Add New Members</button>
-                <button onclick="clearChat()" style="width:100%; padding:10px; background:#f44336; color:white; border:none; border-radius:5px;">Clear Chat History</button>
+        
+        <div style="padding-top: 15px; overflow-y: auto;">
+            <div id="adminPanel" style="display:none; padding: 15px; margin: 10px 15px; background: #fff1f0; border: 1px solid #ffa39e; border-radius: 12px;">
+                <h4 style="margin: 0 0 10px 0; color: #f5222d; font-size: 11px;"><i class="fas fa-crown"></i> COMMANDER TOOLS</h4>
+                <button onclick="clearChat()" style="width:100%; padding:9px; background:#f5222d; color:white; border:none; border-radius:8px; cursor:pointer; margin-bottom:8px; font-weight:600;">Clear History</button>
+                <input type="text" id="pinInp" placeholder="Sanarwa..." style="width:85%; padding:8px; border:1px solid #ddd; border-radius:6px; margin-bottom:5px;">
+                <button onclick="setPin()" style="width:100%; padding:8px; background:var(--cm-blue); color:white; border:none; border-radius:6px; cursor:pointer;">Update Pin</button>
             </div>
-            <h4>Participants</h4>
-            <div id="memberList"></div>
-        </div>
-    </div>
 
-    <div id="modal">
-        <div class="modal-body">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-                <h3 style="margin:0;">Add Friends</h3>
-                <i class="fas fa-times" onclick="closeAddModal()" style="cursor:pointer;"></i>
-            </div>
-            <div id="potentialUsers"></div>
+            <p style="margin: 15px 25px 5px; color: #888; font-size: 11px; font-weight: bold; text-transform: uppercase;">Quick Services</p>
+            <div class="nav-item" onclick="window.open('wallet.html')"><i class="fas fa-bolt" style="color:#faad14"></i> Buy Data & VTU</div>
+            <div class="nav-item" onclick="window.open('academy.html')"><i class="fas fa-graduation-cap" style="color:#1890ff"></i> Academy Portal</div>
+            <div class="nav-item" onclick="window.open('arena.html')"><i class="fas fa-trophy" style="color:#52c41a"></i> Arena Rank</div>
+            <hr style="border:0; border-top:1px solid #eee; margin:10px 20px">
+            <div class="nav-item" style="color:#f5222d"><i class="fas fa-sign-out-alt"></i> Logout System</div>
         </div>
     </div>
 
@@ -96,108 +153,100 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // FIREBASE CONFIGURATION
-        const firebaseConfig = {
-            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
-            authDomain: "cmchat-pro.firebaseapp.com",
-            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
-            projectId: "cmchat-pro"
+        const firebaseConfig = { 
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", 
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com", 
+            projectId: "cmchat-pro" 
         };
         firebase.initializeApp(firebaseConfig);
         const rtdb = firebase.database();
 
-        // USER SETTINGS
-        const currentUserName = localStorage.getItem('username') || "Guest_" + Math.random().toString(36).substr(2, 5);
-        const isAdmin = currentUserName === "Abubakar"; // Sanya sunanka na gaskiya a nan
+        const myName = localStorage.getItem('username') || "Elite_" + Math.floor(Math.random()*1000);
+        const chatRef = rtdb.ref('group_pro_chat');
+        const pinRef = rtdb.ref('pinned_message');
+        const typingRef = rtdb.ref('typing_status');
 
-        if(isAdmin) document.getElementById('adminPanel').style.display = 'block';
-
-        // FUNCTIONS
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
-        function openAddModal() { 
-            document.getElementById('modal').style.display = 'flex'; 
-            loadPotentialFriends();
-        }
-        function closeAddModal() { document.getElementById('modal').style.display = 'none'; }
-
-        // 1. TURA SAKO
-        function sendMessage() {
-            const inp = document.getElementById('msgInp');
-            if(inp.value.trim() === "") return;
-
-            rtdb.ref('group_pro_chat').push({
-                sender: currentUserName,
-                message: inp.value,
-                timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-            });
-            inp.value = "";
+        if(myName === "Abubakar") {
+            document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('closePin').style.display = 'block';
         }
 
-        // 2. DAUKO SAKONNI (LIVE)
-        rtdb.ref('group_pro_chat').on('value', (snapshot) => {
+        function toggleSidebar() {
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('overlay');
+            sb.classList.toggle('active');
+            ov.style.display = sb.classList.contains('active') ? 'block' : 'none';
+        }
+
+        // IMPROVED MESSAGE LOADING (FIX UNDEFINED)
+        chatRef.on('value', (snap) => {
             const container = document.getElementById('chatContainer');
             container.innerHTML = "";
-            snapshot.forEach((child) => {
-                const data = child.val();
-                const isMe = data.sender === currentUserName;
+            snap.forEach((child) => {
+                const d = child.val();
+                if(!d.message || d.message === "undefined") return; // Skip broken messages
+
+                const isMe = d.sender === myName;
+                const sender = d.sender || "Guest";
+                const xp = d.xp || "Lvl 1";
+                
                 container.innerHTML += `
                     <div class="bubble ${isMe ? 'sent' : 'received'}">
-                        <span class="sender-name">${isMe ? 'You' : data.sender}</span>
-                        ${data.message}
-                        <span class="stamp">${data.timestamp}</span>
+                        <div class="sender-info">
+                            <span style="color: ${isMe ? '#fff' : '#0056b3'}">${isMe ? 'Kai' : sender}</span>
+                            <span class="xp-tag">${xp}</span>
+                            ${d.isAdmin ? '<span style="background:#ff4d4f;color:white;padding:1px 6px;border-radius:10px;font-size:9px">Commander</span>' : ''}
+                        </div>
+                        <div>${d.message}</div>
+                        <div style="font-size: 9px; opacity: 0.7; text-align: right; margin-top: 5px;">${d.timestamp}</div>
                     </div>`;
             });
             container.scrollTop = container.scrollHeight;
         });
 
-        // 3. DAUKO MAMBOBI (LIVE)
-        rtdb.ref('group_list').on('value', (snapshot) => {
-            const list = document.getElementById('memberList');
-            let count = 0;
-            list.innerHTML = "";
-            snapshot.forEach((child) => {
-                count++;
-                list.innerHTML += `
-                    <div class="user-item">
-                        <span><i class="fas fa-user-circle"></i> ${child.key}</span>
-                        ${child.key === "Abubakar" ? '<small style="color:var(--s)">Admin</small>' : ''}
-                    </div>`;
+        function sendMessage() {
+            const inp = document.getElementById('msgInp');
+            const msg = inp.value.trim();
+            if(!msg) return;
+
+            chatRef.push({
+                sender: myName,
+                message: msg,
+                timestamp: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+                isAdmin: myName === "Abubakar",
+                xp: "Elite"
             });
-            document.getElementById('memberCount').innerText = count + " members";
+            inp.value = "";
+            typingRef.child(myName).remove();
+        }
+
+        pinRef.on('value', (snap) => {
+            const box = document.getElementById('pinBox');
+            if(snap.exists()) {
+                box.style.display = 'flex';
+                document.getElementById('pinText').innerText = snap.val();
+            } else { box.style.display = 'none'; }
         });
 
-        // 4. NEMO FRIENDS DON KARAWA
-        function loadPotentialFriends() {
-            const list = document.getElementById('potentialUsers');
-            list.innerHTML = "Loading...";
-            // Muna duba bangaren 'users' dinka na Firebase
-            rtdb.ref('users').once('value', (snapshot) => {
-                list.innerHTML = "";
-                snapshot.forEach((child) => {
-                    const name = child.val().username || child.key;
-                    if(name !== currentUserName) {
-                        list.innerHTML += `
-                            <div class="user-item">
-                                <span>${name}</span>
-                                <button onclick="addToGroup('${name}')" style="background:var(--p); color:white; border:none; padding:5px 10px; border-radius:5px;">Add</button>
-                            </div>`;
-                    }
-                });
-            });
-        }
+        function setPin() { const v = document.getElementById('pinInp').value; if(v) { pinRef.set(v); document.getElementById('pinInp').value=""; } }
+        function removePin() { pinRef.remove(); }
+        function clearChat() { if(confirm("Commander, goge dukkan hirar?")) chatRef.remove(); }
 
-        function addToGroup(name) {
-            rtdb.ref('group_list').child(name).set({ status: "active" });
-            alert(name + " added to community!");
-        }
+        let tTimer;
+        document.getElementById('msgInp').addEventListener('input', () => {
+            typingRef.child(myName).set(true);
+            clearTimeout(tTimer);
+            tTimer = setTimeout(() => typingRef.child(myName).remove(), 2000);
+        });
 
-        function clearChat() {
-            if(confirm("Duk sakonnin group zasu goge. Shin kana so?")) {
-                rtdb.ref('group_pro_chat').remove();
-            }
-        }
+        typingRef.on('value', (snap) => {
+            const label = document.getElementById('typingText');
+            if(snap.exists()){
+                const others = Object.keys(snap.val()).filter(u => u !== myName);
+                label.innerText = others.length > 0 ? "Wani yana rubutu..." : "Active Members...";
+            } else { label.innerText = "Active Members..."; }
+        });
 
-        // Enter key to send
         document.getElementById("msgInp").addEventListener("keyup", (e) => { if(e.key === "Enter") sendMessage(); });
     </script>
 </body>
