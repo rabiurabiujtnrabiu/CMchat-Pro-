@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Elite Power | CMchat Pro Utility</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        :root { --p: #1A237E; --accent: #FFD600; --bg: #F4F7FE; --white: #fff; }
+        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: #1c1c1e; padding-bottom: 50px; }
+
+        header { background: var(--p); padding: 25px 20px; display: flex; align-items: center; color: white; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        header i { font-size: 20px; margin-right: 15px; cursor: pointer; }
+
+        .container { padding: 20px; max-width: 500px; margin: 0 auto; }
+        .card { background: var(--white); border-radius: 35px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
+
+        .label-text { display: block; font-size: 11px; font-weight: 800; color: #8e8e93; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; }
+
+        select, input { width: 100%; padding: 18px; border-radius: 20px; border: 2px solid #F0F2F8; outline: none; font-size: 15px; font-weight: 700; background: #F9F9FB; transition: 0.3s; margin-bottom: 20px; }
+        select:focus, input:focus { border-color: var(--p); background: white; }
+
+        .info-pill { background: #E8EAF6; padding: 15px; border-radius: 18px; margin-bottom: 20px; display: none; border-left: 5px solid var(--p); animation: fadeIn 0.5s; }
+        .info-pill p { margin: 0; font-size: 13px; font-weight: 800; color: var(--p); }
+
+        .btn-pay { width: 100%; padding: 20px; border: none; border-radius: 22px; background: var(--p); color: white; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 10px 25px rgba(26, 35, 126, 0.2); }
+        .btn-pay:active { transform: scale(0.96); }
+
+        .bal-badge { font-size: 12px; font-weight: 800; color: var(--accent); background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 10px; margin-left: auto; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <i class="fas fa-arrow-left" onclick="history.back()"></i>
+        <b>Electricity Bill</b>
+        <div class="bal-badge">₦<span id="headerBal">0.00</span></div>
+    </header>
+
+    <div class="container">
+        <div class="card animate__animated animate__fadeInUp">
+            
+            <span class="label-text">Distribution Company (DISCO)</span>
+            <select id="discoProvider">
+                <option value="" disabled selected>-- Select Disco --</option>
+                <option value="AEDC">AEDC - Abuja Disco</option>
+                <option value="JEDC">JEDC - Jos Disco</option>
+                <option value="KEDCO">KEDCO - Kano Disco</option>
+                <option value="KAEDCO">KAEDCO - Kaduna Disco</option>
+                <option value="EKEDC">EKEDC - Eko Disco (Lagos)</option>
+                <option value="IKEDC">IKEDC - Ikeja Disco</option>
+                <option value="IBEDC">IBEDC - Ibadan Disco</option>
+                <option value="EEDC">EEDC - Enugu Disco</option>
+                <option value="PHEDC">PHEDC - Port Harcourt Disco</option>
+                <option value="BEDC">BEDC - Benin Disco</option>
+                <option value="YEDC">YEDC - Yola Disco</option>
+            </select>
+
+            <span class="label-text">Meter Category</span>
+            <select id="meterType">
+                <option value="prepaid">Prepaid (Token)</option>
+                <option value="postpaid">Postpaid (Monthly Bill)</option>
+            </select>
+
+            <span class="label-text">Meter / Account Number</span>
+            <input type="number" id="meterNumber" placeholder="Enter Meter ID" oninput="validateMeter()">
+
+            <div class="info-pill" id="verifyBox">
+                <p id="meterOwner"><i class="fas fa-user-check"></i> Verifying Customer...</p>
+            </div>
+
+            <span class="label-text">Purchase Amount (₦)</span>
+            <input type="number" id="amount" placeholder="Min ₦500">
+
+            <button class="btn-pay" onclick="initiatePayment()">
+                <i class="fas fa-plug" style="margin-right:8px; color:var(--accent)"></i> PURCHASE POWER
+            </button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const myName = localStorage.getItem('username') || "User";
+
+        let userWallet = 0;
+
+        // 1. Balance Sync
+        db.ref('users/' + myName + '/wallet').on('value', snap => {
+            userWallet = snap.val() || 0;
+            document.getElementById('headerBal').innerText = Number(userWallet).toLocaleString();
+        });
+
+        // 2. Meter Validation Mockup
+        function validateMeter() {
+            const m = document.getElementById('meterNumber').value;
+            const box = document.getElementById('verifyBox');
+            if(m.length >= 10) {
+                box.style.display = 'block';
+                document.getElementById('meterOwner').innerText = "Verified: CMchat Elite User";
+            } else {
+                box.style.display = 'none';
+            }
+        }
+
+        // 3. Payment Logic
+        async function initiatePayment() {
+            const disco = document.getElementById('discoProvider').value;
+            const meter = document.getElementById('meterNumber').value;
+            const amt = parseFloat(document.getElementById('amount').value);
+
+            if(!disco) return Swal.fire('Error', 'Please select a DISCO provider', 'error');
+            if(meter.length < 10) return Swal.fire('Error', 'Invalid Meter Number', 'error');
+            if(!amt || amt < 500) return Swal.fire('Warning', 'Minimum amount is ₦500', 'warning');
+            if(amt > userWallet) return Swal.fire('Low Balance', 'Please fund your wallet', 'error');
+
+            const { value: pin } = await Swal.fire({
+                title: 'Security PIN',
+                input: 'password',
+                inputAttributes: { maxlength: 4, textAlign: 'center' },
+                showCancelButton: true,
+                confirmButtonColor: '#1A237E'
+            });
+
+            if(pin) {
+                processBill(disco, meter, amt);
+            }
+        }
+
+        function processBill(disco, meter, amt) {
+            Swal.fire({ title: 'Processing Transaction...', didOpen: () => Swal.showLoading() });
+
+            setTimeout(() => {
+                const newBal = userWallet - amt;
+                db.ref('users/' + myName + '/wallet').set(newBal).then(() => {
+                    // Generate Mock Token for Prepaid
+                    const token = Math.floor(Math.random() * 90000000000000000000).toString().replace(/\B(?=(\d{4})+(?!\d))/g, "-");
+                    
+                    db.ref('transactions/' + myName).push({
+                        type: 'debit',
+                        service: `Electricity (${disco})`,
+                        amount: amt,
+                        meter: meter,
+                        token: token,
+                        time: Date.now()
+                    });
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        html: `<b>Token:</b> <span style="font-size:18px; color:#1A237E">${token}</span><br>Disco: ${disco}`,
+                        confirmButtonText: 'Copy & Close'
+                    }).then(() => {
+                        window.location.href = "Wallet.html";
+                    });
+                });
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

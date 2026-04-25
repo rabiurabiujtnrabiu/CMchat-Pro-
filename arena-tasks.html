@@ -2,133 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Tasks & Spins</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CM Arena | Royal Quiz</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root { --p: #0A192F; --g: #FFD600; --card: #112240; --accent: #64FFDA; }
-        body { margin: 0; background: var(--p); font-family: 'Inter', sans-serif; color: white; padding: 20px; }
+        :root { --bg: #0A192F; --card: #112240; --gold: #FFD600; --cyan: #64FFDA; }
+        body { margin: 0; background: var(--bg); font-family: 'Inter', sans-serif; color: white; text-align: center; overflow: hidden; }
 
-        /* Referral Box */
-        .referral-card {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            padding: 25px; border-radius: 30px; position: relative; overflow: hidden;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3); margin-bottom: 30px;
-        }
-        .referral-card h2 { margin: 0; font-size: 22px; color: var(--g); }
-        .referral-card p { font-size: 13px; opacity: 0.9; margin: 10px 0; }
-        .invite-btn {
-            background: var(--g); color: var(--p); border: none; padding: 12px 25px;
-            border-radius: 15px; font-weight: 900; cursor: pointer; margin-top: 10px;
-        }
+        /* QUIZ HEADER */
+        .quiz-header { padding: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .timer-circle { width: 60px; height: 60px; border: 4px solid var(--cyan); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 20px; box-shadow: 0 0 15px var(--cyan); }
 
-        /* Spin the Wheel UI */
-        .spin-container {
-            text-align: center; margin-top: 40px; position: relative;
-        }
-        .wheel-box {
-            width: 280px; height: 280px; border: 8px solid var(--card);
-            border-radius: 50%; margin: 0 auto; position: relative;
-            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-            background: conic-gradient(
-                #FFD600 0% 12.5%, #112240 12.5% 25%, 
-                #64FFDA 25% 37.5%, #112240 37.5% 50%,
-                #FF3D00 50% 62.5%, #112240 62.5% 75%,
-                #00E676 75% 87.5%, #112240 87.5% 100%
-            );
-            box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.3);
-        }
-        .wheel-pointer {
-            position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
-            width: 0; height: 0; border-left: 15px solid transparent;
-            border-right: 15px solid transparent; border-top: 30px solid white; z-index: 10;
-        }
-        .btn-spin {
-            background: var(--g); color: var(--p); border: none;
-            width: 80px; height: 80px; border-radius: 50%;
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 15; font-weight: 900; box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            cursor: pointer; border: 4px solid var(--p);
-        }
+        /* ROYAL STREAK AREA */
+        .streak-container { margin: 20px 0; height: 50px; position: relative; }
+        .crown-icon { font-size: 40px; color: var(--gold); display: none; filter: drop-shadow(0 0 10px var(--gold)); }
+        .active-streak .crown-icon { display: block; animation: bounceIn 0.5s; }
 
-        /* Mission List */
-        .mission-header { margin-top: 40px; display: flex; justify-content: space-between; }
-        .mission-item {
-            background: var(--card); padding: 18px; border-radius: 20px;
-            display: flex; align-items: center; gap: 15px; margin-top: 15px;
-            border: 1px solid rgba(100,255,218,0.05);
-        }
-        .mission-icon {
-            width: 45px; height: 45px; background: rgba(100,255,218,0.1);
-            border-radius: 12px; display: flex; align-items: center; justify-content: center;
-            color: var(--accent); font-size: 18px;
-        }
+        /* QUESTION CARD */
+        .question-card { background: var(--card); margin: 0 20px; padding: 30px 20px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); min-height: 150px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; line-height: 1.4; }
+
+        /* OPTIONS */
+        .options-grid { padding: 25px 20px; display: grid; gap: 15px; }
+        .option-btn { background: #1d2d44; padding: 18px; border-radius: 20px; border: 2px solid transparent; color: #ccd6f6; font-weight: 600; text-align: left; transition: 0.3s; cursor: pointer; display: flex; align-items: center; gap: 15px; }
+        .option-btn:active { transform: scale(0.95); }
+        .option-btn.correct { border-color: #22c55e; background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+        .option-btn.wrong { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+        /* LIFELINES */
+        .lifelines { display: flex; justify-content: center; gap: 20px; margin-top: 10px; }
+        .life-item { width: 50px; height: 50px; background: rgba(255,255,255,0.05); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 18px; border: 1px solid rgba(255,255,255,0.1); }
+
+        @keyframes bounceIn { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
-    <div class="referral-card">
-        <h2>REFER & SPIN</h2>
-        <p>Invite 1 friend and get <b>1 FREE SPIN</b> on the Wheel of Fortune. Earn XP and Airtime prizes instantly!</p>
-        <div style="font-size: 11px; margin-bottom: 15px;">Your Spins: <b id="spinCount" style="color: var(--g);">2</b></div>
-        <button class="invite-btn" onclick="copyInvite()">COPY INVITE LINK</button>
-    </div>
-
-    <div class="spin-container">
-        <div class="wheel-pointer"></div>
-        <div id="mainWheel" class="wheel-box"></div>
-        <button class="btn-spin" onclick="spinWheel()">SPIN</button>
-        <p style="margin-top: 25px; font-size: 12px; opacity: 0.6;">Try your luck today!</p>
-    </div>
-
-    <div class="mission-header">
-        <b style="color: var(--accent);">DAILY MISSIONS</b>
-        <span style="font-size: 11px; opacity: 0.7;">Resets in 12h</span>
-    </div>
-
-    <div class="mission-item">
-        <div class="mission-icon"><i class="fas fa-comment-dots"></i></div>
-        <div style="flex: 1;">
-            <div style="font-weight: bold; font-size: 14px;">Active Chatter</div>
-            <div style="font-size: 11px; opacity: 0.6;">Send 20 messages in CMchat</div>
+    <div class="quiz-header">
+        <i class="fas fa-times" onclick="history.back()" style="font-size: 20px;"></i>
+        <div class="timer-circle" id="timer">15</div>
+        <div style="text-align: right;">
+            <div style="font-size: 10px; opacity: 0.6;">Score</div>
+            <b id="score" style="font-size: 18px; color: var(--gold);">00</b>
         </div>
-        <div style="color: var(--g); font-weight: 800; font-size: 12px;">+50 XP</div>
     </div>
 
-    <div class="mission-item" style="opacity: 0.5;">
-        <div class="mission-icon"><i class="fas fa-users"></i></div>
-        <div style="flex: 1;">
-            <div style="font-weight: bold; font-size: 14px;">Team Builder</div>
-            <div style="font-size: 11px; opacity: 0.6;">Invite 3 friends today</div>
+    <div class="streak-container" id="streakBox">
+        <i class="fas fa-crown crown-icon"></i>
+        <div style="font-size: 11px; font-weight: 800; color: var(--gold); margin-top: 5px;" id="streakTxt"></div>
+    </div>
+
+    <div class="question-card" id="questionTxt">
+        Loading the first challenge for the future King...
+    </div>
+
+    <div class="options-grid" id="optionsGrid">
         </div>
-        <div style="color: var(--g); font-weight: 800; font-size: 12px;">+200 XP</div>
+
+    <div class="lifelines">
+        <div class="life-item" title="50/50"><i class="fas fa-magic" style="color: var(--cyan);"></i></div>
+        <div class="life-item" title="Freeze"><i class="fas fa-snowflake" style="color: #60a5fa;"></i></div>
+        <div class="life-item" title="Skip"><i class="fas fa-forward" style="color: #94a3b8;"></i></div>
     </div>
 
     <script>
-        // Wheel Logic
-        let spinning = false;
-        function spinWheel() {
-            if(spinning) return;
-            const spins = parseInt(document.getElementById('spinCount').innerText);
-            if(spins <= 0) return alert("No more spins! Invite friends to get more.");
+        let streak = 0;
+        let score = 0;
 
-            spinning = true;
-            const wheel = document.getElementById('mainWheel');
-            const randomDegree = Math.floor(Math.random() * 360) + 3600; // Akalla ya yi juyi 10
+        function handleAnswer(isCorrect, element) {
+            if(isCorrect) {
+                element.classList.add('correct');
+                streak++;
+                score += (streak >= 5) ? 20 : 10; // Double points for royalty
+                
+                if(streak >= 5) {
+                    document.getElementById('streakBox').classList.add('active-streak');
+                    document.getElementById('streakTxt').innerText = "ROYAL STREAK X2";
+                }
+            } else {
+                element.classList.add('wrong');
+                streak = 0;
+                document.getElementById('streakBox').classList.remove('active-streak');
+                document.getElementById('streakTxt').innerText = "";
+            }
             
-            wheel.style.transform = `rotate(${randomDegree}deg)`;
-            
-            setTimeout(() => {
-                spinning = false;
-                alert("Congratulations! You won a Prize. Check your notifications.");
-                // Update spin count in DB here
-            }, 4000);
-        }
-
-        function copyInvite() {
-            const link = "https://cmchatpro.com/join?ref=user123";
-            navigator.clipboard.writeText(link);
-            alert("Referral link copied!");
+            document.getElementById('score').innerText = score.toString().padStart(2, '0');
+            // Muje tambaya ta gaba bayan sakan 1
         }
     </script>
 </body>

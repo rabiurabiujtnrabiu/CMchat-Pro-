@@ -2,99 +2,172 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Vault | Secured Rewards</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CM Arena Vault | The Financial Bank</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
-        :root { --p: #0A192F; --g: #FFD600; --card: #112240; --safe: #00E676; --pending: #FF9100; }
-        body { margin: 0; background: var(--p); font-family: 'Inter', sans-serif; color: white; padding: 20px; }
+        :root { --p: #0A192F; --card: #112240; --gold: #FFD600; --cyan: #64FFDA; }
+        body { margin: 0; background: var(--p); font-family: 'Plus Jakarta Sans', sans-serif; color: white; padding-bottom: 120px; }
 
-        /* Security Dashboard */
-        .vault-status {
-            background: var(--card); border-radius: 25px; padding: 20px;
-            border: 1px solid rgba(255, 214, 0, 0.2); margin-bottom: 30px;
-        }
-        .points-row { display: flex; justify-content: space-between; margin-top: 15px; }
-        .p-box { text-align: center; flex: 1; }
-        .p-box b { display: block; font-size: 20px; }
-        .p-box span { font-size: 10px; opacity: 0.6; text-transform: uppercase; }
+        header { padding: 25px; display: flex; align-items: center; gap: 15px; background: rgba(10,25,47,0.9); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-        /* Anti-Scam Notice */
-        .scam-alert {
-            background: rgba(255, 145, 0, 0.1); color: var(--pending);
-            padding: 12px; border-radius: 15px; font-size: 11px;
-            display: flex; align-items: center; gap: 10px; margin-bottom: 25px;
+        /* THE BANK CARD */
+        .vault-card {
+            background: linear-gradient(135deg, #1d2d44 0%, #0a192f 100%);
+            margin: 20px; padding: 35px 25px; border-radius: 35px; border: 1.5px solid var(--gold);
+            text-align: center; position: relative; box-shadow: 0 15px 35px rgba(0,0,0,0.4);
         }
+        .vault-card i { position: absolute; right: -15px; bottom: -15px; font-size: 110px; opacity: 0.04; color: var(--gold); }
+        .points-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--cyan); font-weight: 800; }
+        .big-xp { font-size: 42px; font-weight: 900; color: var(--gold); margin: 12px 0; text-shadow: 0 0 20px rgba(255, 214, 0, 0.2); }
+        .conversion-rate { font-size: 10px; opacity: 0.6; font-style: italic; }
 
-        /* The Vault Grid */
-        .vault-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        .v-item {
-            background: var(--card); border-radius: 20px; overflow: hidden;
-            position: relative; border: 1px solid rgba(255,255,255,0.05);
+        /* EXCHANGE GRID */
+        .items-grid { padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .item-box { 
+            background: var(--card); border-radius: 25px; padding: 20px; text-align: center;
+            border: 1px solid rgba(255,255,255,0.05); transition: 0.3s;
         }
-        .v-item.locked { filter: grayscale(1); opacity: 0.7; }
-        
-        .lock-tag {
-            position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.8);
-            padding: 5px 12px; border-radius: 10px; font-size: 11px; color: var(--g);
-        }
-        .v-item img { width: 100%; height: 160px; object-fit: cover; }
-        .v-content { padding: 15px; }
+        .item-box i { font-size: 24px; color: var(--gold); margin-bottom: 12px; }
+        .item-title { font-size: 14px; font-weight: 800; margin-bottom: 5px; }
+        .item-cost { font-size: 12px; color: var(--cyan); font-weight: 700; margin-bottom: 15px; }
 
-        .btn-unlock {
-            width: 100%; padding: 12px; border-radius: 12px; border: none;
-            background: #334155; color: #94a3b8; font-weight: 800; cursor: not-allowed;
+        .btn-ex {
+            width: 100%; padding: 12px; border-radius: 15px; border: none;
+            background: #233554; color: #495670; font-weight: 900; font-size: 11px;
         }
-        .btn-ready {
-            background: var(--g) !important; color: var(--p) !important; cursor: pointer !important;
+        .active-btn { background: var(--gold) !important; color: var(--p) !important; cursor: pointer; box-shadow: 0 5px 15px rgba(255, 214, 0, 0.2); }
+
+        /* ADS BANNER PLACEHOLDER */
+        .ads-banner {
+            position: fixed; bottom: 20px; left: 15px; right: 15px;
+            height: 60px; background: #000; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid #333; overflow: hidden; z-index: 1000;
         }
+        .ad-label { position: absolute; top: 2px; left: 5px; font-size: 8px; color: #555; }
     </style>
 </head>
 <body>
 
-    <h2 style="color: var(--g); margin-bottom: 5px;">THE VAULT</h2>
-    <p style="font-size: 12px; opacity: 0.7; margin-top: 0;">Your earned treasures and points.</p>
+    <header>
+        <i class="fas fa-arrow-left" onclick="history.back()"></i>
+        <b style="font-size: 18px;">CM Financial Vault</b>
+    </header>
 
-    <div class="vault-status">
-        <div class="points-row">
-            <div class="p-box">
-                <b style="color: var(--safe);">1,250</b>
-                <span>Verified AP</span>
-            </div>
-            <div style="width: 1px; background: rgba(255,255,255,0.1); height: 40px;"></div>
-            <div class="p-box">
-                <b style="color: var(--pending);">400</b>
-                <span>Pending (48h)</span>
-            </div>
+    <div class="vault-card">
+        <i class="fas fa-university"></i>
+        <div class="points-label">Total Verified Assets</div>
+        <div class="big-xp" id="xpDisplay">00.00</div>
+        <div class="conversion-rate">Exchange Rate: 10,000 XP = ₦1,000</div>
+    </div>
+
+    <div class="items-grid">
+        <div class="item-box">
+            <i class="fas fa-sim-card"></i>
+            <div class="item-title">₦200 Airtime</div>
+            <div class="item-cost">2,000 XP</div>
+            <button class="btn-ex" id="btnAirtime" onclick="startExchange('Airtime', 2000, 200)">EXCHANGE</button>
+        </div>
+
+        <div class="item-box">
+            <i class="fas fa-globe"></i>
+            <div class="item-title">500MB Data</div>
+            <div class="item-cost">1,500 XP</div>
+            <button class="btn-ex" id="btnData" onclick="startExchange('Data', 1500, 150)">EXCHANGE</button>
+        </div>
+
+        <div class="item-box">
+            <i class="fas fa-money-bill-wave"></i>
+            <div class="item-title">₦1,000 Cash</div>
+            <div class="item-cost">10,000 XP</div>
+            <button class="btn-ex" id="btnCash" onclick="startExchange('Cash', 10000, 1000)">EXCHANGE</button>
+        </div>
+
+        <div class="item-box">
+            <i class="fas fa-crown"></i>
+            <div class="item-title">₦5,000 Cash</div>
+            <div class="item-cost">50,000 XP</div>
+            <button class="btn-ex" id="btnElite" onclick="startExchange('Elite Cash', 50000, 5000)">EXCHANGE</button>
         </div>
     </div>
 
-    <div class="scam-alert">
-        <i class="fas fa-shield-alt"></i>
-        <span>Points from new referrals are held for 48h to verify account activity. Fake accounts will be banned.</span>
+    <div class="ads-banner">
+        <span class="ad-label">ADVERTISEMENT</span>
+        <div style="color: #444; font-size: 12px; font-weight: 800;">GOOGLE AD BANNER SPACE</div>
     </div>
 
-    <div class="vault-grid">
-        <div class="v-item">
-            <div class="lock-tag">READY</div>
-            <img src="https://via.placeholder.com/400x200?text=Airtime+Voucher">
-            <div class="v-content">
-                <b style="display: block;">₦200 Instant Airtime</b>
-                <p style="font-size: 11px; opacity: 0.6; margin: 8px 0;">Cost: 500 Verified Points</p>
-                <button class="btn-unlock btn-ready">EXCHANGE NOW</button>
-            </div>
-        </div>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-        <div class="v-item locked">
-            <div class="lock-tag"><i class="fas fa-lock"></i> LVL 5 ONLY</div>
-            <img src="https://via.placeholder.com/400x200?text=Premium+Gift+Box">
-            <div class="v-content">
-                <b style="display: block;">Mystery Tech Box</b>
-                <p style="font-size: 11px; opacity: 0.6; margin: 8px 0;">Cost: 5,000 Verified Points</p>
-                <button class="btn-unlock">LEVEL TOO LOW</button>
-            </div>
-        </div>
-    </div>
+    <script>
+        const firebaseConfig = { databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const myName = localStorage.getItem('username') || "Elite_User";
 
+        let currentXP = 0;
+
+        // Sync Data Real-time
+        db.ref('users/' + myName).on('value', snap => {
+            const data = snap.val() || {};
+            currentXP = data.xpPoints || 0;
+            
+            // Format number with commas (e.g., 10,000)
+            document.getElementById('xpDisplay').innerText = currentXP.toLocaleString() + " XP";
+
+            // Update Buttons Eligibility
+            updateBtn('btnAirtime', 2000);
+            updateBtn('btnData', 1500);
+            updateBtn('btnCash', 10000);
+            updateBtn('btnElite', 50000);
+        });
+
+        function updateBtn(id, cost) {
+            const btn = document.getElementById(id);
+            if(currentXP >= cost) {
+                btn.classList.add('active-btn');
+                btn.innerText = "EXCHANGE NOW";
+            } else {
+                btn.classList.remove('active-btn');
+                btn.innerText = "NOT ENOUGH XP";
+            }
+        }
+
+        function startExchange(name, cost, naira) {
+            if(currentXP < cost) return;
+
+            Swal.fire({
+                title: 'Confirm Vault Exchange',
+                html: `Kuna son musayar <b>${cost.toLocaleString()} XP</b> zuwa <b>₦${naira}</b>?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#FFD600',
+                confirmButtonText: 'Yes, Exchange!',
+                cancelButtonColor: '#1d2d44'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    executeVaultTransaction(name, cost, naira);
+                }
+            });
+        }
+
+        function executeVaultTransaction(name, cost, naira) {
+            db.ref('users/' + myName).transaction((user) => {
+                if (user) {
+                    if (user.xpPoints >= cost) {
+                        user.xpPoints -= cost;
+                        user.balance = (user.balance || 0) + naira;
+                    }
+                }
+                return user;
+            }).then(() => {
+                Swal.fire('Vault Success!', `₦${naira} has been added to your wallet.`, 'success');
+            });
+        }
+    </script>
 </body>
 </html>

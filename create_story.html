@@ -3,77 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Create Special Story | CMchat PRO</title>
+    <title>Elite Story Lab | CMchat PRO</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <style>
-        :root { --primary: #1877f2; }
+        :root { --primary-gradient: linear-gradient(135deg, #0062ff, #00d2ff); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: #000; height: 100vh; color: white; overflow: hidden; position: relative; }
+        body { background: #000; height: 100vh; color: white; overflow: hidden; position: relative; touch-action: none; }
 
-        #storyPreview { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.6; transition: 0.3s; }
+        /* Story Canvas */
+        #storyPreview { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            object-fit: cover; z-index: 1; opacity: 0.5; transition: 0.4s ease;
+        }
 
-        .story-header { position: relative; z-index: 20; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .publish-btn { background: var(--primary); color: white; border: none; padding: 10px 25px; border-radius: 30px; font-weight: 800; cursor: pointer; }
+        /* Overlay Controls */
+        .story-header { position: relative; z-index: 20; padding: 25px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .back-icon { width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); cursor: pointer; }
+        .publish-btn { background: var(--primary-gradient); color: white; border: none; padding: 12px 28px; border-radius: 25px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 98, 255, 0.4); }
 
+        /* MULTI-LINE CAPTION SYSTEM WITH DRAG SUPPORT */
         #draggable-caption {
-            position: absolute; z-index: 15; top: 40%; left: 10%;
-            cursor: move; padding: 10px; width: 80%; text-align: center;
+            position: absolute; z-index: 15; top: 40%; left: 5%;
+            width: 90%; text-align: center;
+            touch-action: none; /* Crucial for Drag */
+            transition: transform 0.05s linear;
         }
         .caption-input {
             background: transparent; border: none; outline: none;
-            color: white; font-size: 26px; text-align: center;
-            font-weight: 900; text-shadow: 2px 2px 12px rgba(0,0,0,1);
-            width: 100%; pointer-events: auto;
+            color: white; font-size: 28px; text-align: center;
+            font-weight: 900; text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            width: 100%; caret-color: #0062ff; resize: none;
+            overflow: hidden; word-wrap: break-word;
+            display: block;
         }
 
-        .story-tools { position: absolute; bottom: 0; width: 100%; z-index: 20; padding: 30px; display: flex; justify-content: space-around; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); }
+        /* EDITING TOOLS PANEL */
+        .edit-panel {
+            position: absolute; right: 15px; top: 100px; 
+            z-index: 20; display: flex; flex-direction: column; gap: 15px;
+        }
+        .edit-tool { width: 45px; height: 45px; background: rgba(0,0,0,0.5); border-radius: 12px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
+
+        /* BOTTOM TOOLS */
+        .story-tools { 
+            position: absolute; bottom: 0; width: 100%; z-index: 20; 
+            padding: 30px 20px; display: flex; justify-content: space-around; 
+            background: linear-gradient(to top, rgba(0,0,0,1), transparent); 
+        }
         .tool-item { text-align: center; cursor: pointer; }
-        .tool-circle { width: 55px; height: 55px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2); }
+        .tool-circle { width: 55px; height: 55px; background: rgba(255,255,255,0.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+        .tool-item span { font-size: 10px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-    <img id="storyPreview" src="https://via.placeholder.com/1080x1920/111/444?text=Select+Photo">
+    <img id="storyPreview" src="https://via.placeholder.com/1080x1920/000/000?text=.">
 
     <div class="story-header">
-        <i class="fas fa-times" onclick="window.history.back()" style="font-size: 24px; cursor:pointer;"></i>
+        <div class="back-icon" onclick="window.history.back()"><i class="fas fa-chevron-left"></i></div>
         <button id="publishBtn" class="publish-btn">Share Story</button>
     </div>
 
+    <div class="edit-panel">
+        <div class="edit-tool" onclick="applyFilter('none')"><i class="fas fa-undo"></i></div>
+        <div class="edit-tool" onclick="applyFilter('grayscale(100%)')"><i class="fas fa-moon"></i></div>
+        <div class="edit-tool" onclick="applyFilter('sepia(80%)')"><i class="fas fa-palette"></i></div>
+        <div class="edit-tool" onclick="applyFilter('brightness(1.5)')"><i class="fas fa-sun"></i></div>
+    </div>
+
     <div id="draggable-caption">
-        <input type="text" id="caption" class="caption-input" placeholder="Type a caption..." autofocus>
+        <textarea id="caption" class="caption-input" placeholder="Aa" rows="1" oninput="autoResize(this)"></textarea>
     </div>
 
     <div class="story-tools">
         <label for="mediaInput" class="tool-item">
-            <div class="tool-circle"><i class="fas fa-image" style="font-size: 20px;"></i></div>
-            <span style="font-size: 11px;">Gallery</span>
+            <div class="tool-circle"><i class="fas fa-images"></i></div>
+            <span>Gallery</span>
         </label>
-        <div class="tool-item" onclick="document.getElementById('caption').focus()">
-            <div class="tool-circle"><i class="fas fa-font" style="font-size: 20px;"></i></div>
-            <span style="font-size: 11px;">Add Text</span>
+        <div class="tool-item" onclick="changeTextColor()">
+            <div class="tool-circle"><i class="fas fa-fill-drip"></i></div>
+            <span>Color</span>
+        </div>
+        <div class="tool-item" onclick="location.reload()">
+            <div class="tool-circle"><i class="fas fa-sync-alt"></i></div>
+            <span>Reset</span>
         </div>
     </div>
 
     <input type="file" id="mediaInput" hidden accept="image/*">
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
-            projectId: "cmchat-pro"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", projectId: "cmchat-pro" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         const mediaInput = document.getElementById('mediaInput');
         const storyPreview = document.getElementById('storyPreview');
         const publishBtn = document.getElementById('publishBtn');
-        const captionBox = document.getElementById('draggable-caption');
+        const captionArea = document.getElementById('caption');
+        const dragBox = document.getElementById('draggable-caption');
 
         let compressedImageBase64 = "";
+
+        // AUTO RESIZE TEXTAREA
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = el.scrollHeight + 'px';
+        }
+
+        // --- ELITE DRAG ENGINE ---
+        let active = false;
+        let currentY;
+        let initialY;
+        let yOffset = 0;
+
+        document.addEventListener("touchstart", dragStart, false);
+        document.addEventListener("touchend", dragEnd, false);
+        document.addEventListener("touchmove", drag, false);
+
+        function dragStart(e) {
+            if (e.target === captionArea) {
+                // If typing, don't drag
+                if (document.activeElement === captionArea) return;
+                
+                initialY = e.touches[0].clientY - yOffset;
+                active = true;
+            }
+        }
+
+        function dragEnd(e) {
+            initialY = currentY;
+            active = false;
+        }
+
+        function drag(e) {
+            if (active) {
+                e.preventDefault();
+                currentY = e.touches[0].clientY - initialY;
+                yOffset = currentY;
+                setTranslate(currentY, dragBox);
+            }
+        }
+
+        function setTranslate(yPos, el) {
+            el.style.transform = "translate3d(0, " + yPos + "px, 0)";
+        }
+
+        // FILTER SYSTEM
+        function applyFilter(filterValue) {
+            storyPreview.style.filter = filterValue;
+        }
+
+        // COLOR SYSTEM
+        const colors = ['#ffffff', '#0062ff', '#ff3b30', '#4cd964', '#ffcc00', '#ff2d55', '#000000'];
+        let colorIdx = 0;
+        function changeTextColor() {
+            colorIdx = (colorIdx + 1) % colors.length;
+            captionArea.style.color = colors[colorIdx];
+        }
 
         mediaInput.onchange = e => {
             const file = e.target.files[0];
@@ -85,12 +177,10 @@
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
-                        const targetWidth = 720;
-                        const targetHeight = (img.height * targetWidth) / img.width;
-                        canvas.width = targetWidth;
-                        canvas.height = targetHeight;
-                        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-                        compressedImageBase64 = canvas.toDataURL('image/jpeg', 0.6);
+                        canvas.width = 1080;
+                        canvas.height = (img.height * 1080) / img.width;
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        compressedImageBase64 = canvas.toDataURL('image/jpeg', 0.8);
                         storyPreview.src = compressedImageBase64;
                         storyPreview.style.opacity = "1";
                     }
@@ -99,27 +189,19 @@
             }
         };
 
-        captionBox.addEventListener('touchmove', function(e) {
-            e.preventDefault();
-            let touch = e.touches[0];
-            captionBox.style.left = (touch.clientX - (captionBox.offsetWidth/2)) + 'px';
-            captionBox.style.top = (touch.clientY - (captionBox.offsetHeight/2)) + 'px';
-        }, {passive: false});
-
-        // GYARAN DA KA BUKATA (SILENT & FAST UPLOAD)
         publishBtn.onclick = () => {
             if(!compressedImageBase64) return;
+            publishBtn.innerText = "Sharing...";
+            publishBtn.disabled = true;
 
-            // Tura sako Firebase a boye (Background)
             db.collection('stories').add({
                 imageUrl: compressedImageBase64,
-                caption: document.getElementById('caption').value,
+                caption: captionArea.value,
+                textColor: captionArea.style.color || '#ffffff',
+                yPos: yOffset, // Save drag position
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                owner: localStorage.getItem('username') || "Anonymous"
-            });
-
-            // Komawa baya nan take ba tare da nuna wani sako ba
-            window.history.back();
+                owner: localStorage.getItem('username') || "Elite Member"
+            }).then(() => window.history.back());
         };
     </script>
 </body>

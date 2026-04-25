@@ -3,123 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CM Market | Global Elite Store</title>
+    <title>Elite Market Pro | CMchat Academy</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
-        :root {
-            --p: #1A237E; --accent: #FFD600; --bg: #F4F7FE;
-            --white: #ffffff; --text: #2D3436; --success: #00E676;
-        }
-        body { 
-            margin: 0; background: var(--bg); font-family: 'Inter', sans-serif; 
-            color: var(--text); padding-bottom: 40px;
-        }
+        :root { --p: #1A237E; --accent: #FFD600; --bg: #f8fafc; --white: #fff; --text: #1e293b; }
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.3s; }
+        body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 50px; }
 
-        /* Header & Navigation */
+        /* --- HEADER & WALLET --- */
         .market-header {
             background: linear-gradient(135deg, var(--p), #303F9F);
-            padding: 40px 25px 60px; border-bottom-left-radius: 40px;
-            border-bottom-right-radius: 40px; color: white;
-            box-shadow: 0 10px 30px rgba(26, 35, 126, 0.2);
+            padding: 45px 25px 70px; border-bottom-left-radius: 50px;
+            border-bottom-right-radius: 50px; color: white;
+            box-shadow: 0 15px 35px rgba(26, 35, 126, 0.2);
         }
-        .header-nav { display: flex; justify-content: space-between; align-items: center; }
-        
-        .market-balance {
-            background: rgba(255,255,255,0.15); padding: 8px 15px;
-            border-radius: 15px; font-size: 13px; font-weight: 700;
-            backdrop-filter: blur(10px); display: flex; align-items: center; gap: 8px;
+        .nav-row { display: flex; justify-content: space-between; align-items: center; }
+        .wallet-card {
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(15px);
+            padding: 10px 18px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.2);
+            display: flex; align-items: center; gap: 10px;
         }
 
-        /* Search Area */
-        .search-container { margin: -25px 20px 25px; }
-        .search-box {
-            background: var(--white); border-radius: 20px; padding: 15px 20px;
+        /* --- SEARCH & CATEGORIES --- */
+        .market-actions { margin: -35px 20px 20px; }
+        .search-wrapper {
+            background: var(--white); border-radius: 22px; padding: 16px 25px;
             display: flex; align-items: center; gap: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9;
         }
-        .search-box input { border: none; outline: none; width: 100%; font-size: 14px; color: #636e72; }
+        .search-wrapper input { border: none; outline: none; width: 100%; font-size: 14px; color: #475569; }
 
-        /* Modern Product Grid */
-        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
-        .product-card {
-            background: white; border-radius: 25px; padding: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.02); border: 1px solid #f1f2f6;
-            transition: 0.3s; position: relative;
+        .cat-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 5px 25px 20px; scrollbar-width: none; }
+        .cat-btn { 
+            padding: 10px 20px; background: white; border-radius: 14px; 
+            font-size: 11px; font-weight: 800; color: #64748b; 
+            white-space: nowrap; border: 1px solid #f1f5f9; cursor: pointer;
         }
+        .cat-btn.active { background: var(--p); color: white; border-color: var(--p); }
+
+        /* --- PRODUCT GRID --- */
+        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 0 20px; }
+        .course-card {
+            background: white; border-radius: 30px; padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02); border: 1px solid #f1f5f9;
+            position: relative;
+        }
+        .course-card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.05); }
         
-        .product-img {
-            width: 100%; height: 130px; background: #f8f9fa;
-            border-radius: 20px; margin-bottom: 12px;
+        .course-icon {
+            width: 100%; height: 130px; border-radius: 24px; margin-bottom: 12px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 35px; color: var(--p); position: relative; overflow: hidden;
+            font-size: 38px; position: relative; overflow: hidden;
         }
-
-        .product-img::after {
-            content: ''; position: absolute; top: -50%; right: -15px;
-            width: 40px; height: 200%;
-            background: linear-gradient(to bottom, transparent, rgba(26, 35, 126, 0.15), transparent);
-            transform: rotate(25deg); animation: shine 4s infinite linear;
+        .course-icon::after {
+            content: ''; position: absolute; top: -50%; right: -20px; width: 40px; height: 200%;
+            background: rgba(255,255,255,0.3); transform: rotate(25deg);
+            animation: shine 3s infinite;
         }
+        @keyframes shine { from { transform: rotate(25deg) translateY(-100%); } to { transform: rotate(25deg) translateY(100%); } }
 
-        @keyframes shine {
-            0% { transform: rotate(25deg) translateY(-100%); }
-            100% { transform: rotate(25deg) translateY(100%); }
-        }
-
-        .product-info h3 { margin: 0; font-size: 13px; font-weight: 800; color: var(--text); height: 35px; overflow: hidden; }
-        .product-info p { margin: 5px 0; font-size: 9px; color: #b2bec3; font-weight: 600; text-transform: uppercase; }
-        .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-        .price { font-weight: 900; color: var(--p); font-size: 14px; }
+        .course-card h3 { font-size: 13px; font-weight: 800; margin: 8px 0; min-height: 38px; line-height: 1.4; }
+        .course-card p { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 0; }
         
-        .add-btn {
-            background: #E8EAF6; color: var(--p); width: 32px; height: 32px;
-            border-radius: 10px; display: flex; align-items: center; 
-            justify-content: center; font-size: 14px; cursor: pointer; transition: 0.2s;
+        .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+        .price-text { font-weight: 900; color: var(--p); font-size: 15px; }
+        
+        .enroll-btn {
+            background: #f1f5f9; color: var(--p); width: 38px; height: 38px;
+            border-radius: 12px; display: flex; align-items: center; 
+            justify-content: center; cursor: pointer;
         }
-        .add-btn:active { background: var(--p); color: white; transform: scale(0.9); }
+        .enroll-btn:hover { background: var(--p); color: white; }
 
-        .section-label { font-size: 11px; font-weight: 800; color: #A4B0BE; margin: 25px 0 10px 30px; text-transform: uppercase; letter-spacing: 1.2px; }
-        .ad-box {
-            margin: 0 20px 25px; padding: 25px; background: #ffffff;
-            border-radius: 25px; border: 2px dashed #D1D8E0;
-            text-align: center; color: #7F8C8D; font-size: 13px; font-weight: 600;
-        }
-        .swal2-popup { border-radius: 25px !important; background: var(--white) !important; color: var(--text) !important; }
+        .section-tag { font-size: 11px; font-weight: 800; color: #94a3b8; margin: 20px 0 15px 30px; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
     <header class="market-header">
-        <div class="header-nav animate__animated animate__fadeIn">
-            <i class="fas fa-chevron-left" onclick="window.history.back()"></i>
-            <div class="market-balance">
+        <div class="nav-row animate__animated animate__fadeIn">
+            <i class="fas fa-arrow-left" onclick="history.back()"></i>
+            <b style="font-size: 18px;">Elite Store</b>
+            <div class="wallet-card">
                 <i class="fas fa-wallet" style="color:var(--accent)"></i>
-                <span id="marketBalDisplay">₦0.00</span>
+                <span id="walletBal">₦0.00</span>
             </div>
-            <h2 style="margin:0; font-size: 18px; letter-spacing: -0.5px;">Elite Market</h2>
         </div>
     </header>
 
-    <div class="search-container animate__animated animate__fadeInUp">
-        <div class="search-box">
-            <i class="fas fa-search" style="color: #b2bec3;"></i>
-            <input type="text" id="marketSearch" onkeyup="filterProducts()" placeholder="Search premium courses...">
+    <div class="market-actions animate__animated animate__fadeInUp">
+        <div class="search-wrapper">
+            <i class="fas fa-search" style="color: #cbd5e1;"></i>
+            <input type="text" id="searchInput" onkeyup="filterCourses()" placeholder="Search premium courses...">
         </div>
     </div>
 
-    <div id="product-list-container">
-        <p class="section-label">Premium Catalog</p>
-        <div class="product-grid" id="main-grid">
-            </div>
+    <div class="cat-scroll">
+        <div class="cat-btn active" onclick="filterCat('All')">All</div>
+        <div class="cat-btn" onclick="filterCat('Tech')">Tech & AI</div>
+        <div class="cat-btn" onclick="filterCat('Trading')">Trading</div>
+        <div class="cat-btn" onclick="filterCat('Coding')">Coding</div>
     </div>
 
-    <p class="section-label">Sponsored Content</p>
-    <div class="ad-box animate__animated animate__fadeIn">
-        <i class="fas fa-bullhorn" style="margin-bottom: 8px; display: block; font-size: 24px; color: var(--accent);"></i>
-        Promote Your Global Product Here
-    </div>
+    <div class="section-tag">Premium Catalog</div>
+    <div class="product-grid" id="marketGrid"></div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -130,101 +122,97 @@
             databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
             projectId: "cmchat-pro"
         };
-        
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const userName = localStorage.getItem('username') || "Guest_User";
+        const myName = localStorage.getItem('username') || "Elite_User";
 
-        // 1. Live Wallet Sync
-        db.ref('users/' + userName + '/wallet').on('value', snap => {
-            const bal = snap.val() || 0;
-            document.getElementById('marketBalDisplay').innerText = "₦" + bal.toLocaleString();
-        });
-
-        // 2. Sample Product Data (Za ka iya maida wannan Firebase daga baya)
-        const products = [
-            { id: 1, cat: 'Artificial Intelligence', name: 'AI Prompt Engineering Mastery', price: 10000, icon: 'fa-robot', bg: '#E3F2FD' },
-            { id: 2, cat: 'Cybersecurity', name: 'Cyber Ghost Security Protocol', price: 15000, icon: 'fa-user-secret', bg: '#FFEBEE' },
-            { id: 3, cat: 'Trading', name: 'Crypto King Trading Strategy', price: 12500, icon: 'fa-chart-line', bg: '#FFF8E1' },
-            { id: 4, cat: 'Development', name: 'Elite Web App Development', price: 20000, icon: 'fa-code', bg: '#E8EAF6' },
-            { id: 5, cat: 'Creative', name: 'Pro Graphics Design Master', price: 8000, icon: 'fa-paint-brush', bg: '#F3E5F5' },
-            { id: 6, cat: 'Social Media', name: 'TikTok Marketing Secrets', price: 5000, icon: 'fa-tiktok', bg: '#E0F2F1' }
+        const courseData = [
+            { id: 'ai_01', cat: 'Tech', name: 'AI Prompt Engineering Mastery', price: 10000, icon: 'fa-robot', bg: '#E3F2FD' },
+            { id: 'trd_01', cat: 'Trading', name: 'Forex King Strategy 2026', price: 15000, icon: 'fa-chart-line', bg: '#FFF8E1' },
+            { id: 'cod_01', cat: 'Coding', name: 'Fullstack Web App Design', price: 25000, icon: 'fa-code', bg: '#E8EAF6' },
+            { id: 'des_01', cat: 'Creative', name: 'Elite Graphics & UI/UX', price: 8500, icon: 'fa-paint-brush', bg: '#F3E5F5' }
         ];
 
-        function displayProducts(filtered) {
-            const grid = document.getElementById('main-grid');
-            grid.innerHTML = filtered.map(p => `
-                <div class="product-card animate__animated animate__zoomIn">
-                    <div class="product-img" style="background: ${p.bg};"><i class="fas ${p.icon}"></i></div>
-                    <div class="product-info">
-                        <p>${p.cat}</p>
-                        <h3>${p.name}</h3>
-                        <div class="price-row">
-                            <span class="price">₦${p.price.toLocaleString()}</span>
-                            <div class="add-btn" onclick="buyItem(${p.price}, '${p.name}')"><i class="fas fa-plus"></i></div>
+        // 1. Wallet Real-time Sync
+        db.ref('users/' + myName + '/wallet').on('value', snap => {
+            const bal = snap.val() || 0;
+            document.getElementById('walletBal').innerText = "₦" + bal.toLocaleString();
+        });
+
+        // 2. Render Courses
+        function render(list) {
+            const grid = document.getElementById('marketGrid');
+            grid.innerHTML = list.map(c => `
+                <div class="course-card animate__animated animate__zoomIn">
+                    <div class="course-icon" style="background: ${c.bg}; color: var(--p);">
+                        <i class="fas ${c.icon}"></i>
+                    </div>
+                    <p>${c.cat}</p>
+                    <h3>${c.name}</h3>
+                    <div class="price-row">
+                        <span class="price-text">₦${c.price.toLocaleString()}</span>
+                        <div class="enroll-btn" onclick="buyCourse(${c.price}, '${c.name}')">
+                            <i class="fas fa-cart-plus"></i>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        // 3. Live Search Filter
-        function filterProducts() {
-            const term = document.getElementById('marketSearch').value.toLowerCase();
-            const filtered = products.filter(p => p.name.toLowerCase().includes(term) || p.cat.toLowerCase().includes(term));
-            displayProducts(filtered);
-        }
-
-        // 4. Secure Purchase System
-        function buyItem(amt, name) {
+        // 3. Purchase & Academy Integration
+        function buyCourse(price, title) {
             Swal.fire({
-                title: 'Confirm Purchase',
-                text: `Unlock "${name}" for ₦${amt.toLocaleString()}?`,
-                icon: 'question',
+                title: 'Enroll Now?',
+                html: `Unlock <b>${title}</b> for ₦${price.toLocaleString()}?`,
+                icon: 'info',
                 showCancelButton: true,
                 confirmButtonColor: '#1A237E',
-                confirmButtonText: 'Confirm Payment',
-                cancelButtonText: 'Cancel'
-            }).then((res) => {
+                confirmButtonText: 'Pay & Enroll'
+            }).then(async (res) => {
                 if (res.isConfirmed) {
-                    const walletRef = db.ref('users/' + userName + '/wallet');
+                    const walletRef = db.ref('users/' + myName + '/wallet');
+                    const transRef = db.ref('transactions/' + myName);
                     
+                    // Verify if already owned
+                    const ownedSnap = await transRef.orderByChild('service').equalTo(`Market: ${title}`).once('value');
+                    if (ownedSnap.exists()) return Swal.fire('Owned!', 'You already have access to this course.', 'success');
+
                     walletRef.once('value').then(s => {
-                        const currentBal = s.val() || 0;
-                        
-                        if (currentBal >= amt) {
-                            // Deduct balance and record transaction
-                            const newBal = currentBal - amt;
-                            walletRef.set(newBal).then(() => {
-                                db.ref('orders/' + userName).push({
-                                    product: name,
-                                    amount: amt,
-                                    timestamp: firebase.database.ServerValue.TIMESTAMP,
-                                    status: 'unlocked'
+                        const bal = s.val() || 0;
+                        if (bal >= price) {
+                            // EXECUTE TRANSACTION
+                            walletRef.set(bal - price).then(() => {
+                                transRef.push({
+                                    service: `Market: ${title}`,
+                                    amount: price,
+                                    time: new Date().toLocaleString(),
+                                    status: 'Success'
                                 });
-                                
-                                Swal.fire({
-                                    title: 'Purchase Successful!',
-                                    text: `You now have access to ${name}.`,
-                                    icon: 'success',
-                                    confirmButtonColor: '#00E676'
-                                });
+                                Swal.fire('Success!', 'Course unlocked. Check your Academy portal.', 'success');
                             });
                         } else {
-                            Swal.fire({
-                                title: 'Insufficient Balance',
-                                text: 'You do not have enough funds. Please top up your wallet.',
-                                icon: 'error',
-                                confirmButtonColor: '#FF3D00'
-                            });
+                            Swal.fire('Low Balance', 'Please top up your wallet to enroll.', 'error');
                         }
                     });
                 }
             });
         }
 
-        // Initial Load
-        displayProducts(products);
+        // 4. Filtering Logic
+        function filterCourses() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = courseData.filter(c => c.name.toLowerCase().includes(q) || c.cat.toLowerCase().includes(q));
+            render(filtered);
+        }
+
+        function filterCat(cat) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            const filtered = cat === 'All' ? courseData : courseData.filter(c => c.cat === cat);
+            render(filtered);
+        }
+
+        window.onload = () => render(courseData);
     </script>
 </body>
 </html>

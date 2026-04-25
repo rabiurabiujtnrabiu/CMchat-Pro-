@@ -14,21 +14,45 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// Wannan zai riƙa nuna sanarwar kira koda app ɗin a rufe yake
 messaging.onBackgroundMessage((payload) => {
-  console.log('Kiran Gaggawa Ya Iso:', payload);
+  console.log('Sakon CMchat Pro Ya Iso:', payload);
   
-  const notificationTitle = 'Kira Daga CMchat Pro';
+  // Logic na tantance nau'in sanarwa (Kira ko Group Message)
+  const isCall = payload.data.type === 'incoming_call';
+  const isUrgent = payload.data.priority === 'high'; // Advanced Setting
+  
+  const notificationTitle = isCall ? 'Kiran Gaggawa Daga CMchat Pro' : payload.notification.title;
+  
   const notificationOptions = {
-    body: payload.data.callerName + ' yana kiran ka...',
-    icon: '/icon.png', // Saka icon ɗin app ɗinka anan
-    tag: 'call-notification',
-    vibrate: [200, 100, 200, 100, 200, 100, 400],
-    actions: [
-      { action: 'accept', title: 'Dagawa' },
-      { action: 'decline', title: 'Kashewa' }
+    body: isCall ? (payload.data.callerName + ' yana kiran ka...') : payload.notification.body,
+    icon: '/icon.png',
+    badge: '/badge.png', // Icon karami na sama
+    tag: isCall ? 'call-notification' : 'group-chat',
+    // Idan kira ne na "Commander", vibration din zai yi tsayi
+    vibrate: isUrgent ? [500, 110, 500, 110, 450, 110, 200, 110, 1000] : [200, 100, 200],
+    data: payload.data, // Adana bayanan don amfani nan gaba
+    actions: isCall ? [
+      { action: 'accept', title: 'Dagawa ✅' },
+      { action: 'decline', title: 'Kashewa ❌' }
+    ] : [
+      { action: 'open_chat', title: 'Budewa 💬' }
     ]
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+// Logic na lokacin da aka taba Notification
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const action = event.action;
+  const data = event.notification.data;
+
+  if (action === 'accept') {
+    // Tura mutum zuwa dakin kiran bidiyo
+    clients.openWindow('/video-call?room=' + data.roomId);
+  } else {
+    // Bude app din kawai
+    clients.openWindow('/');
+  }
 });

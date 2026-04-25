@@ -2,230 +2,111 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Purchase Services | CMchat Pro VTU</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Elite VTU Portal | CMchat Pro</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
-        :root {
-            --primary: #1A237E;
-            --accent: #FFD600;
-            --bg: #F4F7FE;
-            --white: #ffffff;
-            --text-main: #1C1C1E;
-            --text-sub: #8E8E93;
-            --border: #E5E5EA;
-        }
+        :root { --primary: #1A237E; --accent: #FFD600; --bg: #F4F7FE; --white: #ffffff; }
+        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: #1c1c1e; padding-bottom: 50px; }
 
-        body {
-            margin: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--bg);
-            color: var(--text-main);
-            overflow-x: hidden;
-        }
+        header { background: var(--primary); padding: 25px 20px; display: flex; align-items: center; color: white; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; }
+        header i { font-size: 20px; margin-right: 15px; }
 
-        /* --- STICKY HEADER --- */
-        header {
-            background: var(--primary);
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            color: white;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        header i { font-size: 20px; cursor: pointer; margin-right: 15px; }
-        header b { font-size: 18px; font-weight: 700; }
+        .container { padding: 20px; max-width: 500px; margin: 0 auto; }
+        .card { background: var(--white); border-radius: 35px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
 
-        .container {
-            padding: 20px;
-            max-width: 500px;
-            margin: 0 auto;
-        }
+        .label-text { display: block; font-size: 11px; font-weight: 800; color: #8e8e93; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; }
 
-        /* --- SERVICE SELECTOR CARD --- */
-        .card {
-            background: var(--white);
-            border-radius: 30px;
-            padding: 25px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.04);
-            margin-bottom: 20px;
-        }
+        select, input { width: 100%; padding: 18px; border-radius: 20px; border: 2px solid #F0F2F8; outline: none; font-size: 15px; font-weight: 700; background: #F9F9FB; transition: 0.3s; }
+        select:focus, input:focus { border-color: var(--primary); background: white; }
 
-        .label-text {
-            display: block;
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--text-sub);
-            text-transform: uppercase;
-            margin-bottom: 12px;
-            letter-spacing: 1px;
-        }
+        /* Network Selection Modern Grid */
+        .network-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 25px; }
+        .network-item { background: #F9F9FB; border: 2px solid #F0F2F8; border-radius: 18px; padding: 12px 5px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .network-item img { width: 30px; height: 30px; object-fit: contain; margin-bottom: 5px; border-radius: 5px; }
+        .network-item span { font-size: 9px; font-weight: 800; display: block; }
+        .network-item.active { border-color: var(--primary); background: #E8EAF6; transform: scale(1.05); }
 
-        select, input {
-            width: 100%;
-            padding: 16px;
-            border-radius: 18px;
-            border: 2px solid var(--border);
-            outline: none;
-            font-family: inherit;
-            font-size: 15px;
-            font-weight: 600;
-            box-sizing: border-box;
-            transition: 0.3s ease;
-            background: #F9F9FB;
-        }
+        .summary-box { background: #F0F2F8; border-radius: 20px; padding: 20px; margin: 25px 0; display: flex; justify-content: space-between; font-weight: 800; }
+        .summary-box b { color: var(--primary); font-size: 16px; }
 
-        select:focus, input:focus {
-            border-color: var(--primary);
-            background: var(--white);
-            box-shadow: 0 0 0 4px rgba(26, 35, 126, 0.05);
-        }
-
-        /* --- NETWORK GRID (ALL 4 VISIBLE) --- */
-        .network-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .network-item {
-            background: #F9F9FB;
-            border: 2px solid var(--border);
-            border-radius: 20px;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .network-item img {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            object-fit: contain;
-        }
-
-        .network-item span {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .network-item.active {
-            border-color: var(--primary);
-            background: #E8EAF6;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(26, 35, 126, 0.1);
-        }
-
-        /* --- SUMMARY BOX --- */
-        .summary-box {
-            background: #F0F2F8;
-            border-radius: 20px;
-            padding: 15px 20px;
-            margin: 20px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .summary-box span { font-size: 13px; color: var(--text-sub); font-weight: 600; }
-        .summary-box b { font-size: 15px; color: var(--primary); }
-
-        /* --- BUTTONS --- */
-        .btn-primary {
-            width: 100%;
-            padding: 18px;
-            border: none;
-            border-radius: 22px;
-            background: var(--primary);
-            color: white;
-            font-size: 16px;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 10px 25px rgba(26, 35, 126, 0.2);
-            transition: 0.3s;
-        }
-
+        .btn-primary { width: 100%; padding: 20px; border: none; border-radius: 22px; background: var(--primary); color: white; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 10px 25px rgba(26, 35, 126, 0.2); }
         .btn-primary:active { transform: scale(0.96); }
 
+        .bal-mini { font-size: 12px; font-weight: 700; color: var(--accent); background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 10px; margin-left: auto; }
     </style>
 </head>
 <body>
 
     <header>
-        <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
-        <b>Purchase Services</b>
+        <i class="fas fa-arrow-left" onclick="history.back()"></i>
+        <b>Purchase VTU</b>
+        <div class="bal-mini">₦<span id="headerBal">0.00</span></div>
     </header>
 
     <div class="container">
         <div class="card animate__animated animate__fadeInUp">
             
             <div style="margin-bottom: 25px;">
-                <span class="label-text">Transaction Type</span>
+                <span class="label-text">Select Service</span>
                 <select id="serviceType" onchange="toggleFields()">
-                    <option value="airtime">Buy Airtime (Top-up)</option>
-                    <option value="data">Buy Data Bundle</option>
+                    <option value="airtime">Top-up Airtime</option>
+                    <option value="data">Data Bundle Bundle</option>
                 </select>
             </div>
 
-            <span class="label-text">Choose Network Provider</span>
-            <div class="network-grid" id="networkGrid">
+            <span class="label-text">Provider</span>
+            <div class="network-grid">
                 <div class="network-item active" onclick="selectNetwork('MTN', this)">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/MTN_Logo.svg/1200px-MTN_Logo.svg.png">
                     <span>MTN</span>
+                </div>
+                <div class="network-item" onclick="selectNetwork('AIRTEL', this)">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Airtel_logo.png">
+                    <span>AIRTEL</span>
                 </div>
                 <div class="network-item" onclick="selectNetwork('GLO', this)">
                     <img src="https://upload.wikimedia.org/wikipedia/en/thumb/7/77/Globacom_Limited_Logo.svg/1200px-Globacom_Limited_Logo.svg.png">
                     <span>GLO</span>
                 </div>
-                <div class="network-item" onclick="selectNetwork('AIRTEL', this)">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Airtel_logo.png">
-                    <span>Airtel</span>
-                </div>
                 <div class="network-item" onclick="selectNetwork('9MOBILE', this)">
                     <img src="https://upload.wikimedia.org/wikipedia/en/9/90/9mobile_logo.png">
-                    <span>9Mobile</span>
+                    <span>9MOBILE</span>
                 </div>
             </div>
 
             <div style="margin-bottom: 20px;">
-                <span class="label-text">Recipient Phone Number</span>
-                <input type="number" id="phoneNumber" placeholder="e.g. 08103456789">
+                <span class="label-text">Phone Number</span>
+                <input type="number" id="phoneNumber" placeholder="08123456789">
             </div>
 
             <div id="dataSection" style="display: none; margin-bottom: 20px;">
-                <span class="label-text">Select Data Plan</span>
-                <select id="dataPlan">
-                    <option value="250">1GB - ₦250 (SME - 30 Days)</option>
-                    <option value="500">2GB - ₦500 (SME - 30 Days)</option>
-                    <option value="1200">5GB - ₦1,200 (SME - 30 Days)</option>
-                    <option value="2300">10GB - ₦2,300 (SME - 30 Days)</option>
+                <span class="label-text">Data Plan</span>
+                <select id="dataPlan" onchange="updatePrice()">
+                    <option value="250">1GB SME (30 Days) - ₦250</option>
+                    <option value="500">2GB SME (30 Days) - ₦500</option>
+                    <option value="1200">5GB SME (30 Days) - ₦1,200</option>
+                    <option value="2300">10GB SME (30 Days) - ₦2,300</option>
                 </select>
             </div>
 
             <div id="airtimeSection" style="margin-bottom: 20px;">
                 <span class="label-text">Amount (₦)</span>
-                <input type="number" id="amount" placeholder="Minimum ₦100">
+                <input type="number" id="airtimeAmount" oninput="updatePrice()" placeholder="Min ₦100">
             </div>
 
             <div class="summary-box">
-                <span>Fee: <b>₦0.00</b></span>
-                <span id="totalDisplay">Total: <b id="totalPrice">₦0.00</b></span>
+                <span style="color:#8e8e93">To Pay:</span>
+                <b id="totalDisplay">₦0.00</b>
             </div>
 
-            <button class="btn-primary" onclick="initiateTransaction()">
-                <i class="fas fa-shield-alt"></i> SECURE PURCHASE
+            <button class="btn-primary" onclick="validateTransaction()">
+                <i class="fas fa-lock" style="margin-right:8px;"></i> PURCHASE NOW
             </button>
         </div>
     </div>
@@ -239,67 +120,78 @@
             databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
             projectId: "cmchat-pro"
         };
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const username = localStorage.getItem('username') || "User";
+        const myName = localStorage.getItem('username') || "User";
 
         let currentNetwork = "MTN";
+        let userWallet = 0;
 
-        function selectNetwork(net, element) {
+        // Sync Balance
+        db.ref('users/' + myName + '/wallet').on('value', snap => {
+            userWallet = snap.val() || 0;
+            document.getElementById('headerBal').innerText = Number(userWallet).toLocaleString();
+        });
+
+        function selectNetwork(net, el) {
             currentNetwork = net;
             document.querySelectorAll('.network-item').forEach(i => i.classList.remove('active'));
-            element.classList.add('active');
+            el.classList.add('active');
         }
 
         function toggleFields() {
             const type = document.getElementById('serviceType').value;
-            const dataSec = document.getElementById('dataSection');
-            const airtimeSec = document.getElementById('airtimeSection');
-            
-            if(type === 'data') {
-                dataSec.style.display = 'block';
-                airtimeSec.style.display = 'none';
-            } else {
-                dataSec.style.display = 'none';
-                airtimeSec.style.display = 'block';
-            }
+            document.getElementById('dataSection').style.display = (type === 'data') ? 'block' : 'none';
+            document.getElementById('airtimeSection').style.display = (type === 'airtime') ? 'block' : 'none';
+            updatePrice();
         }
 
-        function initiateTransaction() {
-            const phone = document.getElementById('phoneNumber').value;
+        function updatePrice() {
             const type = document.getElementById('serviceType').value;
-            const amount = type === 'data' ? document.getElementById('dataPlan').value : document.getElementById('amount').value;
+            const price = (type === 'data') ? document.getElementById('dataPlan').value : document.getElementById('airtimeAmount').value;
+            document.getElementById('totalDisplay').innerText = "₦" + Number(price || 0).toLocaleString();
+        }
 
-            if(!phone || phone.length < 10) {
-                alert("Please enter a valid phone number.");
-                return;
-            }
-            if(!amount || amount < 100) {
-                alert("Minimum purchase is ₦100.");
-                return;
-            }
+        async function validateTransaction() {
+            const type = document.getElementById('serviceType').value;
+            const amount = parseFloat((type === 'data') ? document.getElementById('dataPlan').value : document.getElementById('airtimeAmount').value);
+            const phone = document.getElementById('phoneNumber').value;
 
-            const confirmPin = prompt("Enter your Transaction PIN to authorize:");
-            if(confirmPin) {
-                // Here you would connect to a real VTU API
-                // For now, we simulate success
-                processInFirebase(type, amount, phone);
+            if(!phone || phone.length < 10) return Swal.fire('Error', 'Enter a valid phone number', 'error');
+            if(!amount || amount < 100) return Swal.fire('Error', 'Minimum purchase is ₦100', 'warning');
+            if(amount > userWallet) return Swal.fire('Low Balance', 'Please top up your wallet first.', 'error');
+
+            const { value: pin } = await Swal.fire({
+                title: 'Enter Secure PIN',
+                input: 'password',
+                inputAttributes: { maxlength: 4, autofocus: 'autofocus', textAlign: 'center' },
+                showCancelButton: true,
+                confirmButtonColor: '#1A237E'
+            });
+
+            if (pin) {
+                // Here we simulate API call and process locally
+                processVTU(type, amount, phone);
             }
         }
 
-        function processInFirebase(type, amt, phone) {
-            const transRef = db.ref('transactions/' + username).push();
-            transRef.set({
-                type: 'debit',
-                service: type.toUpperCase() + " (" + currentNetwork + ")",
-                recipient: phone,
-                amount: amt,
-                time: Date.now(),
-                status: 'Success'
-            }).then(() => {
-                alert("Transaction Successful! Your " + type + " has been sent to " + phone);
-                window.location.href = "Wallet.html";
-            });
+        function processVTU(type, amt, phone) {
+            Swal.fire({ title: 'Processing...', didOpen: () => Swal.showLoading() });
+
+            setTimeout(() => {
+                const newBal = userWallet - amt;
+                db.ref('users/' + myName + '/wallet').set(newBal).then(() => {
+                    db.ref('transactions/' + myName).push({
+                        type: 'debit',
+                        service: `${type.toUpperCase()} - ${currentNetwork}`,
+                        amount: amt,
+                        recipient: phone,
+                        time: Date.now()
+                    });
+                    Swal.fire('Success!', `${currentNetwork} ${type} sent to ${phone}`, 'success')
+                    .then(() => window.location.href = "Wallet.html");
+                });
+            }, 1500);
         }
     </script>
 </body>

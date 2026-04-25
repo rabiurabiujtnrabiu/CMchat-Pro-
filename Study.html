@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Elite Classroom Pro | CMchat Academy</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        :root {
+            --primary: #0062ff;
+            --accent: #FFD600;
+            --bg: #f8fafc;
+            --dark: #1e293b;
+            --white: #ffffff;
+            --success: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg); color: var(--dark); overflow-x: hidden; }
+
+        /* --- STICKY VIDEO PLAYER --- */
+        .video-container {
+            width: 100%; aspect-ratio: 16/9; background: #000;
+            position: sticky; top: 0; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        iframe, video { width: 100%; height: 100%; border: none; }
+
+        /* --- NAVIGATION TABS --- */
+        .study-tabs {
+            display: flex; background: white; border-bottom: 1px solid #e2e8f0;
+            position: sticky; top: 56.25vw; z-index: 999;
+        }
+        .tab-btn {
+            flex: 1; padding: 15px 5px; border: none; background: none;
+            font-size: 11px; font-weight: 800; color: #94a3b8; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 0.5px; transition: 0.3s;
+        }
+        .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
+
+        /* --- CONTENT SECTIONS --- */
+        .content-section { padding: 20px; display: none; animation: fadeIn 0.4s ease; }
+        .content-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- EXAM / QUIZ UI --- */
+        .quiz-card {
+            background: white; border-radius: 20px; padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; margin-bottom: 15px;
+        }
+        .question-text { font-size: 15px; font-weight: 700; margin-bottom: 15px; display: block; color: var(--dark); }
+        .option-item {
+            padding: 12px 15px; border-radius: 12px; border: 1.5px solid #f1f5f9;
+            margin-bottom: 10px; font-size: 13px; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; gap: 10px; font-weight: 600;
+        }
+        .option-item:active { background: #f1f5f9; border-color: var(--primary); }
+        .option-item.selected { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* --- CURRICULUM LIST --- */
+        .module-item {
+            background: white; padding: 15px; border-radius: 18px;
+            display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+            border: 1px solid #f1f5f9; cursor: pointer;
+        }
+        .play-icon { width: 35px; height: 35px; border-radius: 10px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: var(--primary); }
+
+        /* --- SMARTBOARD / RESOURCES --- */
+        .resource-card {
+            background: #fff; border-radius: 18px; padding: 15px; border-left: 5px solid var(--accent);
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+        }
+
+        /* --- FLOATING ACTIONS --- */
+        .footer-actions {
+            position: fixed; bottom: 0; width: 100%; background: white;
+            padding: 15px 20px; display: flex; gap: 12px; border-top: 1px solid #f1f5f9;
+        }
+        .btn-elite {
+            flex: 1; padding: 14px; border: none; border-radius: 15px;
+            font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(0, 98, 255, 0.2); }
+        .btn-outline { background: #f1f5f9; color: #64748b; }
+
+    </style>
+</head>
+<body>
+
+    <div class="video-container" id="masterPlayer">
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#fff;">
+            <i class="fas fa-play-circle" style="font-size: 50px; color: var(--accent);"></i>
+            <p style="margin-top:10px; font-weight:600; font-size:12px; opacity:0.6;">SELECT MODULE TO PLAY</p>
+        </div>
+    </div>
+
+    <div class="study-tabs">
+        <button class="tab-btn active" onclick="showSection('syllabus', this)"><i class="fas fa-list-ul"></i> Syllabus</button>
+        <button class="tab-btn" onclick="showSection('exam', this)"><i class="fas fa-pen-to-square"></i> Exam</button>
+        <button class="tab-btn" onclick="showSection('board', this)"><i class="fas fa-chalkboard"></i> Board</button>
+        <button class="tab-btn" onclick="showSection('notes', this)"><i class="fas fa-sticky-note"></i> Notes</button>
+    </div>
+
+    <div class="content-area">
+        
+        <div id="syllabus" class="content-section active">
+            <h3 style="font-size: 16px; margin-bottom: 15px;">Course Curriculum</h3>
+            <div id="syllabusList">
+                </div>
+        </div>
+
+        <div id="exam" class="content-section">
+            <h3 style="font-size: 16px; margin-bottom: 15px;">Elite Examination</h3>
+            <div class="quiz-card">
+                <span class="question-text">Q1: Menene amfanin Firebase a cikin aikin Software Development?</span>
+                <div class="option-item" onclick="selectOption(this)">A. Domin gina UI/UX kawai</div>
+                <div class="option-item" onclick="selectOption(this)">B. Domin adana bayanai (Real-time Database)</div>
+                <div class="option-item" onclick="selectOption(this)">C. Domin gyara kalar CSS</div>
+                <div class="option-item" onclick="selectOption(this)">D. Babu ɗaya a ciki</div>
+            </div>
+            <button class="btn-elite btn-primary" style="width: 100%;" onclick="submitExam()">SUBMIT EXAM</button>
+        </div>
+
+        <div id="board" class="content-section">
+            <h3 style="font-size: 16px; margin-bottom: 15px;">Smartboard Resources</h3>
+            <div class="resource-card">
+                <div>
+                    <b style="font-size:13px; display:block;">Mastering_JS_v1.pdf</b>
+                    <small style="color:#94a3b8;">1.2 MB | PDF Document</small>
+                </div>
+                <i class="fas fa-download" style="color:var(--primary); cursor:pointer;"></i>
+            </div>
+            <div class="resource-card">
+                <div>
+                    <b style="font-size:13px; display:block;">Elite_Coding_Standards.doc</b>
+                    <small style="color:#94a3b8;">800 KB | Word Doc</small>
+                </div>
+                <i class="fas fa-download" style="color:var(--primary); cursor:pointer;"></i>
+            </div>
+        </div>
+
+        <div id="notes" class="content-section">
+            <h3 style="font-size: 16px; margin-bottom: 10px;">Quick Study Notes</h3>
+            <textarea placeholder="Start typing your elite notes..." style="width:100%; min-height:200px; border-radius:15px; border:1px solid #e2e8f0; padding:15px; outline:none; font-size:14px; background:#fff;"></textarea>
+            <button class="btn-elite btn-primary" style="margin-top:15px; width:auto; padding:10px 30px;">SAVE NOTES</button>
+        </div>
+
+    </div>
+
+    <div class="footer-actions">
+        <button class="btn-elite btn-outline"><i class="fas fa-certificate" style="color:var(--accent);"></i> CERTIFICATE</button>
+        <button class="btn-elite btn-primary">NEXT LESSON <i class="fas fa-arrow-right"></i></button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // 1. SHOW SECTION LOGIC
+        function showSection(id, btn) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // 2. QUIZ LOGIC
+        function selectOption(el) {
+            document.querySelectorAll('.option-item').forEach(opt => opt.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function submitExam() {
+            Swal.fire({
+                title: 'Submit Exam?',
+                text: "Once submitted, you can't change your answers!",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0062ff',
+                confirmButtonText: 'Yes, Submit'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Submitted!', 'Your grade: 85% - B+', 'success');
+                }
+            });
+        }
+
+        // 3. LOAD SYLLABUS
+        const urlParams = new URLSearchParams(window.location.search);
+        const courseID = urlParams.get('course') || "Web_Development";
+
+        db.ref('academy/courses/' + courseID + '/modules').on('value', snap => {
+            const list = document.getElementById('syllabusList');
+            list.innerHTML = "";
+            let i = 1;
+            snap.forEach(child => {
+                const m = child.val();
+                list.innerHTML += `
+                    <div class="module-item" onclick="playLesson('${m.videoURL}', '${m.title}')">
+                        <div class="play-icon">${i++}</div>
+                        <div style="flex:1;">
+                            <b style="font-size:13px; display:block;">${m.title}</b>
+                            <span style="font-size:10px; color:#94a3b8;"><i class="fas fa-clock"></i> ${m.time}</span>
+                        </div>
+                        <i class="fas fa-play-circle" style="color:#e2e8f0;"></i>
+                    </div>`;
+            });
+        });
+
+        function playLesson(url, title) {
+            const player = document.getElementById('masterPlayer');
+            if(url.includes('youtube')) {
+                const vid = url.split('v=')[1];
+                player.innerHTML = `<iframe src="https://www.youtube.com/embed/${vid}?autoplay=1" allowfullscreen allow="autoplay"></iframe>`;
+            } else {
+                player.innerHTML = `<video src="${url}" controls autoplay></video>`;
+            }
+            Swal.fire({ title: 'Playing Lesson', text: title, timer: 1000, showConfirmButton: false, position: 'top' });
+        }
+    </script>
+</body>
+</html>

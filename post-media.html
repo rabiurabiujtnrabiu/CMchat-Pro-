@@ -2,58 +2,73 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Post - CMchat Pro</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Create Elite Post | CMchat Pro</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
-        :root { --primary: #1a73e8; --bg: #f0f2f5; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: #1c1e21; }
+        :root { 
+            --primary: #0062ff; 
+            --primary-gradient: linear-gradient(135deg, #0062ff, #00d2ff);
+            --bg: #f8fafc; 
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--white); color: #1e293b; height: 100vh; overflow: hidden; }
 
+        /* --- MODERN HEADER --- */
         .post-header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 20px; border-bottom: 1px solid #ddd;
-            position: sticky; top: 0; background: white; z-Dashboard: 100;
+            padding: 15px 20px; background: white; border-bottom: 1px solid #f1f5f9;
+            position: sticky; top: 0; z-index: 100;
         }
-        .header-title { font-size: 18px; font-weight: 700; }
+        .header-title { font-size: 17px; font-weight: 800; color: #1e293b; }
         .post-button {
-            background: var(--primary); color: white; border: none;
-            padding: 8px 22px; border-radius: 8px; font-weight: 700;
-            cursor: pointer; transition: 0.3s;
+            background: var(--primary-gradient); color: white; border: none;
+            padding: 10px 25px; border-radius: 12px; font-weight: 700;
+            cursor: pointer; box-shadow: 0 4px 12px rgba(0, 98, 255, 0.2); transition: 0.3s;
         }
-        .post-button:disabled { background: #e4e6eb; color: #bcc0c4; }
+        .post-button:disabled { background: #e2e8f0; color: #94a3b8; box-shadow: none; cursor: not-allowed; }
 
-        .user-section { display: flex; align-items: center; gap: 12px; padding: 15px 20px; background: white; }
-        .user-avatar { width: 45px; height: 45px; border-radius: 50%; background: #1a73e8; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .user-avatar i { font-size: 24px; color: #fff; }
-        
-        .content-area { padding: 10px 20px; background: white; }
+        /* --- USER INFO --- */
+        .user-section { display: flex; align-items: center; gap: 12px; padding: 20px; }
+        .user-avatar { width: 45px; height: 45px; border-radius: 14px; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 18px; }
+        .user-details b { font-size: 15px; font-weight: 700; color: #1e293b; }
+        .privacy-badge { font-size: 11px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 6px; margin-top: 2px; display: inline-block; }
+
+        /* --- CONTENT AREA --- */
+        .content-area { padding: 10px 20px; overflow-y: auto; height: calc(100vh - 200px); }
         textarea {
             width: 100%; border: none; outline: none; font-size: 18px;
-            min-height: 150px; resize: none; font-family: inherit;
+            min-height: 120px; resize: none; color: #334155; line-height: 1.6;
         }
 
+        /* --- MEDIA PREVIEW --- */
         .media-preview {
-            margin: 10px 20px; border-radius: 12px; overflow: hidden;
-            position: relative; display: none; background: #000;
+            margin-top: 15px; border-radius: 18px; overflow: hidden;
+            position: relative; display: none; background: #f1f5f9; border: 1px solid #e2e8f0;
         }
-        .media-preview img, .media-preview video { width: 100%; display: block; max-height: 300px; object-fit: contain; }
-        
-        .close-preview { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: white; border-radius: 50%; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .media-preview img, .media-preview video { width: 100%; display: block; max-height: 350px; object-fit: cover; }
+        .close-preview { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(5px); }
 
+        /* --- BOTTOM TOOLS --- */
         .bottom-tools {
             position: fixed; bottom: 0; width: 100%;
-            background: white; border-top: 1px solid #ddd;
-            padding: 15px 0; border-radius: 20px 20px 0 0;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+            background: white; border-top: 1px solid #f1f5f9;
+            padding: 20px; border-radius: 30px 30px 0 0;
+            box-shadow: 0 -10px 25px rgba(0,0,0,0.05);
         }
-        .tool-grid { display: flex; justify-content: space-around; }
-        .tool-item { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; font-size: 12px; }
-        .tool-item i { font-size: 22px; }
+        .tool-grid { display: flex; justify-content: space-around; align-items: center; }
+        .tool-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; text-decoration: none; }
+        .tool-icon { width: 45px; height: 45px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 20px; background: #f8fafc; transition: 0.3s; }
+        .tool-item span { font-size: 11px; font-weight: 700; color: #64748b; }
+        .tool-item:active .tool-icon { transform: scale(0.9); background: #f1f5f9; }
 
-        .progress-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-Dashboard: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #1a73e8; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        /* --- OVERLAY --- */
+        .progress-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .loader { border: 4px solid #f1f5f9; border-top: 4px solid var(--primary); border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -61,52 +76,57 @@
 
     <div class="progress-overlay" id="loadingOverlay">
         <div class="loader"></div>
-        <p style="margin-top: 15px; font-weight: bold;" id="statusText">OPTIMIZING & UPLOADING...</p>
+        <p style="margin-top: 15px; font-weight: 800; color: #1e293b; letter-spacing: 0.5px;" id="statusText">PUBLISHING POST...</p>
     </div>
 
     <div class="post-header">
-        <i class="fas fa-arrow-left" style="cursor:pointer" onclick="history.back()"></i>
+        <i class="fas fa-chevron-left" style="font-size: 20px; color: #64748b; cursor:pointer" onclick="history.back()"></i>
         <div class="header-title">Create Post</div>
-        <button class="post-button" id="submitPost" disabled onclick="handleUpload()">Post</button>
+        <button class="post-button" id="submitPost" disabled onclick="handleUpload()">Share</button>
     </div>
 
     <div class="user-section">
-        <div class="user-avatar" id="currentAvatar"><i class="fas fa-user"></i></div>
+        <div class="user-avatar">C</div>
         <div class="user-details">
-            <b id="currentName">Commander CM</b>
-            <div style="font-size: 12px; color: #606770;"><i class="fas fa-globe-africa"></i> Public</div>
+            <b>Commander CM</b><br>
+            <div class="privacy-badge"><i class="fas fa-globe-americas"></i> Public</div>
         </div>
     </div>
 
     <div class="content-area">
-        <textarea id="postInput" placeholder="What's on your mind, CM...?" oninput="validate()"></textarea>
-    </div>
-
-    <div id="mediaPreview" class="media-preview">
-        <div class="close-preview" onclick="removeMedia()">&times;</div>
-        <div id="previewContainer"></div>
+        <textarea id="postInput" placeholder="What's on your elite mind, Commander?" oninput="validate()"></textarea>
+        <div id="mediaPreview" class="media-preview">
+            <div class="close-preview" onclick="removeMedia()"><i class="fas fa-times"></i></div>
+            <div id="previewContainer"></div>
+        </div>
     </div>
 
     <div class="bottom-tools">
         <div class="tool-grid">
             <label class="tool-item">
-                <i class="fas fa-images" style="color: #45bd62;"></i>
+                <div class="tool-icon" style="color: #45bd62;"><i class="fas fa-images"></i></div>
                 <span>Photo</span>
                 <input type="file" id="imageInput" hidden accept="image/*" onchange="previewFile(this, 'image')">
             </label>
             <label class="tool-item">
-                <i class="fas fa-video" style="color: #f02849;"></i>
+                <div class="tool-icon" style="color: #f02849;"><i class="fas fa-video"></i></div>
                 <span>Video</span>
                 <input type="file" id="videoInput" hidden accept="video/*" onchange="previewFile(this, 'video')">
             </label>
-            <div class="tool-item"><i class="fas fa-user-tag" style="color: #1877f2;"></i><span>Tag</span></div>
-            <div class="tool-item"><i class="fas fa-location-dot" style="color: #f5533d;"></i><span>Location</span></div>
+            <div class="tool-item">
+                <div class="tool-icon" style="color: #f59e0b;"><i class="fas fa-tags"></i></div>
+                <span>Tag</span>
+            </div>
+            <div class="tool-item">
+                <div class="tool-icon" style="color: #1877f2;"><i class="fas fa-location-dot"></i></div>
+                <span>Check-in</span>
+            </div>
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 
     <script>
         const firebaseConfig = {
@@ -115,12 +135,13 @@
             storageBucket: "cmchat-pro.appspot.com"
         };
         
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const storage = firebase.storage();
 
         let selectedFile = null;
         let selectedType = '';
+        let compressedImageBase64 = "";
 
         function validate() {
             const btn = document.getElementById('submitPost');
@@ -136,22 +157,40 @@
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     document.getElementById('mediaPreview').style.display = 'block';
-                    document.getElementById('previewContainer').innerHTML = type === 'image' 
-                        ? `<img src="${e.target.result}">` 
-                        : `<video src="${e.target.result}" controls></video>`;
+                    if (type === 'image') {
+                        document.getElementById('previewContainer').innerHTML = `<img src="${e.target.result}" id="tempImg">`;
+                        // Auto-compress image in background
+                        compressImage(e.target.result);
+                    } else {
+                        document.getElementById('previewContainer').innerHTML = `<video src="${e.target.result}" controls></video>`;
+                    }
                     validate();
                 };
                 reader.readAsDataURL(file);
             }
         }
 
+        function compressImage(base64) {
+            const img = new Image();
+            img.src = base64;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const maxWidth = 1080;
+                const scale = maxWidth / img.width;
+                canvas.width = maxWidth;
+                canvas.height = img.height * scale;
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                compressedImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
+            };
+        }
+
         function removeMedia() {
             selectedFile = null;
             selectedType = '';
+            compressedImageBase64 = '';
             document.getElementById('mediaPreview').style.display = 'none';
             document.getElementById('previewContainer').innerHTML = '';
-            document.getElementById('imageInput').value = '';
-            document.getElementById('videoInput').value = '';
             validate();
         }
 
@@ -165,8 +204,15 @@
 
             try {
                 let fileUrl = "";
-                if (selectedFile) {
-                    // GYARA: Tura hoto zuwa Storage maimakon Firestore kai-tsaye don magance Error
+                
+                // Idan hoto ne, muna amfani da compressed version don sauri
+                if (selectedType === 'image' && compressedImageBase64) {
+                    const storageRef = storage.ref(`posts/${Date.now()}.jpg`);
+                    await storageRef.putString(compressedImageBase64, 'data_url');
+                    fileUrl = await storageRef.getDownloadURL();
+                } 
+                // Idan video ne (ba mu yin compression na video a browser saboda nauyi)
+                else if (selectedFile) {
                     const storageRef = storage.ref(`posts/${Date.now()}_${selectedFile.name}`);
                     const uploadTask = await storageRef.put(selectedFile);
                     fileUrl = await uploadTask.ref.getDownloadURL();
@@ -174,23 +220,20 @@
 
                 await db.collection('posts').add({
                     text: text,
-                    postImg: fileUrl, // Muna amfani da postImg don yayi dai-dai da Dashboard dinka
+                    postImg: fileUrl,
                     type: selectedType || 'text',
                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                     username: "Commander CM"
                 });
 
                 overlay.style.display = 'none';
-                Swal.fire({ icon: 'success', title: 'Success!', text: 'Post shared successfully!', timer: 2000, showConfirmButton: false });
-                setTimeout(() => location.href = 'Dashboard.html', 2000);
+                Swal.fire({ icon: 'success', title: 'Elite Share!', text: 'Your update is now live.', timer: 1500, showConfirmButton: false });
+                setTimeout(() => window.history.back(), 1500);
 
             } catch (err) {
                 overlay.style.display = 'none';
-                // GYARA: Cire dogon sakon error din nan
-                let cleanMsg = "Akwai matsalar yanar gizo ko ta izini. Ka sake gwadawa.";
-                if(err.message.includes("permission")) cleanMsg = "Ba ka da izinin yin wannan aikin. Duba Firebase Rules.";
-                
-                Swal.fire({ icon: 'error', title: 'Upload Failed', text: cleanMsg });
+                console.error(err);
+                Swal.fire({ icon: 'error', title: 'Upload Failed', text: 'Please check your connection or Firebase rules.' });
                 btn.disabled = false;
             }
         }

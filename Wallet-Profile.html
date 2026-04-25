@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Profile | CMchat Pro</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        :root { --p: #1A237E; --accent: #FFD600; --bg: #F8F9FD; --white: #ffffff; }
+        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: #1e293b; padding-bottom: 100px; }
+
+        /* Profile Header */
+        .profile-header {
+            background: linear-gradient(135deg, var(--p), #3949AB);
+            height: 220px; border-bottom-left-radius: 40px; border-bottom-right-radius: 40px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; position: relative; padding-top: 20px;
+        }
+        .back-btn { position: absolute; top: 30px; left: 20px; color: white; font-size: 20px; }
+
+        .avatar-container { position: relative; margin-bottom: 10px; }
+        .avatar-img { width: 100px; height: 100px; border-radius: 35px; border: 4px solid rgba(255,255,255,0.2); object-fit: cover; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 40px; color: var(--p); font-weight: 800; }
+        .edit-badge { position: absolute; bottom: -5px; right: -5px; background: var(--accent); color: var(--p); width: 30px; height: 30px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 3px solid var(--p); }
+
+        /* Stats Card */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: -30px 20px 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); text-align: center; }
+        .stat-card b { font-size: 16px; display: block; color: var(--p); }
+        .stat-card span { font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
+
+        /* Menu List */
+        .menu-section { padding: 0 20px; }
+        .menu-item { background: white; padding: 18px 20px; border-radius: 20px; display: flex; align-items: center; gap: 15px; margin-bottom: 12px; border: 1px solid #f1f5f9; cursor: pointer; transition: 0.3s; }
+        .menu-item:active { transform: scale(0.97); background: #f8fafc; }
+        .menu-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .menu-text { flex: 1; }
+        .menu-text b { font-size: 14px; display: block; }
+        .menu-text small { font-size: 11px; color: #94a3b8; }
+
+        /* Logout Button */
+        .btn-logout { margin: 20px; padding: 18px; border-radius: 20px; background: #fff1f2; color: #e11d48; text-align: center; font-weight: 800; font-size: 14px; border: 1px solid #fecdd3; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="profile-header">
+        <i class="fas fa-arrow-left back-btn" onclick="history.back()"></i>
+        <div class="avatar-container">
+            <div class="avatar-img" id="userInitial">?</div>
+            <div class="edit-badge"><i class="fas fa-camera"></i></div>
+        </div>
+        <h2 style="margin: 5px 0; font-size: 20px; font-weight: 800;" id="profName">Elite Student</h2>
+        <p style="font-size: 12px; opacity: 0.8; font-weight: 600;" id="profEmail">student@cmchat.pro</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card animate__animated animate__zoomIn">
+            <b id="walletBal">₦0.00</b>
+            <span>Wallet Balance</span>
+        </div>
+        <div class="stat-card animate__animated animate__zoomIn" style="animation-delay: 0.1s;">
+            <b id="courseCount">0</b>
+            <span>Courses Enrolled</span>
+        </div>
+    </div>
+
+    <div class="menu-section">
+        <div class="menu-item animate__animated animate__fadeInUp" onclick="location.href='Wallet.html'">
+            <div class="menu-icon" style="background: #e0e7ff; color: #4338ca;"><i class="fas fa-wallet"></i></div>
+            <div class="menu-text">
+                <b>My Wallet</b>
+                <small>Payment methods & billing</small>
+            </div>
+            <i class="fas fa-chevron-right" style="color: #cbd5e1; font-size: 12px;"></i>
+        </div>
+
+        <div class="menu-item animate__animated animate__fadeInUp" style="animation-delay: 0.1s;" onclick="location.href='Security.html'">
+            <div class="menu-icon" style="background: #fef3c7; color: #b45309;"><i class="fas fa-lock"></i></div>
+            <div class="menu-text">
+                <b>Security Settings</b>
+                <small>Update Password & PIN</small>
+            </div>
+            <i class="fas fa-chevron-right" style="color: #cbd5e1; font-size: 12px;"></i>
+        </div>
+
+        <div class="menu-item animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+            <div class="menu-icon" style="background: #dcfce7; color: #15803d;"><i class="fas fa-graduation-cap"></i></div>
+            <div class="menu-text">
+                <b>Learning Progress</b>
+                <small>View certificates & grades</small>
+            </div>
+            <i class="fas fa-chevron-right" style="color: #cbd5e1; font-size: 12px;"></i>
+        </div>
+
+        <div class="menu-item animate__animated animate__fadeInUp" style="animation-delay: 0.3s;">
+            <div class="menu-icon" style="background: #f1f5f9; color: #475569;"><i class="fas fa-headset"></i></div>
+            <div class="menu-text">
+                <b>Help & Support</b>
+                <small>Contact technical team</small>
+            </div>
+            <i class="fas fa-chevron-right" style="color: #cbd5e1; font-size: 12px;"></i>
+        </div>
+    </div>
+
+    <div class="btn-logout animate__animated animate__fadeInUp" onclick="logout()">
+        <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> LOG OUT ACCOUNT
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com",
+            projectId: "cmchat-pro"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const myName = localStorage.getItem('username') || "Elite_User";
+
+        // Sync Profile Data
+        document.getElementById('profName').innerText = myName;
+        document.getElementById('userInitial').innerText = myName.charAt(0).toUpperCase();
+        document.getElementById('profEmail').innerText = myName.toLowerCase().replace(/\s+/g, '') + "@cmchat.pro";
+
+        // Live Balance Sync
+        db.ref('users/' + myName + '/wallet').on('value', snap => {
+            const bal = snap.val() || 0;
+            document.getElementById('walletBal').innerText = "₦" + Number(bal).toLocaleString();
+        });
+
+        // Course Enrollment Sync
+        db.ref('transactions/' + myName).on('value', snap => {
+            let count = 0;
+            snap.forEach(child => {
+                if(child.val().service && child.val().service.includes('Market')) count++;
+            });
+            document.getElementById('courseCount').innerText = count;
+        });
+
+        function logout() {
+            Swal.fire({
+                title: 'Logout?',
+                text: "Are you sure you want to sign out?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#1A237E',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Logout'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.clear();
+                    window.location.href = "Login.html";
+                }
+            })
+        }
+    </script>
+</body>
+</html>

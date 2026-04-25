@@ -3,82 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CM Academy | Professional Live</title>
+    <title>CM Academy | Elite Video Portal</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
-        :root { --primary: #1A237E; --accent: #FBC02D; --live: #FF3D00; --dark-bg: #0a0a0a; --glass: rgba(255, 255, 255, 0.1); }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--dark-bg); color: white; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        :root { 
+            --primary: #0062ff; 
+            --accent: #FBC02D; 
+            --live: #FF3D00; 
+            --dark-bg: #050505; 
+            --glass: rgba(255, 255, 255, 0.08); 
+        }
+        
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { margin: 0; background: var(--dark-bg); color: white; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        header { background: var(--primary); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; z-index: 1000; }
-        .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 16px; }
+        /* --- MODERN HEADER --- */
+        header { 
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(20px);
+            padding: 15px 20px; display: flex; align-items: center; 
+            justify-content: space-between; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; letter-spacing: -0.5px; }
+        .exit-btn { width: 35px; height: 35px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
-        /* Video Stage */
-        #main-stage { flex: 1; position: relative; background: #000; overflow: hidden; }
+        /* --- VIDEO STAGE --- */
+        #main-stage { flex: 1; position: relative; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         #spotlight-video { width: 100%; height: 100%; object-fit: cover; }
+        #main-stage::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.4) 100%); pointer-events: none; }
 
-        /* Overlays */
-        .live-indicator { position: absolute; top: 15px; left: 15px; background: var(--live); color: white; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
-        .live-indicator span { width: 8px; height: 8px; background: white; border-radius: 50%; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        /* --- OVERLAYS --- */
+        .live-tag { 
+            position: absolute; top: 20px; left: 20px; 
+            background: var(--live); color: white; padding: 6px 14px; 
+            border-radius: 10px; font-size: 11px; font-weight: 800; 
+            display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(255,61,0,0.3);
+        }
+        .live-tag span { width: 8px; height: 8px; background: white; border-radius: 50%; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        .speaker-info { position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); padding: 10px 20px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); font-size: 13px; }
+        /* --- LIVE CHAT OVERLAY --- */
+        .live-chat-overlay {
+            position: absolute; bottom: 100px; left: 20px; width: 260px; height: 180px;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            z-index: 100; overflow-y: auto; padding: 10px; pointer-events: none;
+            mask-image: linear-gradient(transparent, black 20%);
+        }
+        .chat-msg { font-size: 11px; margin-bottom: 8px; animation: slideIn 0.3s ease; }
+        .chat-msg b { color: var(--accent); margin-right: 5px; }
 
-        /* Admin Sidebar */
-        .admin-sidebar { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 18px; z-index: 100; }
-        .circle-btn { width: 52px; height: 52px; background: var(--glass); backdrop-filter: blur(15px); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); transition: 0.3s; position: relative; }
-        .circle-btn:active { transform: scale(0.9); }
-        .badge { position: absolute; top: -2px; right: -2px; background: var(--live); width: 20px; height: 20px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #000; }
+        /* --- ADMIN CONTROL DOCK --- */
+        .control-dock { 
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(25px);
+            padding: 10px 25px; border-radius: 30px; display: flex; gap: 20px;
+            border: 1px solid rgba(255,255,255,0.1); z-index: 200;
+        }
+        .dock-btn { 
+            width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center; font-size: 18px; 
+            cursor: pointer; transition: 0.3s; border: none; color: white;
+        }
+        .dock-btn:active { transform: scale(0.9); }
+        .dock-btn.danger { background: var(--live); }
+        .req-badge { position: absolute; top: -5px; right: -5px; background: white; color: black; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 800; }
 
-        /* Guest Tray */
-        .guest-tray { height: 150px; display: flex; gap: 15px; padding: 15px 20px; background: #000; border-top: 1px solid #222; overflow-x: auto; scrollbar-width: none; }
-        .guest-card { min-width: 100px; height: 120px; background: #1a1a1a; border-radius: 15px; position: relative; overflow: hidden; border: 2px solid transparent; transition: 0.4s; }
-        .guest-card.active { border-color: var(--accent); }
+        /* --- GUEST TRAY --- */
+        .guest-tray { 
+            height: 120px; background: #000; display: flex; gap: 12px; 
+            padding: 10px 20px; overflow-x: auto; scrollbar-width: none; 
+        }
+        .guest-card { 
+            min-width: 140px; height: 100px; border-radius: 18px; 
+            background: #111; position: relative; overflow: hidden; border: 2px solid rgba(255,255,255,0.05); 
+        }
+        .guest-card.active { border-color: var(--primary); }
         .guest-card video { width: 100%; height: 100%; object-fit: cover; }
-        .guest-name { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.7); font-size: 10px; text-align: center; padding: 5px 0; font-weight: bold; }
+        .guest-label { position: absolute; bottom: 8px; left: 8px; font-size: 9px; font-weight: 800; background: rgba(0,0,0,0.5); padding: 3px 8px; border-radius: 6px; }
 
-        /* Policy Alert */
-        .policy-tag { font-size: 9px; color: #666; text-align: center; background: #000; padding: 5px; }
-
-        .swal-custom-ui { border-radius: 20px !important; background: #121826 !important; color: white !important; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo"><i class="fas fa-broadcast-tower" style="color: var(--accent);"></i> CM LIVE PRO</div>
-        <i class="fas fa-sign-out-alt" style="font-size: 20px;" onclick="location.reload()"></i>
+        <div class="logo"><i class="fas fa-satellite-dish" style="color: var(--primary);"></i> CM ACADEMY LIVE</div>
+        <div class="exit-btn" onclick="stopLive()"><i class="fas fa-times"></i></div>
     </header>
 
     <div id="main-stage">
-        <div class="live-indicator"><span></span> LIVE</div>
+        <div class="live-tag"><span></span> LIVE SESSION</div>
         
         <video id="spotlight-video" autoplay playsinline muted></video>
 
-        <div class="speaker-info">
-            <i class="fas fa-microphone" style="color:#00E676;"></i>
-            <span id="hostLabel">Host: CM Master</span>
+        <div class="live-chat-overlay" id="chatStream">
+            <div class="chat-msg"><b>System:</b> Welcome to Elite Classroom.</div>
+            <div class="chat-msg"><b>Admin:</b> Today we are covering Firebase.</div>
         </div>
 
-        <div class="admin-sidebar">
-            <div class="circle-btn" onclick="viewRequests()">
-                <i class="fas fa-user-plus"></i>
-                <div class="badge" id="reqCount">0</div>
+        <div class="control-dock">
+            <div class="dock-btn" onclick="viewRequests()" style="position:relative;">
+                <i class="fas fa-users-viewfinder"></i>
+                <div class="req-badge" id="reqCount">0</div>
             </div>
-            <div class="circle-btn" onclick="toggleMic()"><i class="fas fa-microphone" id="micIco"></i></div>
-            <div class="circle-btn" onclick="sendHeart()"><i class="fas fa-heart" style="color:var(--live)"></i></div>
-            <div class="circle-btn" onclick="stopLive()" style="background:var(--live)"><i class="fas fa-stop"></i></div>
+            <div class="dock-btn" onclick="toggleMic()"><i class="fas fa-microphone" id="micIco"></i></div>
+            <div class="dock-btn" onclick="sendEmoji('❤️')"><i class="fas fa-heart" style="color:var(--live)"></i></div>
+            <div class="dock-btn danger" onclick="stopLive()"><i class="fas fa-phone-slash"></i></div>
         </div>
     </div>
 
     <div class="guest-tray" id="guestTray">
         <div class="guest-card active">
             <video id="mini-me" autoplay muted></video>
-            <div class="guest-name">YOU (HOST)</div>
+            <div class="guest-label">HOST (YOU)</div>
         </div>
-        </div>
-
-    <div class="policy-tag">Notice: Naked dressing or inappropriate content is strictly prohibited.</div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -101,45 +143,42 @@
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 document.getElementById('spotlight-video').srcObject = localStream;
                 document.getElementById('mini-me').srcObject = localStream;
-                
                 db.ref('live_sessions/' + myName).set({ status: 'live', startTime: Date.now() });
             } catch (e) {
-                Swal.fire({ icon: 'error', title: 'Camera Error', text: 'Permit camera access to go live.' });
+                Swal.fire({ icon: 'warning', title: 'Camera Blocked', text: 'Please enable camera to start the academy live.' });
             }
         }
 
-        // Duba masu neman shiga (Requests)
+        // --- REQUEST LOGIC ---
         db.ref('live_requests/' + myName).on('value', snap => {
-            const count = snap.numChildren();
-            document.getElementById('reqCount').innerText = count;
+            document.getElementById('reqCount').innerText = snap.numChildren();
         });
 
         function viewRequests() {
             db.ref('live_requests/' + myName).once('value', snap => {
-                let html = '<div style="text-align:left;">';
-                if(!snap.exists()) html += '<p style="text-align:center">No pending requests.</p>';
+                let list = '<div style="max-height: 250px; overflow-y: auto;">';
+                if(!snap.exists()) list += '<p style="color:#94a3b8; font-size:12px;">No one is asking to join yet.</p>';
                 
                 snap.forEach(child => {
                     const r = child.val();
-                    html += `
-                        <div style="display:flex; justify-content:space-between; align-items:center; background:#1e293b; padding:12px; border-radius:12px; margin-bottom:10px;">
-                            <span><b>${r.user}</b></span>
+                    list += `
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; margin-bottom:8px;">
+                            <b style="font-size:13px; color:white;">${r.user}</b>
                             <div>
-                                <button onclick="handleReq('${child.key}', 'approve', '${r.user}')" style="background:#00E676; border:none; color:white; padding:7px 12px; border-radius:8px;">Accept</button>
-                                <button onclick="handleReq('${child.key}', 'decline')" style="background:var(--live); border:none; color:white; padding:7px 12px; border-radius:8px; margin-left:5px;">Reject</button>
+                                <i class="fas fa-check-circle" onclick="handleReq('${child.key}', 'approve', '${r.user}')" style="color:#00E676; font-size:20px; cursor:pointer;"></i>
+                                <i class="fas fa-times-circle" onclick="handleReq('${child.key}', 'decline')" style="color:var(--live); font-size:20px; cursor:pointer; margin-left:15px;"></i>
                             </div>
                         </div>`;
                 });
-                html += '</div><p style="font-size:10px; color:var(--live); text-align:center;">Policy: Check dress code before accepting.</p>';
+                list += '</div>';
 
-                Swal.fire({ title: 'Join Requests', html: html, showConfirmButton: false, customClass: { popup: 'swal-custom-ui' } });
+                Swal.fire({ title: 'Student Requests', html: list, showConfirmButton: false, background: '#111', color: '#fff', borderRadius: '25px' });
             });
         }
 
         function handleReq(id, action, uName) {
             if(action === 'approve') {
                 db.ref('live_sessions/' + myName + '/guests/' + id).set({ name: uName });
-                Swal.fire('Accepted!', `${uName} can now join.`, 'success');
             }
             db.ref('live_requests/' + myName + '/' + id).remove();
             Swal.close();
@@ -151,14 +190,23 @@
             document.getElementById('micIco').className = isMic ? 'fas fa-microphone' : 'fas fa-microphone-slash';
         }
 
+        function sendEmoji(emoji) {
+            const chat = document.getElementById('chatStream');
+            const msg = document.createElement('div');
+            msg.className = 'chat-msg';
+            msg.innerHTML = `<b>You:</b> sent ${emoji}`;
+            chat.appendChild(msg);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
         function stopLive() {
             Swal.fire({
                 title: 'End Session?',
-                text: "This will disconnect everyone.",
+                text: "The classroom will be closed.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#FF3D00',
-                confirmButtonText: 'End Live'
+                confirmButtonText: 'End Now'
             }).then(r => {
                 if(r.isConfirmed) {
                     db.ref('live_sessions/' + myName).remove();
@@ -166,11 +214,6 @@
                     location.reload();
                 }
             });
-        }
-
-        function sendHeart() {
-            const toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1000 });
-            toast.fire({ icon: 'success', title: 'Sent Heart ❤️' });
         }
 
         window.onload = startLive;

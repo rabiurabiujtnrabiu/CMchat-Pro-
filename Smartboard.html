@@ -3,94 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Professional Smart Board | CM Academy</title>
+    <title>Elite Smart Board | CM Academy</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
-        :root { --p: #1A237E; --accent: #FBC02D; --white: #ffffff; }
-        body { margin: 0; font-family: 'Poppins', sans-serif; background: #f8fafc; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        :root { --primary: #1A237E; --accent: #FFD600; --white: #ffffff; }
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { margin: 0; background: #f1f5f9; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
 
-        header { background: var(--p); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        header { background: var(--primary); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
         
-        #board-container { flex: 1; position: relative; overflow-y: auto; background: var(--white); scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
-        canvas { display: block; width: 100%; height: 5000px; touch-action: none; position: absolute; top: 0; left: 0; z-index: 10; }
+        #board-container { flex: 1; position: relative; overflow-y: auto; background: #fff; background-image: radial-gradient(#e5e7eb 1px, transparent 1px); background-size: 30px 30px; }
+        canvas { display: block; touch-action: none; cursor: crosshair; }
 
-        #pencil-cursor { 
-            position: absolute; width: 35px; height: 35px; z-index: 100; 
-            pointer-events: none; display: none; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
-        }
-
+        /* ELITE TOOLS MENU */
         #menu-trigger {
-            position: fixed; bottom: 160px; right: 20px; width: 60px; height: 60px;
-            background: var(--p); color: white; border-radius: 50%; display: flex;
+            position: fixed; bottom: 120px; right: 20px; width: 60px; height: 60px;
+            background: var(--primary); color: white; border-radius: 20px; display: flex;
             align-items: center; justify-content: center; font-size: 24px; z-index: 2500;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer;
+            box-shadow: 0 8px 25px rgba(26, 35, 126, 0.3); cursor: pointer; transition: 0.3s;
         }
+        #menu-trigger:active { transform: scale(0.9); }
 
         .side-tools { 
-            position: fixed; top: 100px; right: -80px; display: flex; flex-direction: column; gap: 12px; 
-            z-index: 2000; transition: 0.4s; background: white;
-            padding: 15px; border-radius: 25px 0 0 25px; box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+            position: fixed; top: 120px; right: -90px; display: flex; flex-direction: column; gap: 12px; 
+            z-index: 2000; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: white;
+            padding: 20px 15px; border-radius: 25px 0 0 25px; box-shadow: -10px 0 30px rgba(0,0,0,0.05);
         }
         .side-tools.active { right: 0; }
 
-        .tool-btn { width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; border: 1px solid #eee; transition: 0.3s; color: #555; }
-        .tool-btn.active { background: var(--p); color: white; border-color: var(--p); }
+        .tool-btn { width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; border: none; transition: 0.3s; background: #f8fafc; color: #64748b; }
+        .tool-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(26, 35, 126, 0.2); }
         
-        .colors { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; }
-        .clr { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid white; }
-        .clr.active { transform: scale(1.2); border-color: var(--p); }
+        .colors { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #f1f5f9; }
+        .clr { width: 32px; height: 32px; border-radius: 10px; cursor: pointer; border: 3px solid white; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .clr.active { transform: scale(1.25); border-color: var(--accent); }
 
-        .keypad-bar { 
-            position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); 
-            width: 92%; background: white; padding: 12px; display: none; 
-            border-radius: 30px; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); z-index: 3000; 
+        .typing-bar { 
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); 
+            width: 90%; background: white; padding: 10px; display: none; 
+            border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); z-index: 3000; 
         }
-        #auto-pencil-input { width: 100%; padding: 12px 20px; border: 2px solid #eee; border-radius: 25px; outline: none; font-size: 16px; text-align: center; }
+        #board-input { width: 100%; padding: 15px 20px; border: 1px solid #f1f5f9; border-radius: 15px; outline: none; font-size: 16px; background: #f8fafc; }
 
-        .bottom-nav { background: white; display: flex; justify-content: space-around; padding: 12px 0 30px; border-radius: 35px 35px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 1000; }
-        .nav-item { font-size: 26px; color: #cbd5e0; }
-        .nav-item.active { color: var(--accent); }
+        .bottom-nav { background: white; display: flex; justify-content: space-around; padding: 15px 0 35px; border-radius: 35px 35px 0 0; z-index: 1000; border-top: 1px solid #f1f5f9; }
+        .nav-item { font-size: 24px; color: #cbd5e1; transition: 0.3s; }
+        .nav-item.active { color: var(--primary); transform: translateY(-5px); }
     </style>
 </head>
 <body>
 
     <header>
         <div style="display:flex; align-items:center; gap:12px;">
-            <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
-            <span style="font-weight:700;">SMART BOARD PRO</span>
+            <i class="fas fa-chevron-left" onclick="history.back()"></i>
+            <b style="letter-spacing: -0.5px;">Academy Smart Board</b>
         </div>
-        <i class="fas fa-trash-alt" onclick="clearBoard()" style="cursor:pointer; font-size: 20px;"></i>
+        <div style="display:flex; gap:20px;">
+            <i class="fas fa-undo-alt" style="opacity: 0.5;"></i>
+            <i class="fas fa-trash-can" onclick="clearBoard()"></i>
+        </div>
     </header>
 
     <div id="board-container">
-        <div id="pencil-cursor"><i class="fas fa-pencil-alt" style="color:var(--p); font-size:30px;"></i></div>
         <canvas id="mainBoard"></canvas>
     </div>
 
-    <div id="menu-trigger" onclick="toggleSidebar()"><i class="fas fa-tools"></i></div>
+    <div id="menu-trigger" onclick="toggleSidebar()"><i class="fas fa-layer-group"></i></div>
 
     <div class="side-tools" id="sidebar">
-        <div class="tool-btn active" id="btn-pen" onclick="setTool('pen')"><i class="fas fa-pen-nib"></i></div>
-        <div class="tool-btn" id="btn-text" onclick="setTool('text')"><i class="fas fa-keyboard"></i></div>
+        <div class="tool-btn active" id="btn-pen" onclick="setTool('pen')"><i class="fas fa-pen-fancy"></i></div>
+        <div class="tool-btn" id="btn-text" onclick="setTool('text')"><i class="fas fa-font"></i></div>
         <div class="tool-btn" id="btn-eraser" onclick="setTool('eraser')"><i class="fas fa-eraser"></i></div>
         <div class="colors">
             <div class="clr active" style="background:#1A237E;" onclick="changeColor('#1A237E', this)"></div>
-            <div class="clr" style="background:#D32F2F;" onclick="changeColor('#D32F2F', this)"></div>
-            <div class="clr" style="background:#2E7D32;" onclick="changeColor('#2E7D32', this)"></div>
-            <div class="clr" style="background:#000000;" onclick="changeColor('#000000', this)"></div>
+            <div class="clr" style="background:#ef4444;" onclick="changeColor('#ef4444', this)"></div>
+            <div class="clr" style="background:#10b981;" onclick="changeColor('#10b981', this)"></div>
+            <div class="clr" style="background:#0f172a;" onclick="changeColor('#0f172a', this)"></div>
         </div>
     </div>
 
-    <div class="keypad-bar" id="inputBar">
-        <input type="text" id="auto-pencil-input" placeholder="Type your lesson here...">
+    <div class="typing-bar" id="inputBar">
+        <input type="text" id="board-input" placeholder="Start typing elite notes...">
     </div>
 
     <nav class="bottom-nav">
         <div class="nav-item"><i class="fas fa-video"></i></div>
         <div class="nav-item"><i class="fas fa-microphone"></i></div>
-        <div class="nav-item active"><i class="fas fa-chalkboard"></i></div>
-        <div class="nav-item"><i class="fas fa-cog"></i></div>
+        <div class="nav-item active"><i class="fas fa-chalkboard-user"></i></div>
+        <div class="nav-item"><i class="fas fa-users"></i></div>
     </nav>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -99,11 +102,10 @@
     <script>
         const canvas = document.getElementById('mainBoard');
         const ctx = canvas.getContext('2d');
-        const wrapper = document.getElementById('board-container');
-        const pencil = document.getElementById('pencil-cursor');
-        const inputBar = document.getElementById('inputBar');
-        const pencilInput = document.getElementById('auto-pencil-input');
+        const container = document.getElementById('board-container');
         const sidebar = document.getElementById('sidebar');
+        const inputBar = document.getElementById('inputBar');
+        const boardInput = document.getElementById('board-input');
 
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
@@ -112,27 +114,27 @@
         };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const boardID = "academy_live_board"; // Unique ID for the classroom board
+        const boardID = "academy_master_board";
 
         let tool = 'pen', inkColor = "#1A237E", isDrawing = false;
-        let curX = 60, curY = 100;
+        let curX = 50, curY = 80;
 
-        function init() {
-            canvas.width = wrapper.clientWidth;
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
             canvas.height = 5000;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
-            ctx.font = "600 28px 'Poppins'";
+            ctx.font = "700 24px 'Plus Jakarta Sans'";
         }
-        init();
+        resizeCanvas();
 
-        // --- FIREBASE SYNC: Saurari canje-canje daga wasu ---
+        // --- REAL-TIME LISTENER ---
         db.ref('boards/' + boardID).on('child_added', snap => {
             const data = snap.val();
             if (data.type === 'line') {
-                drawLine(data.x1, data.y1, data.x2, data.y2, data.color, data.width, data.isEraser);
+                renderLine(data.x1, data.y1, data.x2, data.y2, data.color, data.width, data.isEraser);
             } else if (data.type === 'text') {
-                drawText(data.char, data.x, data.y, data.color);
+                renderText(data.char, data.x, data.y, data.color);
             } else if (data.type === 'clear') {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
@@ -144,8 +146,8 @@
             tool = t;
             document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`btn-${t}`).classList.add('active');
-            inputBar.style.display = (t === 'text') ? 'flex' : 'none';
-            if(t === 'text') { pencilInput.focus(); sidebar.classList.remove('active'); }
+            inputBar.style.display = (t === 'text') ? 'block' : 'none';
+            if(t === 'text') { boardInput.focus(); sidebar.classList.remove('active'); }
         }
 
         function changeColor(c, el) {
@@ -154,8 +156,8 @@
             el.classList.add('active');
         }
 
-        // Helper Drawing Functions
-        function drawLine(x1, y1, x2, y2, color, width, isEraser) {
+        // Draw Helper
+        function renderLine(x1, y1, x2, y2, color, width, isEraser) {
             ctx.beginPath();
             ctx.globalCompositeOperation = isEraser ? 'destination-out' : 'source-over';
             ctx.strokeStyle = color;
@@ -163,91 +165,81 @@
             ctx.moveTo(x1, y1);
             ctx.lineTo(x2, y2);
             ctx.stroke();
-            ctx.closePath();
         }
 
-        function drawText(char, x, y, color) {
+        function renderText(char, x, y, color) {
             ctx.globalCompositeOperation = 'source-over';
             ctx.fillStyle = color;
             ctx.fillText(char, x, y);
         }
 
-        // --- INTERACTION LOGIC ---
+        // DRAWING LOGIC
         let lastX, lastY;
         canvas.addEventListener('touchstart', (e) => {
             if(tool === 'text') return;
             isDrawing = true;
-            const pos = getPos(e);
-            lastX = pos.x; lastY = pos.y;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            lastX = touch.clientX - rect.left;
+            lastY = touch.clientY - rect.top + container.scrollTop;
         });
 
         canvas.addEventListener('touchmove', (e) => {
             if(!isDrawing || tool === 'text') return;
             e.preventDefault();
-            const pos = getPos(e);
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top + container.scrollTop;
+            
             const isEraser = (tool === 'eraser');
-            const width = isEraser ? 50 : 4;
+            const width = isEraser ? 40 : 4;
+
+            renderLine(lastX, lastY, x, y, inkColor, width, isEraser);
             
-            // Draw Locally
-            drawLine(lastX, lastY, pos.x, pos.y, inkColor, width, isEraser);
-            
-            // Push to Firebase
             db.ref('boards/' + boardID).push({
-                type: 'line', x1: lastX, y1: lastY, x2: pos.x, y2: pos.y,
+                type: 'line', x1: lastX, y1: lastY, x2: x, y2: y,
                 color: inkColor, width: width, isEraser: isEraser
             });
 
-            lastX = pos.x; lastY = pos.y;
+            lastX = x; lastY = y;
         });
 
         canvas.addEventListener('touchend', () => isDrawing = false);
 
-        function getPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            return {
-                x: (e.touches[0].clientX) - rect.left,
-                y: (e.touches[0].clientY) - rect.top + wrapper.scrollTop
-            };
-        }
-
-        // --- TYPING LOGIC ---
-        pencilInput.addEventListener('input', (e) => {
+        // TYPING LOGIC
+        boardInput.addEventListener('input', (e) => {
             const char = e.data;
             if (!char) return;
 
-            const textWidth = ctx.measureText(char).width;
-            if (curX + textWidth > canvas.width - 60) { curX = 60; curY += 60; }
+            const charWidth = ctx.measureText(char).width;
+            if (curX + charWidth > canvas.width - 50) { curX = 50; curY += 50; }
 
-            // Locally and Globally
-            drawText(char, curX, curY, inkColor);
+            renderText(char, curX, curY, inkColor);
             db.ref('boards/' + boardID).push({ type: 'text', char: char, x: curX, y: curY, color: inkColor });
 
-            curX += textWidth + 4;
-            wrapper.scrollTo({ top: curY - 200, behavior: 'smooth' });
+            curX += charWidth + 2;
+            container.scrollTo({ top: curY - 250, behavior: 'smooth' });
         });
 
-        pencilInput.addEventListener('keydown', (e) => {
-            if(e.key === 'Enter') { 
-                curY += 60; curX = 60; 
-                pencilInput.value = "";
-                wrapper.scrollTo({ top: curY - 200, behavior: 'smooth' });
-            }
+        boardInput.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter') { curY += 50; curX = 50; boardInput.value = ""; }
         });
 
         function clearBoard() {
             Swal.fire({
                 title: 'Clear Board?',
-                text: "This will erase content for EVERYONE!",
+                text: "Warning: This erases history for all students!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#1A237E',
-                confirmButtonText: 'Yes, Clear All'
-            }).then((result) => {
-                if (result.isConfirmed) {
+                confirmButtonText: 'Yes, Wipe'
+            }).then((res) => {
+                if (res.isConfirmed) {
                     db.ref('boards/' + boardID).remove();
                     db.ref('boards/' + boardID).push({ type: 'clear' });
-                    curX = 60; curY = 100;
-                    wrapper.scrollTo({ top: 0, behavior: 'smooth' });
+                    curX = 50; curY = 80;
+                    container.scrollTop = 0;
                 }
             });
         }

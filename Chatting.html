@@ -3,99 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CMchat Pro - Messenger</title>
+    <title>CMchat Pro - Elite Messenger</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        :root { --p: #075E54; --s: #128C7E; --bg: #E5DDD5; --white: #ffffff; --my-msg: #DCF8C6; }
+        :root { 
+            --primary: #0062ff; 
+            --primary-gradient: linear-gradient(135deg, #0062ff, #00d2ff);
+            --bg-chat: #f8fafc; 
+            --white: #ffffff; 
+            --sent-msg: var(--primary-gradient);
+            --received-msg: #ffffff;
+            --shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
         
-        body { margin: 0; font-family: 'Segoe UI', Helvetica, sans-serif; background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); background-attachment: fixed; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        html, body { height: 100%; width: 100%; overflow: hidden; }
+        body { background: var(--bg-chat); display: flex; flex-direction: column; }
+
+        /* --- SIDEBAR SETTINGS --- */
+        .sidebar {
+            position: fixed; top: 0; left: -300px; width: 300px; height: 100%;
+            background: white; z-index: 4000; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 40px 25px; box-shadow: 20px 0 60px rgba(0,0,0,0.1);
+        }
+        .sidebar.active { left: 0; }
+        .sidebar-header { border-bottom: 1px solid #f1f5f9; padding-bottom: 25px; margin-bottom: 25px; }
+        .setting-item { display: flex; align-items: center; gap: 18px; padding: 14px 12px; border-radius: 15px; color: #475569; font-weight: 600; cursor: pointer; transition: 0.3s; margin-bottom: 5px; }
+        .setting-item i { width: 20px; font-size: 18px; color: var(--primary); }
+        .setting-item:active { background: #f1f5f9; transform: scale(0.95); }
+
+        /* --- OVERLAY --- */
+        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 3500; display: none; backdrop-filter: blur(8px); }
+
+        /* --- ELITE HEADER --- */
+        .chat-header { 
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px);
+            padding: 0 15px; display: flex; align-items: center; height: 70px; 
+            border-bottom: 1px solid rgba(0,0,0,0.04); z-index: 1000;
+        }
+        .user-info { display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer; }
+        .user-avatar { width: 45px; height: 45px; border-radius: 15px; object-fit: cover; border: 2px solid #fff; box-shadow: var(--shadow); }
+        .user-meta b { font-size: 16px; color: #1e293b; font-weight: 800; display: block; }
+        .status-dot { font-size: 11px; color: #10b981; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+        .status-dot::before { content: ''; width: 8px; height: 8px; background: #10b981; border-radius: 50%; }
+
+        .header-tools { display: flex; gap: 20px; color: #64748b; font-size: 19px; align-items: center; }
+
+        /* --- CHAT AREA --- */
+        .chat-container { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
+        .message { max-width: 80%; padding: 12px 16px; border-radius: 20px; font-size: 14.5px; position: relative; box-shadow: var(--shadow); line-height: 1.5; }
+        .received { background: var(--white); align-self: flex-start; border-bottom-left-radius: 5px; color: #334155; }
+        .sent { background: var(--sent-msg); align-self: flex-end; border-bottom-right-radius: 5px; color: white; }
+        .msg-footer { display: flex; justify-content: flex-end; align-items: center; gap: 5px; margin-top: 4px; font-size: 10px; opacity: 0.8; }
+
+        /* --- ANIMATED STICKER PANEL --- */
+        .sticker-panel { 
+            display: none; position: absolute; bottom: 90px; left: 15px; right: 15px; 
+            background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px);
+            border-radius: 30px; height: 350px; overflow-y: auto; 
+            box-shadow: 0 15px 45px rgba(0,0,0,0.1); z-index: 2000; padding: 25px;
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sticker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 10px; }
+        .sticker-img { width: 80px; height: 80px; cursor: pointer; transition: 0.3s; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); }
+
+        /* --- ELITE INPUT BAR --- */
+        .input-area { padding: 15px 20px; background: white; border-top: 1px solid #f1f5f9; display: flex; align-items: center; gap: 12px; }
+        .input-wrapper { flex: 1; background: #f1f5f9; border-radius: 18px; padding: 6px 18px; display: flex; align-items: center; gap: 12px; }
+        #messageInput { border: none; outline: none; flex: 1; font-size: 15px; padding: 12px 0; background: transparent; color: #1e293b; }
         
-        /* Header & Icons */
-        .chat-header { background: var(--p); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; height: 50px; z-index: 1000; }
-        .user-info { display: flex; align-items: center; gap: 10px; flex: 1; cursor: pointer; }
-        .user-info img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
-        .header-right-icons { display: flex; gap: 18px; align-items: center; }
-        .header-right-icons i { font-size: 18px; cursor: pointer; color: white; }
+        .action-btn { 
+            width: 50px; height: 50px; background: var(--primary-gradient); border: none; 
+            border-radius: 18px; color: white; display: flex; align-items: center; 
+            justify-content: center; font-size: 20px; box-shadow: 0 4px 15px rgba(0,98,255,0.3); transition: 0.3s;
+        }
 
-        /* Floating Selector Animation */
-        .selector-trigger { animation: pulse 2s infinite; color: #00ffcc; font-size: 20px; cursor: pointer; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-
-        /* Chat Area */
-        .chat-container { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .message { max-width: 75%; padding: 8px 12px; border-radius: 12px; font-size: 14.5px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.1); line-height: 1.4; }
-        .received { background: var(--white); align-self: flex-start; border-top-left-radius: 0; }
-        .sent { background: var(--my-msg); align-self: flex-end; border-top-right-radius: 0; }
-        
-        /* Status (P & D) */
-        .msg-footer { display: flex; justify-content: flex-end; align-items: center; gap: 4px; margin-top: 2px; }
-        .time { font-size: 10px; color: #667781; }
-        .status-tag { font-size: 11px; font-weight: bold; color: #34b7f1; }
-
-        /* Input Area */
-        .input-area { padding: 8px; display: flex; align-items: center; gap: 6px; background: transparent; position: relative; }
-        .input-box { flex: 1; background: white; border-radius: 25px; padding: 5px 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        #messageInput { border: none; outline: none; flex: 1; font-size: 16px; padding: 8px 0; }
-        .input-box i { color: #8696a0; font-size: 22px; cursor: pointer; }
-        
-        #sendBtn { width: 45px; height: 45px; background: var(--s); border: none; border-radius: 50%; color: white; cursor: pointer; font-size: 18px; }
-
-        /* Sticker Panel */
-        .sticker-panel { display: none; position: absolute; bottom: 70px; left: 10px; width: 90%; background: white; border-radius: 15px; height: 280px; overflow-y: auto; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 2000; padding: 10px; }
-        .sticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .sticker-grid img { width: 100%; cursor: pointer; transition: 0.2s; }
-        .sticker-grid img:hover { transform: scale(1.1); }
-
-        /* Selector Slide-up */
-        .user-selector { position: fixed; bottom: 0; width: 100%; background: white; border-radius: 20px 20px 0 0; transform: translateY(100%); transition: 0.3s; z-index: 3000; max-height: 70vh; overflow-y: auto; }
-        .user-selector.active { transform: translateY(0); }
-        .friend-item { display: flex; align-items: center; padding: 15px; gap: 15px; border-bottom: 1px solid #f2f2f2; }
-        .avatar { width: 45px; height: 45px; border-radius: 50%; background: var(--p); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 2500; }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div id="overlay" class="overlay" onclick="toggleSelector()"></div>
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2 style="color:var(--primary); font-weight:800; letter-spacing: -0.5px;">Elite Settings</h2>
+            <p style="font-size:12px; color:#64748b; font-weight: 500;">Customize Messenger</p>
+        </div>
+        <div class="setting-item"><i class="fas fa-user-circle"></i> Account Settings</div>
+        <div class="setting-item"><i class="fas fa-shield-halved"></i> Privacy & Security</div>
+        <div class="setting-item"><i class="fas fa-palette"></i> Chat Themes</div>
+        <div class="setting-item"><i class="fas fa-bell"></i> Notifications</div>
+        <div class="setting-item"><i class="fas fa-server"></i> Data & Storage</div>
+        <div class="setting-item"><i class="fas fa-life-ring"></i> Help Center</div>
+        <hr style="margin: 15px 0; border: 0; border-top: 1px solid #f1f5f9;">
+        <div class="setting-item" style="color:#ef4444;"><i class="fas fa-power-off"></i> Logout</div>
+    </div>
 
     <header class="chat-header">
-        <div class="user-info">
-            <i class="fas fa-arrow-left" onclick="location.href='Dashboard.html'"></i>
-            <img src="https://via.placeholder.com/40" id="chatAvatar">
-            <div onclick="toggleSelector()">
-                <b id="chatWith">Select Friend</b>
-                <div id="topStatus" style="font-size: 10px; color: #cfd8dc;">tap to change</div>
+        <div class="user-info" onclick="toggleSidebar()">
+            <i class="fas fa-chevron-left" onclick="event.stopPropagation(); history.back()" style="color:#64748b; margin-right:5px; font-size: 18px;"></i>
+            <img src="https://via.placeholder.com/100" class="user-avatar" id="chatAvatar">
+            <div class="user-meta">
+                <b id="chatWith">Commander CM</b>
+                <div class="status-dot">Online</div>
             </div>
         </div>
-        <div class="header-right-icons">
-            <i class="fas fa-user-plus selector-trigger" onclick="toggleSelector()"></i>
-            <i class="fas fa-video"></i>
-            <i class="fas fa-phone-alt"></i>
+        <div class="header-tools">
+            <i class="fas fa-phone-alt" title="Voice Call"></i>
+            <i class="fas fa-video-camera" title="Video Call"></i>
+            <i class="fas fa-ellipsis-v" onclick="toggleSidebar()"></i>
         </div>
     </header>
 
     <div class="chat-container" id="chatBox"></div>
 
     <div id="stickerPanel" class="sticker-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <b style="color:var(--primary); font-weight: 800;">Elite Animated Emojis</b>
+            <i class="fas fa-times-circle" onclick="toggleStickers()" style="color:#cbd5e1; font-size: 22px; cursor: pointer;"></i>
+        </div>
         <div class="sticker-grid" id="stickerGrid"></div>
     </div>
 
     <div class="input-area">
-        <div class="input-box">
-            <i class="far fa-smile" onclick="toggleStickers()"></i>
-            <input type="text" id="messageInput" placeholder="Message" autocomplete="off">
-            <label for="gallery"><i class="fas fa-paperclip"></i></label>
-            <input type="file" id="gallery" style="display:none" accept="image/*" onchange="sendImage(this)">
-            <i class="fas fa-camera" onclick="alert('Camera opening...')"></i>
+        <div class="input-wrapper">
+            <i class="far fa-face-smile-beam" style="color:#64748b; font-size:24px; cursor: pointer;" onclick="toggleStickers()"></i>
+            <input type="text" id="messageInput" placeholder="Type a message..." oninput="checkInput()">
+            <label for="media-upload">
+                <i class="fas fa-paperclip" style="color:#64748b; cursor: pointer; font-size: 20px;"></i>
+            </label>
+            <input type="file" id="media-upload" hidden accept="image/*,video/*">
         </div>
-        <button id="sendBtn" onclick="handleAction()">
-            <i id="btnIcon" class="fas fa-microphone"></i>
+        <button class="action-btn" id="sendBtn" onclick="handleAction()">
+            <i class="fas fa-microphone" id="btnIcon"></i>
         </button>
-    </div>
-
-    <div id="userSelector" class="user-selector">
-        <div style="padding: 20px; font-weight: bold; text-align: center; border-bottom: 1px solid #eee;">Select a Friend</div>
-        <div id="friendsList"></div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -112,76 +157,38 @@
         const database = firebase.database();
         const auth = firebase.auth();
 
-        let myUID = "", currentFriendUID = "";
-        const chatBox = document.getElementById('chatBox');
-        const messageInput = document.getElementById('messageInput');
+        let myUID = "", currentPartner = "Admin_CM"; // Replace with your logic
 
-        // --- Auth & Status ---
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                myUID = user.uid;
-                database.ref('users/' + myUID + '/status').set('online');
-                database.ref('users/' + myUID + '/status').onDisconnect().set('offline');
-                loadFriendsOnly();
-            } else { window.location.href = "index.html"; }
-        });
+        auth.onAuthStateChanged(user => { if (user) { myUID = user.uid; startChat(); } });
 
-        // --- Load Friends & Status ---
-        function loadFriendsOnly() {
-            database.ref('friends/' + myUID).on('value', snap => {
-                const list = document.getElementById('friendsList');
-                list.innerHTML = "";
-                snap.forEach(child => {
-                    const f = child.val();
-                    const fid = child.key;
-                    database.ref('users/' + fid + '/status').on('value', st => {
-                        const status = st.val() || 'offline';
-                        const color = status === 'online' ? '#00ff00' : '#888';
-                        let item = document.getElementById('f-'+fid);
-                        if(item) { item.querySelector('.st').innerText = status; item.querySelector('.st').style.color = color; }
-                        else {
-                            list.innerHTML += `<div class="friend-item" id="f-${fid}" onclick="selectFriend('${fid}', '${f.name}')">
-                                <div class="avatar">${f.name[0]}</div>
-                                <div><b>${f.name}</b><br><small class="st" style="color:${color}">${status}</small></div>
-                            </div>`;
-                        }
-                    });
-                });
-            });
+        function toggleSidebar() {
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('overlay');
+            sb.classList.toggle('active');
+            ov.style.display = sb.classList.contains('active') ? 'block' : 'none';
         }
 
-        function selectFriend(uid, name) {
-            currentFriendUID = uid;
-            document.getElementById('chatWith').innerText = name;
-            database.ref('users/' + uid + '/status').on('value', s => {
-                document.getElementById('topStatus').innerText = s.val() || 'offline';
-            });
-            toggleSelector();
-            startChat();
-        }
+        const msgInput = document.getElementById('messageInput');
+        const btnIcon = document.getElementById('btnIcon');
 
-        function toggleSelector() {
-            document.getElementById('userSelector').classList.toggle('active');
-            document.getElementById('overlay').style.display = document.getElementById('userSelector').classList.contains('active') ? 'block' : 'none';
+        function checkInput() {
+            btnIcon.className = msgInput.value.trim().length > 0 ? "fas fa-paper-plane" : "fas fa-microphone";
         }
-
-        // --- Chat Logic & Status Indicators ---
-        function getChatID(u1, u2) { return u1 < u2 ? u1 + "_" + u2 : u2 + "_" + u1; }
 
         function startChat() {
-            const cid = getChatID(myUID, currentFriendUID);
-            database.ref('private_chats/' + cid).on('value', snap => {
+            const chatID = myUID < currentPartner ? myUID + "_" + currentPartner : currentPartner + "_" + myUID;
+            database.ref('messages/' + chatID).on('value', snap => {
+                const chatBox = document.getElementById('chatBox');
                 chatBox.innerHTML = "";
                 snap.forEach(child => {
                     const d = child.val();
                     const isMe = d.sender === myUID;
-                    const statusIcon = isMe ? `<span class="status-tag">${d.status}</span>` : "";
                     chatBox.innerHTML += `
                         <div class="message ${isMe ? 'sent' : 'received'}">
                             ${d.type === 'sticker' ? `<img src="${d.msg}" width="100">` : d.msg}
                             <div class="msg-footer">
-                                <span class="time">${d.time}</span>
-                                ${statusIcon}
+                                <span>${d.time}</span>
+                                ${isMe ? '<i class="fas fa-check-double" style="color:white"></i>' : ''}
                             </div>
                         </div>`;
                 });
@@ -190,49 +197,53 @@
         }
 
         function handleAction() {
-            const text = messageInput.value.trim();
-            if (text && currentFriendUID) {
-                const cid = getChatID(myUID, currentFriendUID);
-                const msgData = {
+            if (btnIcon.className.includes("fa-paper-plane")) {
+                const text = msgInput.value.trim();
+                const chatID = myUID < currentPartner ? myUID + "_" + currentPartner : currentPartner + "_" + myUID;
+                database.ref('messages/' + chatID).push({
                     sender: myUID,
                     msg: text,
-                    time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
-                    status: 'P', // Initial Pending
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                };
-                const newRef = database.ref('private_chats/' + cid).push();
-                newRef.set(msgData).then(() => {
-                    newRef.update({ status: 'D' }); // Change to Delivered
+                    type: 'text',
+                    time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
                 });
-                messageInput.value = "";
-                document.getElementById('btnIcon').className = "fas fa-microphone";
+                msgInput.value = "";
+                checkInput();
             }
         }
 
-        // --- Stickers Logic (100+ Professional Stickers) ---
         function toggleStickers() {
             const panel = document.getElementById('stickerPanel');
             panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-            if(panel.style.display === 'block' && document.getElementById('stickerGrid').innerHTML === "") {
-                for(let i=1; i<=100; i++) {
-                    document.getElementById('stickerGrid').innerHTML += 
-                        `<img src="https://api.dicebear.com/7.x/adventurer/svg?seed=${i}" onclick="sendSticker(this.src)">`;
-                }
+            if(panel.style.display === 'block') {
+                const grid = document.getElementById('stickerGrid');
+                grid.innerHTML = "";
+                const stickers = [
+                    'https://fonts.gstatic.com/s/e/notoemoji/latest/1f602/512.gif',
+                    'https://fonts.gstatic.com/s/e/notoemoji/latest/1f62d/512.gif',
+                    'https://fonts.gstatic.com/s/e/notoemoji/latest/1f60d/512.gif',
+                    'https://fonts.gstatic.com/s/e/notoemoji/latest/1f632/512.gif',
+                    'https://fonts.gstatic.com/s/e/notoemoji/latest/1f60e/512.gif',
+                    'https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.gif',
+                    'https://fonts.gstatic.com/s/e/notoemoji/latest/1f614/512.gif',
+                    'https://fonts.gstatic.com/s/e/notoemoji/latest/1f44b/512.gif',
+                    'https://fonts.gstatic.com/s/e/notoemoji/latest/1f525/512.gif'
+                ];
+                stickers.forEach(url => {
+                    grid.innerHTML += `<img src="${url}" class="sticker-img" onclick="sendSticker('${url}')">`;
+                });
             }
         }
 
         function sendSticker(url) {
-            const cid = getChatID(myUID, currentFriendUID);
-            database.ref('private_chats/' + cid).push({
-                sender: myUID, type: 'sticker', msg: url, status: 'D',
-                time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+            const chatID = myUID < currentPartner ? myUID + "_" + currentPartner : currentPartner + "_" + myUID;
+            database.ref('messages/' + chatID).push({
+                sender: myUID,
+                msg: url,
+                type: 'sticker',
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
             });
             toggleStickers();
         }
-
-        messageInput.oninput = () => {
-            document.getElementById('btnIcon').className = messageInput.value.trim() ? "fas fa-paper-plane" : "fas fa-microphone";
-        };
     </script>
 </body>
 </html>

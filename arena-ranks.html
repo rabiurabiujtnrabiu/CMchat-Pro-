@@ -2,141 +2,138 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arena Ranks | Live Leaderboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Arena Hierarchy | CM Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
-        :root { --p: #0A192F; --g: #FFD600; --accent: #64FFDA; --card: #112240; }
-        body { margin: 0; background: var(--p); font-family: 'Inter', sans-serif; color: white; padding: 20px; }
+        :root { --bg: #0A192F; --card: #112240; --gold: #FFD600; --cyan: #64FFDA; }
+        body { margin: 0; background: var(--bg); font-family: 'Inter', sans-serif; color: white; padding-bottom: 30px; }
 
-        /* Top 3 Podium Style */
-        .podium-container {
-            display: flex; justify-content: center; align-items: flex-end;
-            gap: 10px; margin-top: 30px; height: 200px;
-        }
-        .podium-user { text-align: center; width: 30%; }
-        .p-avatar { 
-            width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--g); 
-            margin: 0 auto 10px; position: relative; overflow: hidden;
-            background: #1d2d44; display: flex; align-items: center; justify-content: center;
-        }
-        .p-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .crown { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); color: var(--g); font-size: 18px; }
+        header { padding: 25px; display: flex; align-items: center; gap: 15px; background: rgba(10,25,47,0.9); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        .section-title { padding: 20px 20px 10px; font-size: 13px; font-weight: 800; color: var(--cyan); text-transform: uppercase; letter-spacing: 1px; }
         
-        .bar { width: 100%; border-top-left-radius: 15px; border-top-right-radius: 15px; background: var(--card); }
-        .rank-2 .bar { height: 80px; background: #c0c0c0; } /* Silver */
-        .rank-1 .bar { height: 110px; background: var(--g); } /* Gold */
-        .rank-3 .bar { height: 60px; background: #cd7f32; } /* Bronze */
+        /* TOP 10 SCROLL */
+        .top-ten-scroll { display: flex; overflow-x: auto; padding: 10px 20px 20px; gap: 15px; scrollbar-width: none; }
+        .top-ten-scroll::-webkit-scrollbar { display: none; }
+        .top-card { min-width: 130px; background: var(--card); padding: 15px; border-radius: 20px; text-align: center; border: 1px solid rgba(255, 214, 0, 0.2); transition: 0.3s; }
+        .top-card img { width: 55px; height: 55px; border-radius: 50%; border: 2px solid var(--gold); margin-bottom: 10px; object-fit: cover; }
+        .top-card b { font-size: 13px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .top-card span { font-size: 10px; color: var(--gold); font-weight: 700; }
 
-        /* List View Leaderboard */
-        .ranks-list { margin-top: 40px; background: var(--card); border-radius: 30px; overflow: hidden; }
-        .rank-item {
-            display: flex; align-items: center; padding: 15px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.3s;
+        /* LEVEL LIST */
+        .level-list { padding: 0 20px; }
+        .level-item { 
+            background: rgba(255,255,255,0.02); padding: 16px 20px; border-radius: 22px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.04);
         }
-        .rank-num { width: 30px; font-weight: 900; color: var(--accent); }
-        .user-info { flex: 1; display: flex; align-items: center; gap: 12px; }
-        .mini-avatar { width: 40px; height: 40px; border-radius: 50%; background: #0A192F; }
-        .v-badge { color: #3b82f6; font-size: 10px; margin-left: 4px; }
-        
-        .user-stats { text-align: right; }
-        .xp-val { display: block; font-weight: 800; color: var(--g); font-size: 14px; }
-        .f-val { font-size: 10px; opacity: 0.5; }
+        .level-info { display: flex; align-items: center; gap: 15px; }
+        .level-num { width: 38px; height: 38px; background: #1d2d44; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--gold); font-size: 13px; border: 1px solid rgba(255,214,0,0.2); }
+        .level-name { font-weight: 700; font-size: 14px; letter-spacing: 0.3px; }
+        .user-count { font-size: 11px; font-weight: 800; color: var(--cyan); background: rgba(100, 255, 218, 0.08); padding: 5px 12px; border-radius: 10px; border: 1px solid rgba(100,255,218,0.1); }
 
-        .follow-btn {
-            background: transparent; border: 1px solid var(--accent); color: var(--accent);
-            padding: 5px 12px; border-radius: 10px; font-size: 11px; font-weight: bold;
-        }
+        .level-20 { background: linear-gradient(90deg, #1d2d44, #112240); border: 1px solid var(--gold); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .loading-shimmer { color: var(--text-dim); text-align: center; padding: 40px; font-size: 14px; opacity: 0.5; }
     </style>
 </head>
 <body>
 
-    <h2 style="text-align: center; letter-spacing: 2px;">ARENA LEGENDS</h2>
-    <p style="text-align: center; font-size: 11px; opacity: 0.6; margin-top: -10px;">Weekly Top Influencers</p>
+    <header>
+        <i class="fas fa-crown" style="color: var(--gold);"></i>
+        <b style="font-size: 18px;">Arena Hierarchy</b>
+    </header>
 
-    <div class="podium-container" id="topThree">
-        <div class="podium-user rank-2 animate__animated animate__fadeInUp">
-            <div class="p-avatar"><img id="p2_img" src=""></div>
-            <div class="bar"><b style="color:var(--p); font-size:12px;">2nd</b></div>
-            <small id="p2_name">---</small>
-        </div>
-        <div class="podium-user rank-1 animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
-            <i class="fas fa-crown crown"></i>
-            <div class="p-avatar" style="width: 80px; height: 80px;"><img id="p1_img" src=""></div>
-            <div class="bar"><b style="color:var(--p); font-size:12px;">1st</b></div>
-            <small id="p1_name" style="font-weight: 900;">---</small>
-        </div>
-        <div class="podium-user rank-3 animate__animated animate__fadeInUp" style="animation-delay: 0.4s;">
-            <div class="p-avatar"><img id="p3_img" src=""></div>
-            <div class="bar"><b style="color:var(--p); font-size:12px;">3rd</b></div>
-            <small id="p3_name">---</small>
-        </div>
+    <div class="section-title">Weekly Top Influencers</div>
+    <div class="top-ten-scroll" id="topTenContainer">
+        <div class="loading-shimmer">Loading Champions...</div>
     </div>
 
-    <div class="ranks-list" id="leaderboardList">
+    <div class="section-title">Rank Distribution (Levels 1-20)</div>
+    <div class="level-list" id="levelContainer">
         </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-        const firebaseConfig = { 
-            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", 
-            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com", 
-            projectId: "cmchat-pro" 
+    <script>
+        // 1. FIREBASE INITIALIZATION
+        const firebaseConfig = {
+            databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com"
         };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        // Fetch Live Rankings
-        const usersRef = query(ref(db, 'users'), orderByChild('xp'), limitToLast(10));
-        
-        onValue(usersRef, (snapshot) => {
-            let users = [];
-            snapshot.forEach(child => {
-                users.push({ id: child.key, ...child.val() });
+        const titles = [
+            "Rookie Gladiator", "Brave Warrior", "Skilled Knight", "Arena Veteran", 
+            "Squad Leader", "Master Tactician", "Elite Guardian", "Combat General", 
+            "Arena Baron", "Noble Lord", "Grand Commander", "Elite Governor", 
+            "Silver Prince", "Golden Duke", "Royal Ambassador", "Grand Vizier", 
+            "Supreme Regent", "Kingdom Legend", "Imperial Majesty", "Supreme Emperor"
+        ];
+
+        // 2. FETCH ALL USERS & CALCULATE RANKS
+        db.ref('users').on('value', (snapshot) => {
+            const usersData = snapshot.val();
+            if (!usersData) return;
+
+            const allUsers = Object.values(usersData);
+            const levelCounts = new Array(20).fill(0);
+            
+            // Sort users for Top 10
+            const sortedUsers = allUsers.sort((a, b) => (b.referralCount || 0) - (a.referralCount || 0));
+
+            // Populate Top 10
+            renderTopTen(sortedUsers.slice(0, 10));
+
+            // Calculate how many users are in each level
+            allUsers.forEach(user => {
+                const refs = user.referralCount || 0;
+                // Misali: Duk 50 refs mataki 1 ne, ko kuma amfani da lissafin ka
+                // Anan zamu yi amfani da 'Logic' din dake raba su zuwa Level 1-20
+                let lv = Math.floor(refs / 100) + 1; // 100 refs per level misali
+                if(lv > 20) lv = 20;
+                levelCounts[lv - 1]++;
             });
-            users.reverse(); // Domin babba ya dawo sama
 
-            const list = document.getElementById('leaderboardList');
-            list.innerHTML = '';
+            renderLevels(levelCounts);
+        });
 
-            // Update Podium (Top 3)
-            if(users[0]) {
-                document.getElementById('p1_name').innerText = users[0].username;
-                document.getElementById('p1_img').src = users[0].avatar || 'https://via.placeholder.com/100';
-            }
-            if(users[1]) {
-                document.getElementById('p2_name').innerText = users[1].username;
-                document.getElementById('p2_img').src = users[1].avatar || 'https://via.placeholder.com/100';
-            }
-            if(users[2]) {
-                document.getElementById('p3_name').innerText = users[2].username;
-                document.getElementById('p3_img').src = users[2].avatar || 'https://via.placeholder.com/100';
-            }
-
-            // Update List
-            users.forEach((u, index) => {
-                const item = `
-                    <div class="rank-item">
-                        <div class="rank-num">#${index + 1}</div>
-                        <div class="user-info">
-                            <img class="mini-avatar" src="${u.avatar || 'https://via.placeholder.com/100'}">
-                            <div>
-                                <b>${u.username}</b>
-                                ${u.verified ? '<i class="fas fa-check-circle v-badge"></i>' : ''}
-                            </div>
-                        </div>
-                        <div class="user-stats">
-                            <span class="xp-val">${u.xp.toLocaleString()} XP</span>
-                            <span class="f-val">${u.followers || 0} Followers</span>
-                        </div>
+        function renderTopTen(topUsers) {
+            const container = document.getElementById('topTenContainer');
+            container.innerHTML = '';
+            topUsers.forEach((user, index) => {
+                const photo = user.profilePhoto || "https://ui-avatars.com/api/?name=" + user.username;
+                container.innerHTML += `
+                    <div class="top-card">
+                        <img src="${photo}">
+                        <b>${user.username || 'User'}</b>
+                        <span>Rank #${index + 1}</span>
                     </div>
                 `;
-                list.insertAdjacentHTML('beforeend', item);
             });
-        });
+        }
+
+        function renderLevels(counts) {
+            const container = document.getElementById('levelContainer');
+            container.innerHTML = '';
+            titles.forEach((title, index) => {
+                const lv = index + 1;
+                const isMax = lv === 20;
+                container.innerHTML += `
+                    <div class="level-item ${isMax ? 'level-20' : ''}">
+                        <div class="level-info">
+                            <div class="level-num">${lv}</div>
+                            <div>
+                                <div class="level-name">${title}</div>
+                                <div style="font-size: 10px; opacity: 0.5;">Required: ${lv * 100} Refs</div>
+                            </div>
+                        </div>
+                        <div class="user-count"><i class="fas fa-users"></i> ${counts[index]}</div>
+                    </div>
+                `;
+            });
+        }
     </script>
 </body>
 </html>
