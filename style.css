@@ -1,0 +1,165 @@
+/* --- ELITE PRO ULTIMATE UI SYSTEM --- */
+:root {
+    --primary: #0062ff;
+    --primary-gradient: linear-gradient(135deg, #0062ff, #00d2ff);
+    --bg-main: #f8fafc;
+    --white: #ffffff;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --glass: rgba(255, 255, 255, 0.95);
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.03);
+    --shadow-pro: 0 10px 30px rgba(0, 98, 255, 0.15);
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    margin: 0; padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-main);
+    color: var(--text-dark);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* --- PREMIUM HEADER GYARA --- */
+.main-header {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    z-index: 1000;
+}
+
+/* Wannan ne zai jera komai a Header a kwance */
+.header-content-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-avatar { position: relative; }
+.avatar-box {
+    width: 46px; height: 46px;
+    background: var(--primary-gradient);
+    color: white; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 18px;
+    box-shadow: var(--shadow-pro);
+}
+
+.brand-info h1 { font-size: 17px; font-weight: 700; color: var(--text-dark); }
+.status-container { display: flex; align-items: center; gap: 5px; }
+.status-container .dot { width: 7px; height: 7px; background: #22c55e; border-radius: 50%; }
+
+/* Jera Icons a kwance ba tare da sun hargitse ba */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-icon {
+    background: #f1f5f9; border: none;
+    width: 38px; height: 38px; border-radius: 10px;
+    color: var(--text-muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: 0.2s ease;
+}
+
+.nav-icon:active { transform: scale(0.9); background: var(--primary-light); color: var(--primary); }
+
+/* --- CHAT VIEWPORT --- */
+.chat-viewport {
+    flex: 1; overflow-y: auto;
+    padding: 20px 15px;
+    display: flex; flex-direction: column; gap: 12px;
+}
+
+.msg-bubble {
+    max-width: 80%; padding: 12px 16px;
+    border-radius: 20px; font-size: 15px; line-height: 1.5;
+    box-shadow: var(--shadow-soft);
+    animation: bubbleAppear 0.4s ease-out;
+}
+
+.msg-sent {
+    align-self: flex-end; background: var(--primary-gradient);
+    color: white; border-bottom-right-radius: 4px;
+}
+
+.msg-received {
+    align-self: flex-start; background: white;
+    color: var(--text-dark); border-bottom-left-radius: 4px;
+}
+
+/* --- MODERN INPUT V2 (Floating Style) --- */
+.input-panel {
+    padding: 15px 18px 25px;
+    background: white;
+    border-top: 1px solid rgba(0,0,0,0.03);
+}
+
+.input-container-v2 {
+    background: #f1f5f9;
+    padding: 6px 12px;
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.input-field-wrapper {
+    flex: 1; /* Wannan zai ba gurin rubutu dama ya tura sauran gefe */
+}
+
+.input-field-wrapper input {
+    width: 100%; border: none; outline: none; background: transparent;
+    font-size: 15px; padding: 10px 0; color: var(--text-dark);
+}
+
+.action-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.send-trigger {
+    background: var(--primary-gradient);
+    color: white; border: none;
+    width: 42px; height: 42px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-pro); cursor: pointer;
+}
+
+/* --- BOTTOM SHEETS --- */
+.bottom-sheet-pro {
+    position: fixed; bottom: -100%; left: 0; width: 100%;
+    background: white; border-radius: 30px 30px 0 0;
+    transition: 0.4s cubic-bezier(0.1, 0.7, 0.1, 1);
+    z-index: 2000; padding: 20px;
+}
+.bottom-sheet-pro.active { bottom: 0; }
+
+.overlay {
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(5px); display: none; z-index: 1500;
+}
+
+@keyframes bubbleAppear {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

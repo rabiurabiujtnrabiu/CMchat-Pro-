@@ -1,0 +1,123 @@
+<div class="owner-panel">
+    <div class="settings-header">
+        <div class="owner-identity">
+            <i class="fas fa-crown"></i>
+            <span>Group Owner Tools</span>
+        </div>
+        <button class="close-panel" onclick="togglePanel('settingsPanel')">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <div class="settings-scroll-area">
+        <div class="control-group">
+            <p class="group-label">Chat Management</p>
+            
+            <div class="control-card">
+                <div class="card-info">
+                    <b><i class="fas fa-comment-slash"></i> Lock Chat</b>
+                    <span>Only owner can send messages</span>
+                </div>
+                <label class="ios-switch">
+                    <input type="checkbox" id="lockChat" onchange="updateGroupPolicy('lockChat')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="control-card">
+                <div class="card-info">
+                    <b><i class="fas fa-hourglass-half"></i> Slow Mode</b>
+                    <span>Limit message frequency</span>
+                </div>
+                <label class="ios-switch">
+                    <input type="checkbox" id="slowMode" onchange="updateGroupPolicy('slowMode')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <p class="group-label">Security & Privacy</p>
+            
+            <div class="control-card">
+                <div class="card-info">
+                    <b><i class="fas fa-link-slash"></i> Anti-Link</b>
+                    <span>Auto-delete messages with links</span>
+                </div>
+                <label class="ios-switch">
+                    <input type="checkbox" id="antiLink" checked onchange="updateGroupPolicy('antiLink')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="control-card">
+                <div class="card-info">
+                    <b><i class="fas fa-user-shield"></i> Admin Logs</b>
+                    <span>Track all admin actions</span>
+                </div>
+                <label class="ios-switch">
+                    <input type="checkbox" id="adminLogs">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="control-group danger-section">
+            <p class="group-label" style="color:#ef4444;">Danger Zone</p>
+            <button class="action-btn wipe-btn" onclick="confirmClearHistory()">
+                <i class="fas fa-trash-alt"></i> Clear Group History
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* PROFESSIONAL SETTINGS STYLING */
+.owner-panel { background: #ffffff; border-radius: 30px 30px 0 0; }
+.settings-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px; border-bottom: 1px solid #f1f5f9;
+}
+.owner-identity { display: flex; align-items: center; gap: 12px; font-weight: 700; color: #1e293b; font-size: 18px; }
+.owner-identity i { color: #f59e0b; }
+
+.close-panel { background: #f8fafc; border: none; width: 35px; height: 35px; border-radius: 50%; color: #64748b; cursor: pointer; transition: 0.3s; }
+.close-panel:active { transform: scale(0.9); background: #f1f5f9; }
+
+.settings-scroll-area { padding: 10px 20px 30px; max-height: 70vh; overflow-y: auto; }
+.group-label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin: 25px 0 12px; letter-spacing: 1px; }
+
+.control-card {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #f8fafc; padding: 16px; border-radius: 20px; margin-bottom: 12px;
+    border: 1px solid rgba(0,0,0,0.01);
+}
+.card-info b { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #1e293b; margin-bottom: 3px; }
+.card-info b i { color: #0062ff; font-size: 13px; }
+.card-info span { font-size: 11px; color: #64748b; }
+
+/* MODERN IOS SWITCH */
+.ios-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.ios-switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #cbd5e1; transition: .4s; border-radius: 30px;
+}
+.slider:before {
+    position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+    background-color: white; transition: .4s; border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+input:checked + .slider { background-color: #22c55e; }
+input:checked + .slider:before { transform: translateX(20px); }
+
+.action-btn {
+    width: 100%; padding: 16px; border-radius: 18px; border: none;
+    font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s;
+}
+.wipe-btn { background: #fee2e2; color: #ef4444; margin-top: 10px; }
+.wipe-btn:active { transform: scale(0.97); }
+
+/* Scrollbar Fix */
+.settings-scroll-area::-webkit-scrollbar { width: 0px; }
+</style>
