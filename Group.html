@@ -5,79 +5,236 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CMchat Elite - Pro Edition</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root {
+            --primary: #0062ff;
+            --primary-gradient: linear-gradient(135deg, #0062ff, #00d2ff);
+            --bg-main: #f1f5f9;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(0, 98, 255, 0.15);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- HEADER --- */
+        .main-header { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 15px 20px; border-bottom: 1px solid #e2e8f0; z-index: 2000; position: relative; }
+        .header-content { display: flex; align-items: center; justify-content: space-between; }
+        .brand-avatar { width: 48px; height: 48px; background: var(--primary-gradient); color: white; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 19px; box-shadow: var(--shadow); }
+        .header-btns { display: flex; gap: 8px; }
+        .nav-btn { background: #f1f5f9; border: none; width: 40px; height: 40px; border-radius: 12px; color: #64748b; cursor: pointer; transition: 0.2s; }
+        .nav-btn:active { transform: scale(0.9); }
+
+        /* --- CHAT CANVAS --- */
+        .chat-viewport { 
+            flex: 1; overflow-y: auto; padding: 20px; 
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 0.8px, transparent 0.8px);
+            background-size: 24px 24px;
+            display: flex; flex-direction: column; gap: 12px;
+        }
+
+        .msg-bubble { max-width: 80%; padding: 12px 16px; border-radius: 20px; font-size: 14.5px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); position: relative; line-height: 1.5; }
+        .sent { align-self: flex-end; background: var(--primary-gradient); color: white; border-bottom-right-radius: 4px; }
+        .received { align-self: flex-start; background: white; color: #334155; border-bottom-left-radius: 4px; border: 1px solid #f1f5f9; }
+
+        /* --- FLOATING FRIEND BUTTON --- */
+        .fab-friend {
+            position: fixed; bottom: 110px; right: 20px; width: 60px; height: 60px;
+            background: var(--primary-gradient); border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; color: white;
+            font-size: 24px; box-shadow: var(--shadow); z-index: 2400; cursor: pointer;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* --- INPUT PANEL --- */
+        .input-panel { padding: 12px 18px 35px; background: white; border-top: 1px solid #f1f5f9; z-index: 2001; }
+        .input-wrapper { background: #f1f5f9; border-radius: 30px; padding: 6px 12px; display: flex; align-items: center; gap: 10px; }
+        #msgInp { flex: 1; border: none; outline: none; background: transparent; font-size: 15px; padding: 10px 5px; color: #1e293b; }
+        
+        .action-btn { width: 44px; height: 44px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
+        .voice-mode { background: #e2e8f0; color: #64748b; }
+        .send-mode { background: var(--primary-gradient); color: white; box-shadow: var(--shadow); }
+
+        /* --- BOTTOM SHEETS --- */
+        .bottom-sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: white; border-radius: 35px 35px 0 0; transition: 0.5s cubic-bezier(0.1, 0.7, 0.1, 1); z-index: 3000; padding: 25px; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); max-height: 85vh; overflow-y: auto; }
+        .bottom-sheet.active { bottom: 0; }
+        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(10px); display: none; z-index: 2500; }
+
+        /* SETTINGS & FRIENDS LIST */
+        .list-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: #f8fafc; border-radius: 18px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+        .list-item i { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; background: white; border-radius: 10px; color: var(--primary); }
+        .sticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    </style>
 </head>
-<body class="pro-ui">
+<body>
 
     <div id="overlay" class="overlay" onclick="closeAllPanels()"></div>
 
     <header class="main-header">
-        <div class="header-content-wrapper">
-            <div class="header-left" onclick="showGroupInfo()">
-                <div class="brand-avatar">
-                    <div class="avatar-box">CM</div>
-                    <div class="pulse-indicator"></div>
-                </div>
+        <div class="header-content">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="brand-avatar">CM</div>
                 <div class="brand-info">
-                    <h1 id="groupName">Elite Community</h1>
-                    <div class="status-container">
-                        <span class="dot"></span>
-                        <small id="connectionStatus">Online</small>
-                    </div>
+                    <h2 style="font-size: 17px; font-weight: 800;">Elite Community</h2>
+                    <small style="color: #10b981; font-weight: 700;">● Online</small>
                 </div>
             </div>
-
-            <div class="header-right">
-                <button class="nav-icon" onclick="toggleSearch()">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </button>
-                <button class="nav-icon" onclick="togglePanel('stickerPanel')">
-                    <i class="fa-solid fa-face-smile"></i>
-                </button>
-                <button class="nav-icon" onclick="togglePanel('settingsPanel')">
-                    <i class="fa-solid fa-gear"></i>
-                </button>
+            <div class="header-btns">
+                <button class="nav-btn" onclick="togglePanel('stickerPanel')"><i class="fa-solid fa-face-smile"></i></button>
+                <button class="nav-btn" onclick="togglePanel('settingsPanel')"><i class="fa-solid fa-gear"></i></button>
             </div>
         </div>
     </header>
 
-    <main class="chat-viewport" id="chatBox">
-        <div class="initial-loader">
-            <div class="spinner-pro"></div>
-            <p>Syncing encrypted messages...</p>
-        </div>
-    </main>
+    <div class="fab-friend" id="friendBtn" onclick="togglePanel('friendsPanel')">
+        <i class="fas fa-user-friends"></i>
+    </div>
+
+    <main class="chat-viewport" id="chatBox"></main>
 
     <footer class="input-panel">
-        <div class="input-container-v2">
-            <button class="media-btn" onclick="openMedia()">
-                <i class="fa-solid fa-plus"></i>
+        <div class="input-wrapper">
+            <label for="media-upload" style="cursor: pointer; color: #64748b;"><i class="fa-solid fa-circle-plus" style="font-size: 22px;"></i></label>
+            <input type="file" id="media-upload" hidden accept="image/*" onchange="handleImage(this)">
+            <input type="text" id="msgInp" placeholder="Type something elite..." oninput="checkInputState()">
+            <button class="action-btn voice-mode" id="actionBtn" onclick="handleAction()">
+                <i class="fa-solid fa-microphone" id="actionIcon"></i>
             </button>
-            
-            <div class="input-field-wrapper">
-                <input type="text" id="msgInp" placeholder="Type a message..." autocomplete="off">
-            </div>
-
-            <div class="action-group">
-                <button class="voice-trigger" id="voiceBtn" onclick="startVoiceRecord()">
-                    <i class="fa-solid fa-microphone"></i>
-                </button>
-                <button class="send-trigger" id="sendBtn" onclick="sendMessage()">
-                    <i class="fa-solid fa-paper-plane"></i>
-                </button>
-            </div>
         </div>
     </footer>
 
-    <div id="stickerPanel" class="bottom-sheet-pro"></div>
-    <div id="settingsPanel" class="bottom-sheet-pro"></div>
+    <div id="stickerPanel" class="bottom-sheet">
+        <h3 style="margin-bottom: 20px; font-weight: 800;">Elite 100+ Animated Stickers</h3>
+        <div class="sticker-grid" id="stickerGrid"></div>
+    </div>
 
-    <script src="script.js"></script>
+    <div id="settingsPanel" class="bottom-sheet">
+        <h3 style="font-weight: 800; margin-bottom: 20px;">Elite Settings</h3>
+        <div class="list-item"><i class="fas fa-user-circle"></i> <div><b>My Account</b><br><small id="userNameDisplay">Elite User</small></div></div>
+        <div class="list-item"><i class="fas fa-shield-halved"></i> <div><b>Privacy & Security</b><br><small>Two-Factor Auth</small></div></div>
+        <div class="list-item"><i class="fas fa-palette"></i> <div><b>Chat Themes</b><br><small>Customize colors</small></div></div>
+        <div class="list-item" style="color: #ef4444;" onclick="location.reload()"><i class="fas fa-power-off"></i> <b>Logout</b></div>
+    </div>
+
+    <div id="friendsPanel" class="bottom-sheet">
+        <h3 style="font-weight: 800; margin-bottom: 20px;">My Elite Friends</h3>
+        <div id="friendContainer"></div>
+    </div>
+
+    <script>
+        const firebaseConfig = { databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const rtdb = firebase.database();
+
+        const myUID = localStorage.getItem('user_uid') || "USER_" + Math.floor(Math.random() * 1000);
+        const myName = localStorage.getItem('username') || "Elite_User";
+
+        // 1. DYNAMIC INPUT ICON
+        function checkInputState() {
+            const inp = document.getElementById('msgInp');
+            const btn = document.getElementById('actionBtn');
+            const icon = document.getElementById('actionIcon');
+            if (inp.value.trim().length > 0) {
+                btn.className = "action-btn send-mode";
+                icon.className = "fa-solid fa-paper-plane";
+            } else {
+                btn.className = "action-btn voice-mode";
+                icon.className = "fa-solid fa-microphone";
+            }
+        }
+
+        function handleAction() {
+            const icon = document.getElementById('actionIcon');
+            if (icon.classList.contains('fa-paper-plane')) sendMessage();
+        }
+
+        function sendMessage(msg = null, type = 'text') {
+            const inp = document.getElementById('msgInp');
+            const content = msg || inp.value;
+            rtdb.ref('messages/global').push({
+                sender: myName, uid: myUID, msg: content, type: type,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+            if (!msg) inp.value = "";
+            checkInputState();
+        }
+
+        // 2. LOAD IYA ABOKAI KAWAI
+        function loadFriendsOnly() {
+            const container = document.getElementById('friendContainer');
+            container.innerHTML = "Syncing Elite friends...";
+            rtdb.ref(`friends/${myUID}`).once('value', snap => {
+                container.innerHTML = "";
+                if (!snap.exists()) {
+                    container.innerHTML = "<p style='text-align:center; color:#94a3b8;'>No friends connected yet.</p>";
+                    return;
+                }
+                snap.forEach(child => {
+                    const f = child.val();
+                    container.innerHTML += `
+                        <div class="list-item">
+                            <div style="width:40px; height:40px; border-radius:10px; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-weight:800;">${f.name[0]}</div>
+                            <div><b>${f.name}</b><br><small style="color:#10b981;">Connected</small></div>
+                        </div>`;
+                });
+            });
+        }
+
+        // 3. LOAD ANIMATED STICKERS
+        function loadStickers() {
+            const grid = document.getElementById('stickerGrid');
+            grid.innerHTML = "";
+            for(let i=0; i<100; i++) {
+                const url = `https://fonts.gstatic.com/s/e/notoemoji/latest/1f60${i%9}/512.gif`;
+                grid.innerHTML += `<div class="sticker-item" onclick="sendMessage('${url}', 'sticker'); closeAllPanels()"><img src="${url}" width="100%"></div>`;
+            }
+        }
+
+        function handleImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => sendMessage(e.target.result, 'image');
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        rtdb.ref('messages/global').on('value', snap => {
+            const box = document.getElementById('chatBox');
+            box.innerHTML = "";
+            snap.forEach(child => {
+                const d = child.val();
+                const isMe = d.uid === myUID;
+                let content = d.type === 'text' ? d.msg : `<img src="${d.msg}" style="width:140px; border-radius:12px;">`;
+                box.innerHTML += `
+                    <div class="msg-bubble ${isMe ? 'sent' : 'received'}">
+                        <small style="display:block; font-size:10px; font-weight:800; margin-bottom:4px; opacity:0.6;">${d.sender}</small>
+                        ${content}
+                        <div style="text-align:right; font-size:9px; opacity:0.5; margin-top:5px;">${d.time}</div>
+                    </div>`;
+            });
+            box.scrollTop = box.scrollHeight;
+        });
+
+        function togglePanel(id) {
+            closeAllPanels();
+            document.getElementById(id).classList.add('active');
+            document.getElementById('overlay').style.display = 'block';
+            if(id === 'stickerPanel') loadStickers();
+            if(id === 'friendsPanel') loadFriendsOnly();
+            if(id === 'settingsPanel') document.getElementById('userNameDisplay').innerText = myName;
+        }
+
+        function closeAllPanels() {
+            document.querySelectorAll('.bottom-sheet').forEach(p => p.classList.remove('active'));
+            document.getElementById('overlay').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
