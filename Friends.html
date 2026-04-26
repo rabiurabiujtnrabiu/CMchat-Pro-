@@ -17,6 +17,7 @@
             --text-main: #1e293b;
             --online: #10b981;
             --offline: #94a3b8;
+            --accent: #10b981;
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -49,8 +50,13 @@
         .avatar { width: 55px; height: 55px; border-radius: 18px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; font-weight: 800; }
         .status-dot { width: 14px; height: 14px; background: var(--offline); border: 3px solid white; border-radius: 50%; position: absolute; bottom: -2px; right: -2px; transition: 0.3s; }
 
-        .btn { padding: 10px 16px; border-radius: 12px; font-weight: 800; font-size: 11px; border: none; cursor: pointer; }
+        .btn { padding: 10px 16px; border-radius: 12px; font-weight: 800; font-size: 11px; border: none; cursor: pointer; transition: 0.3s; }
         .btn-add { background: var(--primary); color: white; }
+        .btn-pending { background: #f1f5f9; color: #94a3b8; cursor: default; }
+        .btn-accept { background: var(--accent); color: white; }
+        .btn-friends { background: transparent; border: 1.5px solid #e2e8f0; color: #64748b; }
+
+        .empty-state { text-align: center; padding: 100px 20px; color: #94a3b8; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -59,7 +65,7 @@
         <i class="fas fa-chevron-left" onclick="history.back()"></i>
         <div class="search-bar">
             <i class="fas fa-search"></i>
-            <input type="text" placeholder="Search members..." oninput="filterUsers()">
+            <input type="text" placeholder="Search members..." id="searchBox" oninput="filterUsers()">
         </div>
         <i class="fas fa-bell"></i>
     </header>
@@ -83,41 +89,16 @@
         const myUid = localStorage.getItem('user_uid') || "TEMP_ID";
         const myName = localStorage.getItem('username') || "Anonymous";
 
-        // --- PRESENCE ENGINE (ENGLISH ONLY) ---
         function setupPresence() {
             const statusRef = db.ref('/status/' + myUid);
-            const connectedRef = db.ref('.info/connected');
-
-            connectedRef.on('value', (snap) => {
+            db.ref('.info/connected').on('value', (snap) => {
                 if (snap.val() === false) return;
-                statusRef.onDisconnect().set({
-                    state: 'offline',
-                    last_changed: firebase.database.ServerValue.TIMESTAMP
-                }).then(() => {
-                    statusRef.set({
-                        state: 'online',
-                        last_changed: firebase.database.ServerValue.TIMESTAMP
-                    });
+                statusRef.onDisconnect().set({ state: 'offline' }).then(() => {
+                    statusRef.set({ state: 'online' });
                 });
             });
         }
 
-        function monitorUserStatus(uid) {
-            const card = document.getElementById(`card-${uid}`);
-            if (!card) return;
-            const dot = card.querySelector('.status-dot');
-
-            db.ref('/status/' + uid).on('value', (snap) => {
-                const status = snap.val();
-                if (status && status.state === 'online') {
-                    dot.style.background = '#10b981';
-                } else {
-                    dot.style.background = '#94a3b8';
-                }
-            });
-        }
-
-        // --- VIEW RENDERING ---
         let currentTab = 'explore';
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -128,6 +109,8 @@
 
         function renderView() {
             const display = document.getElementById('mainDisplay');
+            display.innerHTML = '<div class="empty-state">Syncing Elite Network...</div>';
+
             if (currentTab === 'explore') {
                 db.ref('users').on('value', snap => {
                     display.innerHTML = "";
@@ -144,19 +127,103 @@
                                         </div>
                                         <div class="details"><b>${u.username}</b><br><small>Suggested</small></div>
                                     </div>
-                                    <button class="btn btn-add" onclick="sendRequest('${uid}', '${u.username}')">CONNECT</button>
+                                    <div id="btn-container-${uid}">
+                                        <button class="btn btn-add" onclick="sendRequest('${uid}', '${u.username}')">CONNECT</button>
+                                    </div>
                                 </div>`;
                             monitorUserStatus(uid);
+                            determineButtonState(uid, u.username);
                         }
                     });
                 });
+            } else if (currentTab === 'requests') {
+                db.ref('requests/' + myUid).on('value', snap => {
+                    display.innerHTML = "";
+                    if(!snap.exists()) display.innerHTML = '<div class="empty-state">No pending requests</div>';
+                    snap.forEach(child => {
+                        const r = child.val();
+                        display.innerHTML += `
+                            <div class="user-card">
+                                <div class="user-info" style="display:flex; align-items:center; gap:15px;">
+                                    <div class="avatar" style="background:var(--accent)">${r.sender[0].toUpperCase()}</div>
+                                    <div class="details"><b>${r.sender}</b><br><small>Sent you a request</small></div>
+                                </div>
+                                <button class="btn btn-accept" onclick="acceptRequest('${child.key}', '${r.sender}')">ACCEPT</button>
+                            </div>`;
+                    });
+                });
+            } else if (currentTab === 'friends') {
+                db.ref('friends/' + myUid).on('value', snap => {
+                    display.innerHTML = "";
+                    if(!snap.exists()) display.innerHTML = '<div class="empty-state">No connections found</div>';
+                    snap.forEach(child => {
+                        const f = child.val();
+                        display.innerHTML += `
+                            <div class="user-card">
+                                <div class="user-info" style="display:flex; align-items:center; gap:15px;">
+                                    <div class="avatar" style="background:white; color:var(--primary); border:1px solid #eee">${f.name[0].toUpperCase()}</div>
+                                    <div class="details"><b>${f.name}</b><br><small>Elite Friend</small></div>
+                                </div>
+                                <button class="btn btn-friends" onclick="location.href='Chatting.html?uid=${child.key}'">MESSAGE</button>
+                            </div>`;
+                    });
+                });
             }
-            // ... Other tabs logic in English
+        }
+
+        function determineButtonState(targetUid, targetName) {
+            const container = document.getElementById(`btn-container-${targetUid}`);
+            if (!container) return;
+
+            db.ref(`friends/${myUid}/${targetUid}`).on('value', fSnap => {
+                if (fSnap.exists()) {
+                    container.innerHTML = `<button class="btn btn-friends">FRIENDS</button>`;
+                } else {
+                    // Check if I sent a request (Target's inbox)
+                    db.ref(`requests/${targetUid}/${myUid}`).on('value', sSnap => {
+                        if (sSnap.exists()) {
+                            container.innerHTML = `<button class="btn btn-pending" disabled>PENDING</button>`;
+                        } else {
+                            // Check if they sent me a request (My inbox)
+                            db.ref(`requests/${myUid}/${targetUid}`).on('value', rSnap => {
+                                if (rSnap.exists()) {
+                                    container.innerHTML = `<button class="btn btn-accept" onclick="acceptRequest('${targetUid}', '${targetName}')">ACCEPT</button>`;
+                                } else {
+                                    container.innerHTML = `<button class="btn btn-add" onclick="sendRequest('${targetUid}', '${targetName}')">CONNECT</button>`;
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function monitorUserStatus(uid) {
+            const dot = document.querySelector(`#card-${uid} .status-dot`);
+            db.ref('/status/' + uid).on('value', snap => {
+                const s = snap.val();
+                if (dot) dot.style.background = (s && s.state === 'online') ? '#10b981' : '#94a3b8';
+            });
         }
 
         window.sendRequest = (id, name) => {
             db.ref(`requests/${id}/${myUid}`).set({ sender: myName }).then(() => {
-                Swal.fire({ title: 'Sent!', text: 'Connection request sent to ' + name, icon: 'success', timer: 1500 });
+                Swal.fire({ title: 'Request Sent', text: 'Waiting for ' + name, icon: 'success', timer: 1000, showConfirmButton: false });
+            });
+        };
+
+        window.acceptRequest = (senderId, senderName) => {
+            db.ref(`friends/${myUid}/${senderId}`).set({ name: senderName });
+            db.ref(`friends/${senderId}/${myUid}`).set({ name: myName });
+            db.ref(`requests/${myUid}/${senderId}`).remove().then(() => {
+                Swal.fire({ title: 'Connected!', text: 'You are now friends', icon: 'success', timer: 1000, showConfirmButton: false });
+            });
+        };
+
+        window.filterUsers = () => {
+            const q = document.getElementById('searchBox').value.toLowerCase();
+            document.querySelectorAll('.user-card').forEach(c => {
+                c.style.display = c.querySelector('b').innerText.toLowerCase().includes(q) ? 'flex' : 'none';
             });
         };
 
