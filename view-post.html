@@ -13,17 +13,17 @@
         :root { 
             --primary: #0062ff; 
             --primary-gradient: linear-gradient(135deg, #0062ff, #00d2ff);
-            --bg: #f8fafc; 
+            --bg: #f1f5f9; /* Kyautataccen background */
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #1e293b; padding-bottom: 80px; }
 
         /* --- MODERN HEADER --- */
         .main-header {
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px);
             padding: 15px 20px; display: flex; justify-content: space-between; 
             align-items: center; position: sticky; top: 0; z-index: 1000;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
         }
         .logo { font-size: 22px; font-weight: 800; color: var(--primary); letter-spacing: -1px; }
 
@@ -32,8 +32,8 @@
 
         .post-card {
             background: white; border-radius: 24px; padding: 16px;
-            margin-bottom: 18px; border: 1px solid #f1f5f9;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            margin-bottom: 18px; border: 1px solid rgba(241, 245, 249, 0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
             animation: fadeIn 0.5s ease;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -41,34 +41,34 @@
         .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         .user-meta { display: flex; align-items: center; gap: 12px; }
         .avatar { 
-            width: 48px; height: 48px; border-radius: 16px; 
+            width: 45px; height: 45px; border-radius: 14px; 
             background: var(--primary-gradient); color: white;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 20px; box-shadow: 0 4px 10px rgba(0,98,255,0.2);
+            font-weight: 800; font-size: 18px; box-shadow: 0 4px 10px rgba(0,98,255,0.2);
         }
         .user-details b { font-size: 15px; color: #1e293b; letter-spacing: -0.2px; }
-        .user-details small { font-size: 12px; color: #94a3b8; display: block; margin-top: 1px; }
+        .user-details small { font-size: 11px; color: #94a3b8; display: block; margin-top: 1px; }
 
-        .post-text { font-size: 15px; line-height: 1.6; color: #334155; margin-bottom: 12px; white-space: pre-wrap; }
+        .post-text { font-size: 15px; line-height: 1.6; color: #334155; margin-bottom: 12px; white-space: pre-wrap; padding: 0 4px; }
 
-        /* --- MEDIA DISPLAY (1-1-1 Layout) --- */
-        .media-stack { display: flex; flex-direction: column; gap: 12px; }
-        .media-container { width: 100%; border-radius: 18px; overflow: hidden; background: #f1f5f9; border: 1px solid #f1f5f9; }
-        .post-img { width: 100%; height: auto; display: block; object-fit: cover; max-height: 550px; }
-        .post-video { width: 100%; border-radius: 18px; background: #000; outline: none; display: block; }
+        /* --- MEDIA DISPLAY (Cloudinary Optimized) --- */
+        .media-stack { display: flex; flex-direction: column; gap: 10px; }
+        .media-container { width: 100%; border-radius: 20px; overflow: hidden; background: #000; position: relative; }
+        .post-img { width: 100%; height: auto; display: block; object-fit: cover; max-height: 500px; border-radius: 20px; }
+        .post-video { width: 100%; border-radius: 20px; display: block; max-height: 500px; }
 
         /* --- ACTIONS --- */
         .post-footer {
-            display: flex; justify-content: space-between;
-            padding-top: 16px; margin-top: 12px; border-top: 1px solid #f8fafc;
+            display: flex; justify-content: space-around;
+            padding-top: 15px; margin-top: 10px; border-top: 1px solid #f1f5f9;
         }
         .action-btn { 
             display: flex; align-items: center; gap: 8px; 
             color: #64748b; font-size: 14px; font-weight: 700; cursor: pointer;
-            transition: 0.2s; padding: 8px 12px; border-radius: 12px;
+            transition: 0.2s; padding: 8px 15px; border-radius: 12px;
         }
-        .action-btn:active { background: #f1f5f9; transform: scale(0.95); }
-        .action-btn i { font-size: 18px; }
+        .action-btn:active { background: #f1f5f9; transform: scale(0.9); }
+        .action-btn i { font-size: 19px; }
         .like-active { color: #ef4444; }
 
         .delete-icon { color: #cbd5e1; cursor: pointer; padding: 8px; transition: 0.2s; border-radius: 50%; }
@@ -77,13 +77,13 @@
         /* --- FLOATING ADD BUTTON --- */
         .fab {
             position: fixed; bottom: 30px; right: 25px;
-            width: 60px; height: 60px; border-radius: 20px;
+            width: 65px; height: 65px; border-radius: 22px;
             background: var(--primary-gradient); color: white;
             display: flex; align-items: center; justify-content: center;
-            font-size: 24px; box-shadow: 0 10px 25px rgba(0, 98, 255, 0.4);
+            font-size: 26px; box-shadow: 0 15px 30px rgba(0, 98, 255, 0.4);
             cursor: pointer; z-index: 100; transition: 0.3s;
         }
-        .fab:active { transform: rotate(90deg) scale(0.9); }
+        .fab:hover { transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -111,7 +111,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 1. Live Feed Listener (Babban Sirrin Live Update)
+        // 1. Live Feed Listener
         db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
             const container = document.getElementById('feedContainer');
             
@@ -131,21 +131,31 @@
             console.error("Snapshot error:", error);
         });
 
-        // 2. Render Post Function
+        // 2. Render Post Function (GYARARRE)
         function renderPost(id, data) {
             const container = document.getElementById('feedContainer');
             
-            // GYARA: Handle Base64 Media Rendering
+            // GYARA NA GASKIYA: Media Rendering for Cloudinary
             let mediaHtml = '';
             if (data.media && data.media.length > 0) {
                 mediaHtml = '<div class="media-stack">';
                 data.media.forEach(m => {
-                    // Muna amfani da m.data domin karanta asalin hoton daga Firestore
-                    const source = m.url || m.data; 
+                    // Muna duba m.url kai tsaye domin Cloudinary ne
+                    const source = m.url; 
                     if (m.type === 'image') {
-                        mediaHtml += `<div class="media-container"><img src="${source}" class="post-img" loading="lazy"></div>`;
+                        mediaHtml += `
+                            <div class="media-container">
+                                <img src="${source}" class="post-img" loading="lazy" 
+                                     onclick="window.open('${source}', '_blank')">
+                            </div>`;
                     } else if (m.type === 'video') {
-                        mediaHtml += `<div class="media-container"><video controls class="post-video"><source src="${source}"></video></div>`;
+                        mediaHtml += `
+                            <div class="media-container">
+                                <video controls class="post-video">
+                                    <source src="${source}">
+                                    Your browser does not support the video tag.
+                                </video>
+                            </div>`;
                     }
                 });
                 mediaHtml += '</div>';
@@ -158,7 +168,7 @@
                             <div class="avatar">${(data.username || 'C')[0]}</div>
                             <div class="user-details">
                                 <b>${data.username || 'Commander CM'}</b>
-                                <small>${data.timestamp ? timeSince(data.timestamp.toDate()) : 'publishing...'}</small>
+                                <small>${data.timestamp ? timeSince(data.timestamp.toDate()) : 'just now'}</small>
                             </div>
                         </div>
                         <i class="fas fa-trash-alt delete-icon" onclick="deletePost('${id}')"></i>
@@ -183,10 +193,9 @@
             container.innerHTML += postCard;
         }
 
-        // 3. Live Actions
+        // 3. Actions
         async function handleLike(id, currentLikes) {
             try {
-                // Update Firestore live
                 await db.collection('posts').doc(id).update({
                     likes: (currentLikes || 0) + 1
                 });
@@ -202,13 +211,15 @@
                 confirmButtonColor: '#ef4444',
                 cancelButtonColor: '#64748b',
                 confirmButtonText: 'Yes, Delete',
-                cancelButtonText: 'Cancel'
+                cancelButtonText: 'Cancel',
+                background: '#fff',
+                color: '#1e293b'
             });
 
             if (result.isConfirmed) {
                 try {
                     await db.collection('posts').doc(id).delete();
-                    Swal.fire({ icon: 'success', title: 'Deleted', timer: 1000, showConfirmButton: false });
+                    Swal.fire({ icon: 'success', title: 'Post Deleted', timer: 1000, showConfirmButton: false });
                 } catch (err) {
                     Swal.fire('Error', 'Failed to delete post.', 'error');
                 }
@@ -216,15 +227,14 @@
         }
 
         function sharePost(text, id) {
-            const shareData = {
-                title: 'CMchat Pro',
-                text: text || 'Check out this post on CMchat Pro!',
-                url: window.location.href + '#post-' + id
-            };
             if (navigator.share) {
-                navigator.share(shareData);
+                navigator.share({
+                    title: 'CMchat Pro',
+                    text: text,
+                    url: window.location.href
+                });
             } else {
-                Swal.fire('Link Copied', 'Post link copied to clipboard!', 'success');
+                Swal.fire('Share', 'Copy the URL to share this elite content!', 'info');
             }
         }
 

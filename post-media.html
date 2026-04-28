@@ -14,38 +14,34 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: white; height: 100vh; overflow: hidden; }
 
-        .header { display: flex; justify-content: space-between; padding: 15px 20px; align-items: center; border-bottom: 1px solid #1e293b; }
-        .post-btn { background: var(--primary); color: white; border: none; padding: 8px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; }
-        .post-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .header { display: flex; justify-content: space-between; padding: 15px 20px; align-items: center; border-bottom: 1px solid #1e293b; background: var(--bg); position: sticky; top: 0; z-index: 100; }
+        .post-btn { background: var(--primary); color: white; border: none; padding: 8px 22px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .post-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
         .content { padding: 20px; overflow-y: auto; height: calc(100vh - 140px); padding-bottom: 100px; }
-        textarea { width: 100%; background: transparent; border: none; color: white; font-size: 18px; outline: none; resize: none; min-height: 120px; }
+        textarea { width: 100%; background: transparent; border: none; color: white; font-size: 19px; outline: none; resize: none; min-height: 150px; line-height: 1.5; }
 
         #mediaPreview { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
-        .preview-item { position: relative; width: 100%; border-radius: 15px; overflow: hidden; border: 1px solid #334155; background: var(--card); }
-        .preview-item img, .preview-item video { width: 100%; display: block; max-height: 400px; object-fit: cover; }
-        .remove-btn { position: absolute; top: 10px; right: 10px; background: rgba(239, 68, 68, 0.9); color: white; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
+        .preview-item { position: relative; width: 100%; border-radius: 20px; overflow: hidden; border: 1px solid #334155; background: var(--card); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .preview-item img, .preview-item video { width: 100%; display: block; max-height: 450px; object-fit: cover; }
+        .remove-btn { position: absolute; top: 12px; right: 12px; background: rgba(239, 68, 68, 0.9); color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; backdrop-filter: blur(5px); }
 
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--card); padding: 15px; border-radius: 25px 25px 0 0; display: flex; justify-content: space-around; box-shadow: 0 -5px 20px rgba(0,0,0,0.3); }
-        .tool { text-align: center; color: #94a3b8; font-size: 11px; cursor: pointer; }
-        .tool i { display: block; font-size: 22px; margin-bottom: 5px; color: #38bdf8; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--card); padding: 18px; border-radius: 30px 30px 0 0; display: flex; justify-content: space-around; box-shadow: 0 -10px 30px rgba(0,0,0,0.4); z-index: 100; }
+        .tool { text-align: center; color: #94a3b8; font-size: 12px; cursor: pointer; transition: 0.2s; }
+        .tool:active { transform: scale(0.9); }
+        .tool i { display: block; font-size: 24px; margin-bottom: 6px; color: #38bdf8; }
 
-        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
-        .loader { border: 4px solid #1e293b; border-top: 4px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #uploadStatus { margin-top: 15px; font-weight: 600; color: #38bdf8; }
+        /* Mafi saukin progress indicator */
+        .upload-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--primary); width: 0%; transition: 0.3s; z-index: 1000; }
     </style>
 </head>
 <body>
 
-    <div class="overlay" id="loadingOverlay">
-        <div class="loader"></div>
-        <p id="uploadStatus">PREPARING...</p>
-    </div>
+    <div class="upload-bar" id="progressBar"></div>
 
     <div class="header">
-        <i class="fas fa-arrow-left" onclick="history.back()"></i>
-        <b style="font-size: 18px;">Create Post</b>
+        <i class="fas fa-times" style="font-size: 20px;" onclick="history.back()"></i>
+        <b style="font-size: 18px; letter-spacing: -0.5px;">New Elite Post</b>
         <button class="post-btn" id="submitBtn" disabled onclick="uploadPost()">Share</button>
     </div>
 
@@ -56,34 +52,28 @@
 
     <div class="bottom-nav">
         <label class="tool">
-            <i class="fas fa-camera"></i>Photo
+            <i class="fas fa-image"></i>Photo
             <input type="file" id="imageInput" hidden accept="image/*" multiple onchange="handleFiles(this, 'image')">
         </label>
         <label class="tool">
-            <i class="fas fa-video"></i>Video
+            <i class="fas fa-play-circle"></i>Video
             <input type="file" id="videoInput" hidden accept="video/*" onchange="handleFiles(this, 'video')">
         </label>
-        <div class="tool"><i class="fas fa-user-tag"></i>Tag</div>
-        <div class="tool"><i class="fas fa-map-marker-alt"></i>Check-in</div>
+        <div class="tool"><i class="fas fa-at"></i>Tag</div>
+        <div class="tool"><i class="fas fa-location-arrow"></i>Place</div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // CONFIG DINka NA ASALI
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
-            authDomain: "cmchat-pro.firebaseapp.com",
-            projectId: "cmchat-pro",
-            storageBucket: "cmchat-pro.firebasestorage.app",
-            messagingSenderId: "227572132170",
-            appId: "1:227572132170:web:cc39de4627d4da01c7f9b3"
+            projectId: "cmchat-pro"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- CLOUDINARY SETTINGS ---
         const CLOUD_NAME = "dyfyhzp3o"; 
         const UPLOAD_PRESET = "cmchat_pro"; 
 
@@ -91,7 +81,8 @@
 
         function checkInput() {
             const text = document.getElementById('postText').value.trim();
-            document.getElementById('submitBtn').disabled = !(text || selectedFiles.length > 0);
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = !(text || selectedFiles.length > 0);
         }
 
         function handleFiles(input, type) {
@@ -101,9 +92,7 @@
                 selectedFiles.push({ id: fileId, file: file, type: type });
 
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    renderPreview(fileId, e.target.result, type);
-                };
+                reader.onload = (e) => renderPreview(fileId, e.target.result, type);
                 reader.readAsDataURL(file);
             });
             checkInput();
@@ -117,7 +106,7 @@
             div.id = `preview-${id}`;
             div.innerHTML = `
                 <div class="remove-btn" onclick="removeMedia('${id}')"><i class="fas fa-times"></i></div>
-                ${type === 'image' ? `<img src="${src}">` : `<video src="${src}" controls></video>`}
+                ${type === 'image' ? `<img src="${src}">` : `<video src="${src}" muted autoplay loop></video>`}
             `;
             container.appendChild(div);
         }
@@ -130,24 +119,28 @@
 
         async function uploadPost() {
             const text = document.getElementById('postText').value.trim();
-            const overlay = document.getElementById('loadingOverlay');
-            const statusText = document.getElementById('uploadStatus');
             const submitBtn = document.getElementById('submitBtn');
+            const progressBar = document.getElementById('progressBar');
 
+            // UI Feedback: Instant feel
             submitBtn.disabled = true;
-            overlay.style.display = 'flex';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            progressBar.style.width = '20%';
             
             const uploadedUrls = [];
 
             try {
-                // MATAKI NA 1: TURA MEDIA ZUWA CLOUDINARY
+                // Tura files zuwa Cloudinary tare da matsewa (Compression)
                 for (let i = 0; i < selectedFiles.length; i++) {
                     const item = selectedFiles[i];
-                    statusText.innerText = `UPLOADING MEDIA ${i+1}/${selectedFiles.length}...`;
                     
                     const formData = new FormData();
                     formData.append('file', item.file);
                     formData.append('upload_preset', UPLOAD_PRESET);
+                    
+                    // WANNAN SHINE SIRRIN SAURI: Compression & Auto-format
+                    formData.append('quality', 'auto:eco');
+                    formData.append('fetch_format', 'auto');
 
                     const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, {
                         method: 'POST',
@@ -155,16 +148,13 @@
                     });
 
                     const data = await response.json();
-                    
                     if (data.secure_url) {
                         uploadedUrls.push({ url: data.secure_url, type: item.type });
-                    } else {
-                        throw new Error(data.error.message);
+                        progressBar.style.width = `${40 + ((i+1)/selectedFiles.length * 40)}%`;
                     }
                 }
 
-                // MATAKI NA 2: AJIYEWA A FIRESTORE
-                statusText.innerText = "FINALIZING POST...";
+                // Final save to Firestore
                 await db.collection('posts').add({
                     text: text,
                     media: uploadedUrls,
@@ -174,15 +164,16 @@
                     comments: 0
                 });
 
-                overlay.style.display = 'none';
-                Swal.fire('Success', 'Post published!', 'success')
-                    .then(() => window.location.href = 'Dashboard.html');
+                progressBar.style.width = '100%';
+                
+                // Refresh Dashboard nan take
+                window.location.href = 'Dashboard.html';
 
             } catch (err) {
-                overlay.style.display = 'none';
                 submitBtn.disabled = false;
-                console.error(err);
-                Swal.fire('Error', 'Matsala: ' + err.message, 'error');
+                submitBtn.innerText = "Share";
+                progressBar.style.width = '0%';
+                Swal.fire('Error', 'Check your connection, Commander.', 'error');
             }
         }
     </script>
