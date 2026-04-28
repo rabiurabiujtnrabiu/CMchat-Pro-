@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Sidebar Pro - Complete</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0062ff;
+            --primary-soft: #eef4ff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --danger: #ef4444;
+            --danger-soft: #fff5f5;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: white; padding: 20px; color: var(--text-main); overflow-y: auto; }
+
+        /* --- PROFILE HEADER --- */
+        .profile-box {
+            background: var(--primary-soft);
+            padding: 25px 20px;
+            border-radius: 28px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .profile-img {
+            width: 85px; height: 85px;
+            border-radius: 24px;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+        }
+        .uid-container {
+            background: white;
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            display: inline-flex;
+            align-items: center; gap: 8px;
+            margin-top: 12px; cursor: pointer; transition: 0.2s;
+        }
+        .uid-container:active { transform: scale(0.9); }
+
+        /* --- CHAT STATS ROW --- */
+        .stats-row {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 25px;
+        }
+        .stat-card {
+            background: #f8fafc; padding: 12px; border-radius: 18px; text-align: center;
+        }
+        .stat-card i { color: var(--primary); font-size: 14px; margin-bottom: 4px; }
+        .stat-card b { display: block; font-size: 15px; color: var(--text-main); }
+        .stat-card span { font-size: 10px; color: var(--text-sub); font-weight: 800; text-transform: uppercase; }
+
+        /* --- STATUS TOGGLE --- */
+        .status-card {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px; background: #f8fafc; border-radius: 18px; margin-bottom: 25px;
+        }
+
+        /* --- MENU GROUPS --- */
+        .menu-group { margin-bottom: 25px; }
+        .group-title {
+            font-size: 11px; color: #94a3b8; font-weight: 800;
+            margin-left: 10px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .menu-list { display: flex; flex-direction: column; gap: 4px; }
+        .menu-item {
+            display: flex; align-items: center; gap: 15px; padding: 12px 14px;
+            border-radius: 16px; cursor: pointer; transition: 0.2s; color: #475569; font-weight: 600;
+        }
+        .menu-item i { width: 22px; color: var(--primary); font-size: 18px; }
+        .menu-item:active { background: #f1f5f9; transform: scale(0.97); }
+        .menu-item .label { flex: 1; }
+        .menu-item .extra { background: #f1f5f9; padding: 2px 8px; border-radius: 8px; font-size: 11px; color: var(--text-sub); }
+
+        /* --- DANGER ZONE --- */
+        .danger-group { background: var(--danger-soft); border-radius: 20px; padding: 5px; }
+        .danger-item { color: var(--danger); }
+        .danger-item i { color: var(--danger); }
+        .logout-btn { margin-top: 10px; background: #fff5f5; border: 1px solid #fee2e2; }
+
+        .app-footer { text-align: center; margin-top: 20px; padding-bottom: 20px; }
+        .app-footer p { font-size: 10px; color: #cbd5e1; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div class="profile-box">
+        <img src="https://via.placeholder.com/150" id="userPhoto" class="profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'">
+        <h3 id="userName" style="margin-top:12px; font-weight:800; font-size:19px;">Elite User</h3>
+        <div class="uid-container" id="uidBox" onclick="copyUID()">
+            <span>ID: <span id="userUID">--------</span></span>
+            <i class="far fa-copy"></i>
+        </div>
+    </div>
+
+    <div class="stats-row" id="chatStats" style="display: none;">
+        <div class="stat-card">
+            <i class="fas fa-comment-dots"></i>
+            <b id="msgCount">0</b>
+            <span>Messages</span>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-photo-film"></i>
+            <b id="mediaCount">0</b>
+            <span>Media</span>
+        </div>
+    </div>
+
+    <div class="status-card" id="statusCard">
+        <div>
+            <p style="font-size:14px; font-weight:800;">Active Status</p>
+            <p style="font-size:11px; color:#94a3b8;" id="statusDesc">Visible to everyone</p>
+        </div>
+        <i class="fas fa-toggle-on" id="statusToggle" style="color:#10b981; font-size:26px; cursor:pointer;" onclick="handleStatus()"></i>
+    </div>
+
+    <div class="menu-group">
+        <p class="group-title">Messenger</p>
+        <div class="menu-list">
+            <div class="menu-item" onclick="parent.location.href='Friends.html'">
+                <i class="fas fa-user-group"></i>
+                <span class="label">Friends List</span>
+                <span class="extra" id="friendCount">0</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-bookmark"></i>
+                <span class="label">Saved Messages</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-palette"></i>
+                <span class="label">Theme & Wallpaper</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="menu-group" id="chatActions" style="display: none;">
+        <p class="group-title">Manage Conversation</p>
+        <div class="danger-group">
+            <div class="menu-item danger-item" onclick="clearChat()">
+                <i class="fas fa-broom"></i>
+                <span class="label">Clear Messages</span>
+            </div>
+            <div class="menu-item danger-item" onclick="deleteChat()">
+                <i class="fas fa-trash-can"></i>
+                <span class="label">Delete Chat</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="menu-group">
+        <p class="group-title">Security & Privacy</p>
+        <div class="menu-list">
+            <div class="menu-item danger-item" onclick="parent.location.href='blocked-list.html'">
+                <i class="fas fa-user-slash"></i>
+                <span class="label">Blocked Users</span>
+                <span class="extra" id="blockedCount">0</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-shield-halved"></i>
+                <span class="label">Privacy Settings</span>
+            </div>
+            <div class="menu-item logout-btn" onclick="logout()">
+                <i class="fas fa-power-off"></i>
+                <span class="label">Logout Account</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-footer">
+        <p>CMCHAT PRO • VERSION 2.0.4</p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = { databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const myUID = localStorage.getItem('user_uid') || "TEMP_USER";
+        const urlParams = new URLSearchParams(window.location.search);
+        const partnerUID = urlParams.get('uid'); // Daga Chatting Page
+        
+        document.getElementById('userUID').innerText = myUID;
+
+        // --- INTELLIGENT MODE CHECK ---
+        // Idan tana dauke da partnerUID, tana nuna bayanan hira kenan
+        if (partnerUID) {
+            document.getElementById('chatStats').style.display = 'grid';
+            document.getElementById('chatActions').style.display = 'block';
+            document.getElementById('statusCard').style.display = 'none';
+            document.getElementById('uidBox').style.display = 'none';
+            
+            loadPartnerData(partnerUID);
+            loadChatStats(partnerUID);
+        } else {
+            loadUserData();
+        }
+
+        function loadUserData() {
+            database.ref('users/' + myUID).on('value', snap => {
+                const u = snap.val();
+                if(u) {
+                    document.getElementById('userName').innerText = u.username || "Elite User";
+                    if(u.profilePhoto) document.getElementById('userPhoto').src = u.profilePhoto;
+                }
+            });
+        }
+
+        function loadPartnerData(pUID) {
+            database.ref('users/' + pUID).on('value', snap => {
+                const u = snap.val();
+                if(u) {
+                    document.getElementById('userName').innerText = u.username;
+                    if(u.profilePhoto) document.getElementById('userPhoto').src = u.profilePhoto;
+                }
+            });
+        }
+
+        function loadChatStats(pUID) {
+            const chatID = myUID < pUID ? myUID + "_" + pUID : pUID + "_" + myUID;
+            database.ref('messages/' + chatID).on('value', snap => {
+                document.getElementById('msgCount').innerText = snap.numChildren();
+                let mediaCount = 0;
+                snap.forEach(child => {
+                    if(child.val().type !== 'text') mediaCount++;
+                });
+                document.getElementById('mediaCount').innerText = mediaCount;
+            });
+        }
+
+        // --- CHAT ACTIONS ---
+        function clearChat() {
+            const chatID = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
+            if(confirm("Goge duka sakonni? Wannan aikin ba zai dawo ba!")) {
+                database.ref('messages/' + chatID).remove().then(() => alert("Sakonni sun goge!"));
+            }
+        }
+
+        function deleteChat() {
+            const chatID = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
+            if(confirm("Goge duka hirar gaba daya?")) {
+                database.ref('messages/' + chatID).remove().then(() => {
+                    parent.window.location.href = 'chat-list.html';
+                });
+            }
+        }
+
+        // --- OLD LOGIC RETAINED ---
+        database.ref('friends/' + myUID).on('value', snap => {
+            document.getElementById('friendCount').innerText = snap.numChildren();
+        });
+        database.ref('blocked/' + myUID).on('value', snap => {
+            document.getElementById('blockedCount').innerText = snap.numChildren();
+        });
+
+        let isOnline = true;
+        function handleStatus() {
+            const icon = document.getElementById('statusToggle');
+            const desc = document.getElementById('statusDesc');
+            isOnline = !isOnline;
+            if(isOnline) {
+                icon.className = "fas fa-toggle-on"; icon.style.color = "#10b981";
+                desc.innerText = "Visible to everyone";
+                database.ref('status/' + myUID).set({ state: 'online', last_changed: Date.now() });
+            } else {
+                icon.className = "fas fa-toggle-off"; icon.style.color = "#cbd5e1";
+                desc.innerText = "Hidden (Invisible)";
+                database.ref('status/' + myUID).set({ state: 'offline', last_changed: Date.now() });
+            }
+        }
+
+        function copyUID() {
+            navigator.clipboard.writeText(myUID);
+            alert("Your ID has been copied!");
+        }
+
+        function logout() {
+            if(confirm("Do you really want to logout?")) {
+                localStorage.clear();
+                parent.location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

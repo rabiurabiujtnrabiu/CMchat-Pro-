@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Friends - CMchat Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --primary: #0062ff; 
+            --primary-gradient: linear-gradient(135deg, #0062ff, #00d2ff);
+            --bg: #f8fafc;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: #1e293b; display: flex; flex-direction: column; height: 100vh; }
+
+        /* --- HEADER --- */
+        .header { padding: 20px; background: white; border-bottom: 1px solid #f1f5f9; position: sticky; top: 0; z-index: 100; }
+        .header-top { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .header h2 { font-weight: 800; font-size: 22px; flex: 1; }
+
+        /* --- SEARCH BAR --- */
+        .search-container {
+            background: #f1f5f9;
+            padding: 12px 15px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .search-container input { border: none; background: transparent; outline: none; flex: 1; font-weight: 600; }
+
+        /* --- FRIENDS LIST --- */
+        .friends-list { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .friend-card {
+            background: white;
+            padding: 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            transition: 0.3s;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .friend-card:active { transform: scale(0.97); border-color: var(--primary); }
+        .f-avatar { width: 55px; height: 55px; border-radius: 18px; object-fit: cover; }
+        .f-info { flex: 1; }
+        .f-info b { display: block; font-size: 16px; margin-bottom: 2px; }
+        .f-info span { font-size: 12px; color: #94a3b8; font-weight: 600; }
+
+        .chat-icon { color: var(--primary); font-size: 20px; margin-right: 10px; }
+
+        .empty-state { text-align: center; margin-top: 100px; color: #94a3b8; }
+        .empty-state i { font-size: 50px; margin-bottom: 15px; opacity: 0.3; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-top">
+            <i class="fas fa-arrow-left" onclick="history.back()" style="cursor:pointer;"></i>
+            <h2>My Friends</h2>
+            <i class="fas fa-plus-circle" style="color:var(--primary); font-size: 24px;" onclick="searchNewFriend()"></i>
+        </div>
+        <div class="search-container">
+            <i class="fas fa-search" style="color:#94a3b8;"></i>
+            <input type="text" id="filterInput" placeholder="Search friends..." oninput="filterFriends()">
+        </div>
+    </div>
+
+    <div class="friends-list" id="friendsBox">
+        <div class="empty-state" id="loader">
+            <i class="fas fa-circle-notch fa-spin"></i>
+            <p>Loading your friends...</p>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // --- FIREBASE SETUP ---
+        const firebaseConfig = { databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const myUID = localStorage.getItem('user_uid') || "TEMP_USER";
+
+        function loadFriends() {
+            database.ref('friends/' + myUID).on('value', snap => {
+                const friendsBox = document.getElementById('friendsBox');
+                friendsBox.innerHTML = "";
+                
+                if (!snap.exists()) {
+                    friendsBox.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-user-friends"></i>
+                            <p>No friends yet. Add someone!</p>
+                        </div>`;
+                    return;
+                }
+
+                snap.forEach(child => {
+                    const friendUID = child.key;
+                    
+                    // Fetch Friend details
+                    database.ref('users/' + friendUID).once('value', uSnap => {
+                        const u = uSnap.val();
+                        if (u) {
+                            const card = document.createElement('div');
+                            card.className = "friend-card";
+                            
+                            // GYARA: Wannan shine zai bude chatting page na abokin da aka taba
+                            card.onclick = () => {
+                                window.location.href = 'chat-page.html?uid=' + friendUID;
+                            };
+                            
+                            card.innerHTML = `
+                                <img src="${u.profilePhoto || 'https://ui-avatars.com/api/?name='+u.username}" class="f-avatar">
+                                <div class="f-info">
+                                    <b>${u.username}</b>
+                                    <span id="status-${friendUID}">Checking...</span>
+                                </div>
+                                <i class="fas fa-comment-dots chat-icon"></i>
+                            `;
+                            friendsBox.appendChild(card);
+                            
+                            // Live Status
+                            database.ref('status/' + friendUID).on('value', sSnap => {
+                                const s = sSnap.val();
+                                const statusEl = document.getElementById('status-' + friendUID);
+                                if(statusEl) {
+                                    statusEl.innerText = (s && s.state === 'online') ? "Online" : "Offline";
+                                    statusEl.style.color = (s && s.state === 'online') ? "#10b981" : "#94a3b8";
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+        }
+
+        function searchNewFriend() {
+            const newID = prompt("Enter Friend's UID to add:");
+            if (newID && newID !== myUID) {
+                database.ref('users/' + newID).once('value', snap => {
+                    if (snap.exists()) {
+                        database.ref('friends/' + myUID + '/' + newID).set(true);
+                        database.ref('friends/' + newID + '/' + myUID).set(true);
+                        alert("Friend Added Successfully!");
+                    } else {
+                        alert("User ID not found!");
+                    }
+                });
+            }
+        }
+
+        function filterFriends() {
+            const val = document.getElementById('filterInput').value.toLowerCase();
+            document.querySelectorAll('.friend-card').forEach(c => {
+                const name = c.querySelector('b').innerText.toLowerCase();
+                c.style.display = name.includes(val) ? "flex" : "none";
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadFriends);
+    </script>
+</body>
+</html>

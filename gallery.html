@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Gallery - Select Media</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #0062ff; --bg: #ffffff; }
+        body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); }
+        
+        /* Header */
+        .gallery-header { 
+            position: sticky; top: 0; background: white; padding: 15px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid #f1f5f9; z-index: 100;
+        }
+        .btn-send { 
+            background: var(--primary); color: white; border: none; 
+            padding: 8px 20px; border-radius: 20px; font-weight: 800; cursor: pointer;
+            display: none; /* Zai fito idan an yi selection */
+        }
+
+        /* Grid System */
+        .media-grid { 
+            display: grid; grid-template-columns: repeat(3, 1fr); 
+            gap: 2px; padding: 2px; 
+        }
+        .media-item { 
+            aspect-ratio: 1/1; position: relative; background: #eee; 
+            overflow: hidden; cursor: pointer;
+        }
+        .media-item img, .media-item video { 
+            width: 100%; height: 100%; object-fit: cover; 
+        }
+        
+        /* Selection Overlay */
+        .select-overlay {
+            position: absolute; top: 5px; right: 5px;
+            width: 20px; height: 20px; border: 2px solid white;
+            border-radius: 50%; background: rgba(0,0,0,0.2);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .selected .select-overlay {
+            background: var(--primary); border-color: var(--primary);
+        }
+        .selected .select-overlay::after {
+            content: "\f00c"; font-family: "Font Awesome 5 Free";
+            font-weight: 900; color: white; font-size: 10px;
+        }
+        .video-badge {
+            position: absolute; bottom: 5px; left: 5px;
+            color: white; font-size: 10px; background: rgba(0,0,0,0.5);
+            padding: 2px 5px; border-radius: 4px;
+        }
+
+        /* Hidden Input */
+        #fileInput { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="gallery-header">
+        <i class="fas fa-times" onclick="history.back()" style="font-size: 20px;"></i>
+        <h3 style="font-size: 16px; margin: 0;">Select Media</h3>
+        <button class="btn-send" id="sendBtn" onclick="sendSelected()">Send (<span id="count">0</span>)</button>
+    </div>
+
+    <div style="padding: 20px; text-align: center;" id="uploadArea">
+        <button onclick="document.getElementById('fileInput').click()" style="padding: 15px; border-radius: 10px; border: 2px dashed #ccc; background: none; width: 100%;">
+            <i class="fas fa-images" style="font-size: 30px; color: #ccc;"></i><br>
+            Tap to open Phone Gallery
+        </button>
+    </div>
+
+    <input type="file" id="fileInput" multiple accept="image/*,video/*" onchange="loadFiles(this)">
+
+    <div class="media-grid" id="mediaGrid"></div>
+
+    <script>
+        let selectedFiles = [];
+
+        function loadFiles(input) {
+            const grid = document.getElementById('mediaGrid');
+            document.getElementById('uploadArea').style.display = 'none';
+            
+            Array.from(input.files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const isVideo = file.type.startsWith('video');
+                    const div = document.createElement('div');
+                    div.className = 'media-item';
+                    div.onclick = () => toggleSelect(div, e.target.result, file.type);
+                    
+                    if(isVideo) {
+                        div.innerHTML = `
+                            <video src="${e.target.result}"></video>
+                            <div class="video-badge"><i class="fas fa-video"></i></div>
+                            <div class="select-overlay"></div>`;
+                    } else {
+                        div.innerHTML = `
+                            <img src="${e.target.result}">
+                            <div class="select-overlay"></div>`;
+                    }
+                    grid.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function toggleSelect(el, data, type) {
+            el.classList.toggle('selected');
+            const fileData = { data, type };
+            
+            const index = selectedFiles.findIndex(f => f.data === data);
+            if(index > -1) {
+                selectedFiles.splice(index, 1);
+            } else {
+                selectedFiles.push(fileData);
+            }
+            
+            updateUI();
+        }
+
+        function updateUI() {
+            const btn = document.getElementById('sendBtn');
+            const count = document.getElementById('count');
+            count.innerText = selectedFiles.length;
+            btn.style.display = selectedFiles.length > 0 ? 'block' : 'none';
+        }
+
+        function sendSelected() {
+            // Adana bayanan a localStorage don 'group-chat.html' ya karanta
+            localStorage.setItem('pending_media', JSON.stringify(selectedFiles));
+            history.back(); // Koma shafin hira
+        }
+    </script>
+</body>
+</html>

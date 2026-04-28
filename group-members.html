@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Members - CMchat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        :root { --primary: #0062ff; --bg: #f1f5f9; }
+        body { background: var(--bg); font-family: 'Inter', sans-serif; padding: 20px; margin: 0; }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
+        
+        .section-title { font-size: 14px; font-weight: 800; color: #64748b; margin: 20px 0 10px; text-transform: uppercase; }
+        
+        .card { 
+            background: white; padding: 12px 15px; border-radius: 18px; 
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 42px; height: 42px; border-radius: 12px; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+        
+        .badge { font-size: 10px; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
+        .btn-add { background: #e0eaff; color: var(--primary); border: none; padding: 8px 15px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 12px; }
+        .btn-kick { color: #ef4444; border: none; background: none; font-size: 18px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <i class="fas fa-arrow-left" onclick="history.back()" style="cursor: pointer;"></i>
+        <h2 style="font-weight: 800; font-size: 18px;">Members</h2>
+        <div style="width: 20px;"></div>
+    </div>
+
+    <div class="section-title">In this Group</div>
+    <div id="currentMembersList">Loading members...</div>
+
+    <div id="adminSection" style="display: none;">
+        <div class="section-title">Add Friends to Group</div>
+        <div id="availableFriendsList">Loading friends...</div>
+    </div>
+
+    <script>
+        const firebaseConfig = { databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const rtdb = firebase.database();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const groupID = urlParams.get('id');
+        const myUID = localStorage.getItem('user_uid');
+
+        async function init() {
+            if (!groupID) return alert("Group ID missing!");
+
+            // 1. Check if I am Admin
+            const adminSnap = await rtdb.ref(`groups/${groupID}/admins/${myUID}`).once('value');
+            if (adminSnap.exists()) {
+                document.getElementById('adminSection').style.display = 'block';
+                loadFriendsToAdd();
+            }
+
+            loadCurrentMembers();
+        }
+
+        // --- Load existing members ---
+        function loadCurrentMembers() {
+            const container = document.getElementById('currentMembersList');
+            rtdb.ref(`groups/${groupID}/members`).on('value', async (snap) => {
+                container.innerHTML = "";
+                const isAdmin = (await rtdb.ref(`groups/${groupID}/admins/${myUID}`).once('value')).exists();
+
+                snap.forEach(child => {
+                    const m = child.val();
+                    const uid = child.key;
+                    const isOwner = m.role === 'owner';
+
+                    container.innerHTML += `
+                        <div class="card">
+                            <div class="user-info">
+                                <div class="avatar">${m.name[0].toUpperCase()}</div>
+                                <div>
+                                    <div style="font-weight:700; font-size:14px;">${m.name} ${uid === myUID ? '(You)' : ''}</div>
+                                    <span id="badge-${uid}"></span>
+                                </div>
+                            </div>
+                            ${isAdmin && uid !== myUID && !isOwner ? 
+                                `<button class="btn-kick" onclick="kickMember('${uid}', '${m.name}')"><i class="fas fa-user-minus"></i></button>` : ''}
+                        </div>`;
+                    
+                    // Show admin badge
+                    rtdb.ref(`groups/${groupID}/admins/${uid}`).once('value', aSnap => {
+                        if(aSnap.exists()) document.getElementById(`badge-${uid}`).innerHTML = '<span class="badge">ADMIN</span>';
+                    });
+                });
+            });
+        }
+
+        // --- Load friends who are NOT in the group yet ---
+        function loadFriendsToAdd() {
+            const container = document.getElementById('availableFriendsList');
+            rtdb.ref(`friends/${myUID}`).on('value', snap => {
+                container.innerHTML = "";
+                if (!snap.exists()) container.innerHTML = "<p style='font-size:12px; color:#94a3b8;'>No friends found to add.</p>";
+
+                snap.forEach(child => {
+                    const f = child.val();
+                    const fUID = child.key;
+
+                    // Check if friend is already a member
+                    rtdb.ref(`groups/${groupID}/members/${fUID}`).once('value', mSnap => {
+                        if (!mSnap.exists()) {
+                            container.innerHTML += `
+                                <div class="card">
+                                    <div class="user-info">
+                                        <div class="avatar" style="background:#cbd5e1; color:#64748b;">${f.name[0]}</div>
+                                        <div style="font-weight:700; font-size:14px;">${f.name}</div>
+                                    </div>
+                                    <button class="btn-add" onclick="addMemberToGroup('${fUID}', '${f.name}')">ADD</button>
+                                </div>`;
+                        }
+                    });
+                });
+            });
+        }
+
+        async function addMemberToGroup(uid, name) {
+            await rtdb.ref(`groups/${groupID}/members/${uid}`).set({
+                name: name,
+                role: 'member'
+            });
+            alert(`${name} added to group!`);
+        }
+
+        async function kickMember(uid, name) {
+            if (confirm(`Remove ${name} from this group?`)) {
+                await rtdb.ref(`groups/${groupID}/members/${uid}`).remove();
+                await rtdb.ref(`groups/${groupID}/admins/${uid}`).remove();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

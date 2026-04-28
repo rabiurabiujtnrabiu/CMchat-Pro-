@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Group Settings - CMchat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        :root { --primary: #0062ff; --bg: #f8fafc; --danger: #ef4444; }
+        body { background: var(--bg); font-family: 'Inter', sans-serif; padding: 20px; color: #1e293b; }
+        
+        .settings-container { max-width: 500px; margin: 0 auto; }
+        .section-card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .section-title { font-size: 11px; font-weight: 800; color: #94a3b8; letter-spacing: 1px; margin-bottom: 15px; text-transform: uppercase; }
+        
+        .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+        .setting-row:last-child { border: none; }
+        
+        .label-text { font-weight: 600; font-size: 14px; }
+        .sub-text { font-size: 12px; color: #64748b; display: block; }
+        
+        /* Toggle Switch */
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn-outline { background: none; border: 1px solid #e2e8f0; color: #475569; }
+        .btn-danger { background: #fee2e2; color: var(--danger); }
+    </style>
+</head>
+<body>
+
+    <div class="settings-container">
+        <div style="margin-bottom: 25px; display: flex; align-items: center; gap: 15px;">
+            <i class="fas fa-arrow-left" onclick="history.back()" style="cursor:pointer;"></i>
+            <h2 style="font-size: 18px; font-weight: 800;">Group Settings</h2>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">Preferences</div>
+            <div class="setting-row">
+                <div>
+                    <span class="label-text">Mute Notifications</span>
+                    <span class="sub-text">Silence group alerts on this device</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="muteToggle" onchange="savePreference('mute')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="setting-row">
+                <div>
+                    <span class="label-text">Auto-Delete Storage</span>
+                    <span class="sub-text">Optimizing database performance</span>
+                </div>
+                <span style="color: #10b981; font-weight: 800; font-size: 12px;">ACTIVE</span>
+            </div>
+        </div>
+
+        <div class="section-card" id="adminArea" style="display:none;">
+            <div class="section-title">Admin Controls</div>
+            <div class="setting-row">
+                <div>
+                    <span class="label-text">3-Day Auto-Wipe</span>
+                    <span class="sub-text">Automatic message retention is on</span>
+                </div>
+                <i class="fas fa-shield-halved" style="color:var(--primary);"></i>
+            </div>
+            <button class="btn btn-outline" onclick="clearAllChat()">Clear Group History</button>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">Danger Zone</div>
+            <p style="font-size: 12px; color: #64748b; margin-bottom: 10px;">Warning: These actions cannot be undone.</p>
+            <button class="btn btn-danger" onclick="deleteGroup()">Delete Group Permanently</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = { databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const rtdb = firebase.database();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const groupID = urlParams.get('id');
+        const myUID = localStorage.getItem('user_uid');
+
+        async function initSettings() {
+            if(!groupID) return;
+
+            // Check Admin Status
+            rtdb.ref(`groups/${groupID}/admins/${myUID}`).once('value', snap => {
+                if(snap.exists()) {
+                    document.getElementById('adminArea').style.display = 'block';
+                }
+            });
+
+            // Load Mute preference
+            const isMuted = localStorage.getItem(`mute_${groupID}`) === 'true';
+            document.getElementById('muteToggle').checked = isMuted;
+        }
+
+        function savePreference(type) {
+            if(type === 'mute') {
+                const status = document.getElementById('muteToggle').checked;
+                localStorage.setItem(`mute_${groupID}`, status);
+            }
+        }
+
+        async function clearAllChat() {
+            if(confirm("Are you sure you want to clear all messages for everyone?")) {
+                await rtdb.ref(`messages/groups/${groupID}`).remove();
+                alert("Group history cleared successfully!");
+            }
+        }
+
+        async function deleteGroup() {
+            // Only Owner or Admin can delete the whole group structure
+            if(confirm("This will permanently delete the group and all its data. Continue?")) {
+                await rtdb.ref(`groups/${groupID}`).remove();
+                await rtdb.ref(`messages/groups/${groupID}`).remove();
+                alert("Group deleted.");
+                window.location.href = "index.html"; // Adjust to your main page
+            }
+        }
+
+        // Logic for Auto-Delete (Older than 3 Days)
+        function runAutoCleaner() {
+            const threeDaysInMs = 3 * 24 * 60 * 60 * 1000;
+            const expirationTime = Date.now() - threeDaysInMs;
+
+            rtdb.ref(`messages/groups/${groupID}`)
+                .orderByChild('timestamp')
+                .endAt(expirationTime)
+                .once('value', snap => {
+                    snap.forEach(child => {
+                        child.ref.remove();
+                    });
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initSettings();
+            runAutoCleaner();
+        });
+    </script>
+</body>
+</html>

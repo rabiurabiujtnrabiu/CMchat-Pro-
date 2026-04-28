@@ -30,22 +30,17 @@
         .header-icons { display: flex; gap: 8px; align-items: center; }
         .icon-circle { background: #f1f5f9; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #334155; text-decoration: none; position: relative; }
         
-        /* Notification Badge */
         .badge-dot { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; background: #ff3b30; border-radius: 50%; border: 2px solid #fff; }
-
         .balance-badge { background: #ecfdf5; color: #10b981; padding: 6px 10px; border-radius: 10px; font-size: 12px; font-weight: 800; border: 1px solid #d1fae5; cursor: pointer; white-space: nowrap; }
 
-        /* --- POST INPUT --- */
         .post-input-container { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #e2e8f0; flex-shrink: 0; border: 2px solid white; box-shadow: var(--shadow); }
         .fake-input { background: #f1f5f9; flex-grow: 1; padding: 10px 15px; border-radius: 12px; color: #64748b; font-size: 14px; font-weight: 500; cursor: pointer; }
 
-        /* --- QUICK ACTIONS --- */
         .quick-actions { background: var(--white); display: flex; justify-content: space-around; padding: 15px 0; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
         .action-btn { text-align: center; color: #475569; font-size: 10px; font-weight: 700; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .action-btn i { font-size: 18px; margin-bottom: 2px; }
 
-        /* --- STORIES --- */
         .stories-wrapper { padding: 15px; display: flex; gap: 15px; overflow-x: auto; scrollbar-width: none; background: white; margin-bottom: 10px; }
         .stories-wrapper::-webkit-scrollbar { display: none; }
         .story-item { flex-shrink: 0; width: 70px; text-align: center; }
@@ -54,32 +49,21 @@
         .add-story-inner { background: #f1f5f9; border-radius: 50%; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
         .story-name { font-size: 10px; font-weight: 600; color: #64748b; display: block; overflow: hidden; text-overflow: ellipsis; }
 
-        /* --- FEED, CARDS & SKELETON --- */
         .card { background: var(--white); border-radius: 20px; padding: 18px; margin-bottom: 12px; box-shadow: var(--shadow); }
         .post-media { width: 100%; border-radius: 12px; margin-top: 12px; max-height: 450px; object-fit: cover; cursor: pointer; }
         .post-footer { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
         .post-action { display: flex; align-items: center; gap: 5px; color: #64748b; font-size: 13px; font-weight: 600; cursor: pointer; }
 
-        /* Skeleton Animation */
         .skeleton { background: #e2e8f0; position: relative; overflow: hidden; }
         .skeleton::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: loading 1.5s infinite; }
         @keyframes loading { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
-        /* --- SCROLL TO TOP BUTTON --- */
         #scrollTopBtn { position: fixed; bottom: 85px; right: 20px; width: 45px; height: 45px; background: var(--primary); color: #fff; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 5px 15px rgba(0,98,255,0.4); z-index: 2500; cursor: pointer; border: none; transition: 0.3s; }
 
-        /* --- STORY OVERLAY --- */
-        #storyOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: flex-end; }
-        .story-view-box { width: 100%; height: 85vh; background: #000; border-radius: 25px 25px 0 0; position: relative; overflow: hidden; }
-        .story-header { position: absolute; top: 20px; left: 20px; color: white; z-index: 10; font-weight: bold; font-size: 14px; }
-        .close-story { position: absolute; top: 20px; right: 20px; color: white; font-size: 28px; z-index: 10; }
-
-        /* --- BOTTOM NAV --- */
         .bottom-nav { position: fixed; bottom: 20px; left: 15px; right: 15px; background: #1e293b; display: flex; justify-content: space-around; padding: 12px 0; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 2000; }
         .nav-item { color: #94a3b8; font-size: 18px; text-decoration: none; display: flex; flex-direction: column; align-items: center; }
         .nav-item.active { color: #38bdf8; }
 
-        /* SIDEBAR */
         .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: white; z-index: 3000; transition: 0.3s; padding: 30px 20px; }
         .sidebar.active { left: 0; box-shadow: 10px 0 30px rgba(0,0,0,0.1); }
         .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 2500; display: none; backdrop-filter: blur(4px); }
@@ -88,14 +72,6 @@
 <body>
 
     <button id="scrollTopBtn" onclick="scrollToTop()"><i class="fas fa-chevron-up"></i></button>
-
-    <div id="storyOverlay" onclick="closeStory()">
-        <div class="story-view-box" onclick="event.stopPropagation()">
-            <div class="story-header" id="storyUser">Elite Member</div>
-            <span class="close-story" onclick="closeStory()">&times;</span>
-            <img id="viewImg" style="width:100%; height:100%; object-fit:contain;">
-        </div>
-    </div>
 
     <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="sidebar">
@@ -124,8 +100,8 @@
         </div>
         <div class="post-input-container">
             <div class="user-avatar" id="headerAvatar"></div>
-            <div class="fake-input" onclick="window.location.href='upload.html'">What's on your elite mind?</div>
-            <a href="upload.html" class="icon-circle" style="background:none;"><i class="fas fa-image" style="color: #10b981; font-size: 20px;"></i></a>
+            <div class="fake-input" onclick="window.location.href='post-media.html'">What's on your elite mind?</div>
+            <a href="post-media.html" class="icon-circle" style="background:none;"><i class="fas fa-image" style="color: #10b981; font-size: 20px;"></i></a>
         </div>
     </header>
 
@@ -171,7 +147,6 @@
             ov.style.display = sb.classList.contains('active') ? 'block' : 'none';
         }
 
-        // Scroll to Top Logic
         window.onscroll = function() {
             let btn = document.getElementById("scrollTopBtn");
             if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
@@ -189,22 +164,41 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Story Logic (24h)
-        function viewStory(url, name) {
-            document.getElementById('viewImg').src = url;
-            document.getElementById('storyUser').innerText = name;
-            document.getElementById('storyOverlay').style.display = 'flex';
-        }
-        function closeStory() { document.getElementById('storyOverlay').style.display = 'none'; }
+        // --- NEW MODULAR FUNCTIONS ---
+        let allStories = [];
 
+        function openStoryPage(index) {
+            localStorage.setItem('all_stories', JSON.stringify(allStories));
+            localStorage.setItem('start_index', index);
+            window.location.href = 'view-story.html';
+        }
+
+        function openFullPost(data) {
+            localStorage.setItem('current_view_post', JSON.stringify(data));
+            window.location.href = 'view-post.html';
+        }
+
+        // Story Logic (24h)
         const expiry24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
         db.collection('stories').where('timestamp', '>', expiry24h).orderBy('timestamp', 'desc').onSnapshot(snap => {
             const container = document.getElementById('storiesContainer');
             const addBtn = container.firstElementChild;
             container.innerHTML = ''; container.appendChild(addBtn);
+            
+            allStories = []; // Clear and refill
+            let index = 0;
+            
             snap.forEach(doc => {
                 const s = doc.data();
-                container.innerHTML += `<div class="story-item" onclick="viewStory('${s.imageUrl}', '${s.owner}')"><div class="story-ring"><div class="story-img" style="background-image:url('${s.imageUrl}')"></div></div><span class="story-name">${s.owner || 'Elite'}</span></div>`;
+                allStories.push(s);
+                container.innerHTML += `
+                    <div class="story-item" onclick="openStoryPage(${index})">
+                        <div class="story-ring">
+                            <div class="story-img" style="background-image:url('${s.imageUrl}')"></div>
+                        </div>
+                        <span class="story-name">${s.owner || 'Elite'}</span>
+                    </div>`;
+                index++;
             });
         });
 
@@ -212,10 +206,18 @@
         const expiry48h = new Date(Date.now() - 48 * 60 * 60 * 1000);
         db.collection('posts').where('timestamp', '>', expiry48h).orderBy('timestamp', 'desc').onSnapshot(snap => {
             const feed = document.getElementById('feedContainer');
-            feed.innerHTML = ''; // Removes skeletons once data arrives
+            feed.innerHTML = ''; 
             snap.forEach(doc => {
                 const p = doc.data();
                 const time = p.timestamp ? new Date(p.timestamp.toDate()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'Now';
+                
+                const postData = JSON.stringify({
+                    url: p.postImg,
+                    author: p.username || 'Elite Member',
+                    caption: p.text || '',
+                    type: p.postImg && (p.postImg.includes('video') || p.postImg.includes('.mp4')) ? 'video' : 'image'
+                }).replace(/'/g, "\\'");
+
                 feed.innerHTML += `
                     <div class="card">
                         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
@@ -223,7 +225,7 @@
                             <div><h4 style="font-size:14px;font-weight:700">${p.username || 'Elite Member'}</h4><p style="font-size:11px;color:#94a3b8">${time}</p></div>
                         </div>
                         <p style="font-size:14px;color:#334155;line-height:1.6">${p.text || ''}</p>
-                        ${p.postImg ? `<img src="${p.postImg}" class="post-media" onclick="window.open('${p.postImg}')">` : ''}
+                        ${p.postImg ? `<img src="${p.postImg}" class="post-media" onclick='openFullPost(${postData})'>` : ''}
                         <div class="post-footer">
                             <div class="post-action"><i class="far fa-heart"></i> Like</div>
                             <div class="post-action"><i class="far fa-comment"></i> Comment</div>

@@ -4,7 +4,7 @@
             <i class="fa-solid fa-wand-magic-sparkles"></i>
             <span>Elite Living Stickers</span>
         </div>
-        <button class="close-panel-btn" onclick="togglePanel('stickerPanel')">
+        <button class="close-panel-btn" onclick="closeAllPanels()">
             <i class="fas fa-times"></i>
         </button>
     </div>
@@ -15,138 +15,119 @@
         <div class="tab" onclick="switchTab('luxury')">Luxury</div>
     </div>
 
-    <div class="sticker-grid-pro" id="stickerGrid">
-        </div>
+    <div class="sticker-grid-pro" id="stickerGrid"></div>
 </div>
 
 <style>
-/* --- ELITE PRO STICKER UI --- */
-.elite-sticker-wrapper { 
-    background: #ffffff; 
-    border-radius: 35px 35px 0 0; 
-    user-select: none;
-    overflow: hidden;
-    box-shadow: 0 -15px 50px rgba(0,0,0,0.1);
-}
+    /* --- INTEGRATED STICKER STYLING --- */
+    .elite-sticker-wrapper { 
+        background: #ffffff; 
+        border-radius: 35px 35px 0 0; 
+        user-select: none;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
 
-.panel-header-pro { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    padding: 20px 25px; 
-    border-bottom: 1px solid #f1f5f9; 
-}
+    .panel-header-pro { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        padding: 20px 25px; 
+        border-bottom: 1px solid #f1f5f9; 
+    }
 
-.header-title { 
-    display: flex; 
-    align-items: center; 
-    gap: 12px; 
-    font-weight: 800; 
-    color: #0f172a; 
-    font-size: 17px; 
-}
+    .header-title { 
+        display: flex; 
+        align-items: center; 
+        gap: 12px; 
+        font-weight: 800; 
+        color: #0f172a; 
+        font-size: 16px; 
+    }
 
-.header-title i { 
-    background: var(--primary-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
+    .header-title i { 
+        background: linear-gradient(135deg, #0062ff, #00d2ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 
-.close-panel-btn { 
-    background: #f1f5f9; 
-    border: none; 
-    width: 36px; 
-    height: 36px; 
-    border-radius: 50%; 
-    color: #64748b; 
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: 0.2s;
-}
+    .close-panel-btn { 
+        background: #f1f5f9; 
+        border: none; 
+        width: 36px; 
+        height: 36px; 
+        border-radius: 50%; 
+        color: #64748b; 
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+    }
 
-.close-panel-btn:active { transform: scale(0.9); }
+    .sticker-tabs { 
+        display: flex; 
+        gap: 10px; 
+        padding: 15px 25px; 
+        background: #ffffff;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .sticker-tabs::-webkit-scrollbar { display: none; }
 
-/* --- NAVIGATION TABS --- */
-.sticker-tabs { 
-    display: flex; 
-    gap: 10px; 
-    padding: 15px 25px; 
-    background: #ffffff;
-    overflow-x: auto;
-}
+    .tab { 
+        font-size: 12px; 
+        font-weight: 700; 
+        color: #94a3b8; 
+        padding: 10px 20px; 
+        border-radius: 25px; 
+        cursor: pointer; 
+        background: #f8fafc;
+        white-space: nowrap;
+        transition: 0.3s;
+    }
 
-.sticker-tabs::-webkit-scrollbar { display: none; }
+    .tab.active { 
+        background: #0062ff; 
+        color: #ffffff; 
+        box-shadow: 0 8px 20px rgba(0, 98, 255, 0.2); 
+    }
 
-.tab { 
-    font-size: 13px; 
-    font-weight: 700; 
-    color: #94a3b8; 
-    padding: 10px 22px; 
-    border-radius: 25px; 
-    cursor: pointer; 
-    transition: 0.3s cubic-bezier(0.1, 0.7, 0.1, 1);
-    background: #f8fafc;
-    white-space: nowrap;
-}
+    .sticker-grid-pro { 
+        display: grid; 
+        grid-template-columns: repeat(4, 1fr); 
+        gap: 12px; 
+        padding: 15px 25px 30px; 
+        overflow-y: auto;
+        flex: 1;
+    }
 
-.tab.active { 
-    background: #0062ff; 
-    color: #ffffff; 
-    box-shadow: 0 8px 20px rgba(0, 98, 255, 0.25); 
-}
+    .sticker-item { 
+        background: #f8fafc; 
+        border-radius: 20px; 
+        padding: 15px 5px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        cursor: pointer; 
+        transition: 0.2s;
+    }
 
-/* --- DYNAMIC STICKER GRID --- */
-.sticker-grid-pro { 
-    display: grid; 
-    grid-template-columns: repeat(4, 1fr); 
-    gap: 15px; 
-    padding: 10px 25px 30px; 
-    max-height: 420px; 
-    overflow-y: auto; 
-}
+    .sticker-item:active { transform: scale(0.85); background: #ffffff; border: 1px solid #0062ff; }
+    .sticker-item span { font-size: 32px; display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); }
 
-.sticker-item { 
-    background: #f8fafc; 
-    border-radius: 25px; 
-    padding: 22px 10px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    cursor: pointer; 
-    border: 1.5px solid transparent; 
-    transition: 0.3s cubic-bezier(0.1, 0.7, 0.1, 1); 
-}
+    /* --- ANIMATION CORE --- */
+    @keyframes laugh { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-10deg) translateY(-3px); } 75% { transform: rotate(10deg) translateY(-3px); } }
+    .anim-laugh span { animation: laugh 0.6s infinite ease-in-out; }
 
-.sticker-item:active { 
-    transform: scale(0.8); 
-    background: #ffffff; 
-    border-color: #0062ff; 
-}
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+    .anim-pulse span, .anim-heart span { animation: pulse 0.8s infinite; }
 
-.sticker-item span { 
-    font-size: 40px; 
-    display: block;
-    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.08));
-}
+    @keyframes fly { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    .anim-float span { animation: fly 2s infinite ease-in-out; }
 
-/* --- ELITE ANIMATIONS ENGINE --- */
-@keyframes laugh { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-10deg) translateY(-5px); } 75% { transform: rotate(10deg) translateY(-5px); } }
-.anim-laugh span { animation: laugh 0.6s infinite ease-in-out; }
-
-@keyframes cry { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.8); opacity: 0.7; } }
-.anim-cry span { animation: cry 1.5s infinite; }
-
-@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
-.anim-pulse span, .anim-heart span { animation: pulse 0.8s infinite; }
-
-@keyframes fly { 0% { transform: translateY(0); } 50% { transform: translateY(-10px) rotate(5deg); } 100% { transform: translateY(0); } }
-.anim-float span { animation: fly 2s infinite ease-in-out; }
-
-@keyframes glow { 0%, 100% { filter: drop-shadow(0 0 2px #0062ff); transform: scale(1); } 50% { filter: drop-shadow(0 0 15px #00d2ff); transform: scale(1.1); } }
-.anim-glow span { animation: glow 1.8s infinite; }
-
-@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
-.anim-shake span { animation: shake 0.5s infinite; }
+    @keyframes glow { 0%, 100% { filter: drop-shadow(0 0 2px #0062ff); } 50% { filter: drop-shadow(0 0 12px #00d2ff); } }
+    .anim-glow span { animation: glow 1.5s infinite; }
 </style>

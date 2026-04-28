@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Groups - CMchat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        :root { --primary: #0062ff; --bg: #f1f5f9; }
+        body { background: var(--bg); font-family: 'Inter', sans-serif; margin: 0; padding: 20px; }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
+        .group-card { 
+            background: white; padding: 15px; border-radius: 18px; 
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .group-card:active { transform: scale(0.98); }
+        .group-info { display: flex; align-items: center; gap: 15px; }
+        .group-icon { width: 50px; height: 50px; border-radius: 15px; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; }
+        .create-btn { 
+            position: fixed; bottom: 30px; right: 25px; width: 60px; height: 60px; 
+            background: var(--primary); color: white; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 24px; box-shadow: 0 10px 20px rgba(0,98,255,0.3);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2 style="font-weight: 800;">Communities</h2>
+        <i class="fas fa-search" style="color: #64748b;"></i>
+    </div>
+
+    <div id="groupsContainer">
+        <p style="text-align: center; color: #94a3b8; font-size: 14px; margin-top: 50px;">Searching for your groups...</p>
+    </div>
+
+    <a href="create-group.html" class="create-btn">
+        <i class="fas fa-plus"></i>
+    </a>
+
+    <script>
+        const firebaseConfig = { databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const rtdb = firebase.database();
+        const myUID = localStorage.getItem('user_uid');
+
+        function loadMyGroups() {
+            const container = document.getElementById('groupsContainer');
+            
+            // Nemo dukkan groups inda wannan UID yake matsayin mamba
+            rtdb.ref('groups').on('value', snap => {
+                container.innerHTML = "";
+                let found = false;
+
+                snap.forEach(child => {
+                    const group = child.val();
+                    const groupID = child.key;
+
+                    // Duba idan mutum yana cikin members na wannan group din
+                    if (group.members && group.members[myUID]) {
+                        found = true;
+                        container.innerHTML += `
+                            <div class="group-card" onclick="openGroup('${groupID}', '${group.name}')">
+                                <div class="group-info">
+                                    <div class="group-icon">${group.name[0].toUpperCase()}</div>
+                                    <div>
+                                        <div style="font-weight: 800; font-size: 16px;">${group.name}</div>
+                                        <div style="font-size: 12px; color: #64748b;">Tap to join conversation</div>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right" style="color: #cbd5e1;"></i>
+                            </div>`;
+                    }
+                });
+
+                if (!found) {
+                    container.innerHTML = `
+                        <div style="text-align: center; margin-top: 80px;">
+                            <i class="fas fa-users" style="font-size: 50px; color: #cbd5e1; margin-bottom: 20px;"></i>
+                            <p style="color: #64748b;">No groups found.<br>Create one to get started!</p>
+                        </div>`;
+                }
+            });
+        }
+
+        function openGroup(id, name) {
+            window.location.href = `group-chat.html?id=${id}&name=${name}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', loadMyGroups);
+    </script>
+</body>
+</html>

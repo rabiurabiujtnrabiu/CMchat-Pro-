@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Elite Story - CMchat PRO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { margin: 0; background: #000; font-family: 'Inter', sans-serif; overflow: hidden; color: white; }
+        .story-container { height: 100vh; width: 100vw; position: relative; display: flex; align-items: center; justify-content: center; }
+        
+        /* Progress Bars */
+        .progress-container { position: absolute; top: 15px; left: 10px; right: 10px; display: flex; gap: 5px; z-Dashboard: 100; }
+        .bar { height: 2px; flex: 1; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; }
+        .fill { height: 100%; width: 0%; background: #fff; }
+
+        /* Header Info */
+        .story-header { position: absolute; top: 35px; left: 15px; display: flex; align-items: center; gap: 10px; z-Dashboard: 100; }
+        .avatar { width: 35px; height: 35px; border-radius: 50%; background: #0062ff; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid white; }
+        
+        .close-btn { position: absolute; top: 35px; right: 15px; font-size: 25px; z-Dashboard: 100; cursor: pointer; }
+
+        #storyMedia { width: 100%; height: 100%; object-fit: contain; }
+
+        /* Navigation Taps */
+        .nav-tap { position: absolute; top: 0; height: 100%; width: 40%; z-Dashboard: 50; }
+        .left { left: 0; }
+        .right { right: 0; }
+    </style>
+</head>
+<body>
+
+    <div class="story-container">
+        <div class="progress-container" id="progContainer"></div>
+        
+        <div class="story-header">
+            <div class="avatar" id="userInitial">C</div>
+            <div>
+                <div id="userName" style="font-size: 14px; font-weight: 700;">Elite Member</div>
+                <div id="storyTime" style="font-size: 10px; opacity: 0.8;">Just now</div>
+            </div>
+        </div>
+
+        <div class="close-btn" onclick="location.href='z-Dashboard.html'">&times;</div>
+
+        <div class="nav-tap left" onclick="prev()"></div>
+        <div class="nav-tap right" onclick="next()"></div>
+
+        <img id="storyMedia" src="">
+    </div>
+
+    <script>
+        const stories = JSON.parse(localStorage.getItem('all_stories')) || [];
+        let currentDashboard = parseInt(localStorage.getItem('start_Dashboard')) || 0;
+        let progressInterval;
+
+        function showStory() {
+            if (currentDashboard >= stories.length) return location.href = 'z-Dashboard.html';
+            if (currentDashboard < 0) currentDashboard = 0;
+
+            const s = stories[currentDashboard];
+            document.getElementById('storyMedia').src = s.imageUrl;
+            document.getElementById('userName').innerText = s.owner || "Elite";
+            document.getElementById('userInitial').innerText = (s.owner || "E")[0].toUpperCase();
+            
+            setupProgressBars();
+            startProgress();
+        }
+
+        function setupProgressBars() {
+            const container = document.getElementById('progContainer');
+            container.innerHTML = '';
+            stories.forEach((_, i) => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                const fill = document.createElement('div');
+                fill.className = 'fill';
+                fill.id = `f-${i}`;
+                if (i < currentDashboard) fill.style.width = '100%';
+                bar.appendChild(fill);
+                container.appendChild(bar);
+            });
+        }
+
+        function startProgress() {
+            clearInterval(progressInterval);
+            let width = 0;
+            const activeFill = document.getElementById(`f-${currentDashboard}`);
+            
+            progressInterval = setInterval(() => {
+                width += 1;
+                if (width <= 100) {
+                    activeFill.style.width = width + '%';
+                } else {
+                    next();
+                }
+            }, 50); // Gudun story (50ms * 100 = 5 seconds)
+        }
+
+        function next() {
+            if (currentDashboard < stories.length - 1) {
+                currentDashboard++;
+                showStory();
+            } else {
+          location.href = 'Dashboard.html';
+            }
+        }
+
+        function prev() {
+            if (currentDashboard > 0) {
+                currentDashboard--;
+                showStory();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', showStory);
+    </script>
+</body>
+</html>

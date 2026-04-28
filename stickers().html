@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Stickers Pro - CMchat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --primary: #0062ff; 
+            --bg: #ffffff;
+            --tab-inactive: #94a3b8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- HEADER --- */
+        .header { 
+            padding: 15px 20px; 
+            display: flex; 
+            align-items: center; 
+            gap: 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .header h2 { font-weight: 800; font-size: 20px; color: #1e293b; }
+        .close-btn { font-size: 20px; color: #64748b; cursor: pointer; }
+
+        /* --- STICKER GRID --- */
+        .sticker-container {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            align-content: start;
+            background: #fafafa;
+        }
+
+        .sticker-card {
+            background: white;
+            border-radius: 18px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        .sticker-card:active { transform: scale(0.85); }
+        .sticker-img { width: 100%; height: auto; border-radius: 10px; }
+
+        /* --- CATEGORY TABS --- */
+        .tabs-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            background: white;
+            border-top: 1px solid #f1f5f9;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.02);
+        }
+        .tab-item { 
+            font-size: 22px; 
+            color: var(--tab-inactive); 
+            cursor: pointer; 
+            padding: 8px 15px;
+            transition: 0.3s;
+            border-radius: 12px;
+        }
+        .tab-item.active { 
+            color: var(--primary); 
+            background: #eef4ff;
+        }
+
+        /* Animation */
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <i class="fas fa-times close-btn" onclick="history.back()"></i>
+        <h2>Elite Stickers</h2>
+    </div>
+
+    <div class="sticker-container" id="stickerGrid">
+        </div>
+
+    <div class="tabs-bar">
+        <i class="fas fa-grin-beam tab-item active" onclick="switchTab('happy', this)"></i>
+        <i class="fas fa-fire tab-item" onclick="switchTab('trending', this)"></i>
+        <i class="fas fa-heart tab-item" onclick="switchTab('love', this)"></i>
+        <i class="fas fa-face-sad-tear tab-item" onclick="switchTab('sad', this)"></i>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = { databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const myUID = localStorage.getItem('user_uid') || "TEMP_USER";
+        const urlParams = new URLSearchParams(window.location.search);
+        const partnerUID = urlParams.get('uid') || "Admin_CM";
+        const chatID = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
+
+        // Cikakken Database na Stickers
+        const stickerLibrary = {
+            happy: [
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f602/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f923/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f60e/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f973/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f60a/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f61c/512.gif'
+            ],
+            trending: [
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f525/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f4af/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f680/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f44b/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f4aa/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f44f/512.gif'
+            ],
+            love: [
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f60d/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/2764_fe0f/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f618/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f970/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f48b/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f496/512.gif'
+            ],
+            sad: [
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f62d/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f614/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f62b/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f61e/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.gif',
+                'https://fonts.gstatic.com/s/e/notoemoji/latest/1f632/512.gif'
+            ]
+        };
+
+        function switchTab(category, element) {
+            // Canza Active Tab
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+
+            // Load Stickers
+            const grid = document.getElementById('stickerGrid');
+            grid.innerHTML = "";
+            stickerLibrary[category].forEach(url => {
+                const card = document.createElement('div');
+                card.className = 'sticker-card fade-in';
+                card.onclick = () => sendSticker(url);
+                card.innerHTML = `<img src="${url}" class="sticker-img">`;
+                grid.appendChild(card);
+            });
+        }
+
+        function sendSticker(url) {
+            database.ref('messages/' + chatID).push({
+                sender: myUID,
+                msg: url,
+                type: 'sticker',
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            }).then(() => {
+                history.back();
+            });
+        }
+
+        // Fara loda bangaren farko (Happy)
+        document.addEventListener('DOMContentLoaded', () => {
+            switchTab('happy', document.querySelector('.tab-item.active'));
+        });
+    </script>
+</body>
+</html>

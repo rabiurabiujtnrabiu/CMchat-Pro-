@@ -12,142 +12,120 @@
         :root { 
             --primary: #0062ff; 
             --primary-gradient: linear-gradient(135deg, #0062ff, #00d2ff);
-            --bg-chat: #f8fafc; 
+            --bg-chat: #f0f2f5; 
             --white: #ffffff; 
             --sent-msg: var(--primary-gradient);
             --received-msg: #ffffff;
-            --shadow: 0 4px 15px rgba(0,0,0,0.05);
+            --shadow: 0 2px 10px rgba(0,0,0,0.08);
+            --danger: #ef4444;
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        html, body { height: 100%; width: 100%; overflow: hidden; }
-        body { background: var(--bg-chat); display: flex; flex-direction: column; }
+        html, body { height: 100%; width: 100%; overflow: hidden; background: var(--bg-chat); }
+        body { display: flex; flex-direction: column; }
 
-        /* --- SIDEBAR SETTINGS --- */
-        .sidebar {
-            position: fixed; top: 0; left: -300px; width: 300px; height: 100%;
-            background: white; z-index: 4000; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 40px 25px; box-shadow: 20px 0 60px rgba(0,0,0,0.1);
-        }
-        .sidebar.active { left: 0; }
-        .sidebar-header { border-bottom: 1px solid #f1f5f9; padding-bottom: 25px; margin-bottom: 25px; }
-        .setting-item { display: flex; align-items: center; gap: 18px; padding: 14px 12px; border-radius: 15px; color: #475569; font-weight: 600; cursor: pointer; transition: 0.3s; margin-bottom: 5px; }
-        .setting-item i { width: 20px; font-size: 18px; color: var(--primary); }
-        .setting-item:active { background: #f1f5f9; transform: scale(0.95); }
+        /* --- SIDEBAR OVERLAY --- */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 3500; display: none; backdrop-filter: blur(4px); }
 
-        /* --- OVERLAY --- */
-        .overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); z-index: 3500; display: none; backdrop-filter: blur(8px); }
-
-        /* --- ELITE HEADER --- */
+        /* --- HEADER --- */
         .chat-header { 
-            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px);
-            padding: 0 15px; display: flex; align-items: center; height: 70px; 
-            border-bottom: 1px solid rgba(0,0,0,0.04); z-index: 1000;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
+            padding: 10px 15px; display: flex; align-items: center; height: 75px; 
+            border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 1000; position: sticky; top: 0;
         }
-        .user-info { display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer; }
-        .user-avatar { width: 45px; height: 45px; border-radius: 15px; object-fit: cover; border: 2px solid #fff; box-shadow: var(--shadow); }
-        .user-meta b { font-size: 16px; color: #1e293b; font-weight: 800; display: block; }
-        .status-dot { font-size: 11px; color: #94a3b8; font-weight: 700; display: flex; align-items: center; gap: 5px; }
-        .online-dot { color: #10b981; }
-        .online-dot::before { content: ''; width: 8px; height: 8px; background: #10b981; border-radius: 50%; }
+        .header-left { display: flex; align-items: center; gap: 5px; flex: 1; }
+        .user-info { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .user-avatar { width: 48px; height: 48px; border-radius: 16px; object-fit: cover; background: #e2e8f0; }
+        .user-meta b { font-size: 16px; color: #1e293b; font-weight: 800; }
+        .status-dot { font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 5px; }
+        .online-dot { color: #10b981 !important; font-weight: 600; }
+        .online-dot::before { content: ''; width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; }
 
-        .header-tools { display: flex; gap: 20px; color: #64748b; font-size: 19px; align-items: center; }
+        /* --- CHAT BUBBLES --- */
+        .chat-container { flex: 1; padding: 20px 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; position: relative; }
+        .message { max-width: 75%; padding: 10px 14px; border-radius: 18px; font-size: 14.5px; line-height: 1.4; position: relative; box-shadow: var(--shadow); }
+        .received { background: var(--white); align-self: flex-start; border-bottom-left-radius: 4px; color: #334155; }
+        .sent { background: var(--sent-msg); align-self: flex-end; border-bottom-right-radius: 4px; color: white; }
+        
+        /* Voice Message Player UI */
+        .voice-player { display: flex; align-items: center; gap: 10px; padding: 5px 0; min-width: 150px; }
+        .voice-player i { cursor: pointer; font-size: 18px; }
+        .voice-progress { flex: 1; height: 4px; background: rgba(0,0,0,0.1); border-radius: 2px; position: relative; }
+        .sent .voice-progress { background: rgba(255,255,255,0.3); }
+        .voice-duration { font-size: 11px; font-weight: 600; }
 
-        /* --- CHAT AREA --- */
-        .chat-container { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
-        .message { max-width: 80%; padding: 12px 16px; border-radius: 20px; font-size: 14.5px; position: relative; box-shadow: var(--shadow); line-height: 1.5; }
-        .received { background: var(--white); align-self: flex-start; border-bottom-left-radius: 5px; color: #334155; }
-        .sent { background: var(--sent-msg); align-self: flex-end; border-bottom-right-radius: 5px; color: white; }
-        .msg-footer { display: flex; justify-content: flex-end; align-items: center; gap: 5px; margin-top: 4px; font-size: 10px; opacity: 0.8; }
+        .msg-footer { display: flex; justify-content: flex-end; align-items: center; gap: 4px; margin-top: 4px; font-size: 10px; opacity: 0.8; }
+        .tick-blue { color: #fff; } 
+        .tick-grey { color: rgba(255,255,255,0.5); } 
 
         /* --- FLOATING ADD FRIEND BUTTON --- */
         .floating-add {
-            position: fixed; bottom: 100px; right: 20px; width: 55px; height: 55px;
-            background: var(--primary-gradient); border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; color: white;
-            font-size: 22px; box-shadow: 0 8px 25px rgba(0, 98, 255, 0.4);
-            z-index: 3000; cursor: pointer; transition: 0.3s;
+            position: fixed; bottom: 90px; left: 20px; 
+            width: 56px; height: 56px; background: var(--primary-gradient);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 22px; box-shadow: 0 8px 20px rgba(0, 98, 255, 0.3);
+            z-index: 2000; cursor: pointer; transition: 0.3s;
+            animation: floatAnim 3s ease-in-out infinite;
         }
-        .floating-add:active { transform: scale(0.8); }
+        @keyframes floatAnim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .floating-add:active { transform: scale(0.9); }
 
-        /* --- ANIMATED STICKER PANEL --- */
-        .sticker-panel { 
-            display: none; position: absolute; bottom: 90px; left: 15px; right: 15px; 
-            background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px);
-            border-radius: 30px; height: 350px; overflow-y: auto; 
-            box-shadow: 0 15px 45px rgba(0,0,0,0.1); z-index: 2000; padding: 25px;
-            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .sticker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 10px; }
-        .sticker-img { width: 80px; height: 80px; cursor: pointer; transition: 0.3s; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); }
-
-        /* --- ELITE INPUT BAR --- */
-        .input-area { padding: 15px 20px; background: white; border-top: 1px solid #f1f5f9; display: flex; align-items: center; gap: 12px; }
-        .input-wrapper { flex: 1; background: #f1f5f9; border-radius: 18px; padding: 6px 18px; display: flex; align-items: center; gap: 12px; }
-        #messageInput { border: none; outline: none; flex: 1; font-size: 15px; padding: 12px 0; background: transparent; color: #1e293b; }
+        /* --- INPUT AREA & VOICE RECORDING --- */
+        .input-area { padding: 12px 15px; background: white; display: flex; align-items: center; gap: 10px; border-top: 1px solid #edf2f7; z-index: 1000; position: relative; }
+        .input-wrapper { flex: 1; background: #f1f5f9; border-radius: 25px; padding: 5px 15px; display: flex; align-items: center; position: relative; overflow: hidden; }
+        #messageInput { border: none; background: transparent; outline: none; flex: 1; padding: 10px; font-size: 15px; transition: 0.3s; }
         
-        .action-btn { 
-            width: 50px; height: 50px; background: var(--primary-gradient); border: none; 
-            border-radius: 18px; color: white; display: flex; align-items: center; 
-            justify-content: center; font-size: 20px; box-shadow: 0 4px 15px rgba(0,98,255,0.3); transition: 0.3s;
-        }
+        .record-ui { display: none; position: absolute; left: 50px; color: var(--danger); font-weight: 700; font-size: 14px; align-items: center; gap: 10px; }
+        .recording-active { color: var(--danger) !important; animation: pulse-red 1.2s infinite; }
+        @keyframes pulse-red { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
 
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .action-btn { width: 48px; height: 48px; border-radius: 50%; background: var(--primary-gradient); border: none; color: white; cursor: pointer; transition: 0.2s; position: relative; }
+        .action-btn:active { transform: scale(0.9); }
+
+        .sticker-img { width: 100px; height: 100px; object-fit: contain; }
     </style>
 </head>
 <body>
 
-    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h2 style="color:var(--primary); font-weight:800; letter-spacing: -0.5px;">Elite Settings</h2>
-            <p style="font-size:12px; color:#64748b; font-weight: 500;">Customize Messenger</p>
-        </div>
-        <div class="setting-item" onclick="location.href='Friends.html'"><i class="fas fa-user-plus"></i> Find Friends</div>
-        <div class="setting-item"><i class="fas fa-shield-halved"></i> Privacy & Security</div>
-        <div class="setting-item"><i class="fas fa-palette"></i> Chat Themes</div>
-        <hr style="margin: 15px 0; border: 0; border-top: 1px solid #f1f5f9;">
-        <div class="setting-item" style="color:#ef4444;"><i class="fas fa-power-off"></i> Logout</div>
-    </div>
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
     <header class="chat-header">
-        <div class="user-info" onclick="toggleSidebar()">
-            <i class="fas fa-chevron-left" onclick="event.stopPropagation(); history.back()" style="color:#64748b; margin-right:5px; font-size: 18px;"></i>
-            <img src="https://via.placeholder.com/100" class="user-avatar" id="chatAvatar">
-            <div class="user-meta">
-                <b id="chatWith">Loading...</b>
-                <div class="status-dot" id="statusText">Offline</div>
+        <div class="header-left">
+            <i class="fas fa-chevron-left" onclick="history.back()" style="padding: 10px; color:#64748b; cursor:pointer;"></i>
+            <i class="fas fa-bars" onclick="openModule('sidebar().html')" style="padding: 10px; color:#64748b; cursor:pointer; font-size: 18px;"></i>
+            <div class="user-info" onclick="openModule('sidebar.html')">
+                <img src="https://via.placeholder.com/100" class="user-avatar" id="chatAvatar" onerror="this.src='https://ui-avatars.com/api/?name=User&background=random'">
+                <div class="user-meta">
+                    <b id="chatWith">User</b> 
+                    <div class="status-dot" id="statusText">Connecting...</div>
+                </div>
             </div>
         </div>
-        <div class="header-tools">
-            <i class="fas fa-phone-alt"></i>
-            <i class="fas fa-video"></i>
-            <i class="fas fa-ellipsis-v" onclick="toggleSidebar()"></i>
+        <div class="header-tools" style="display:flex; gap:15px; color:#64748b;">
+            <i class="fas fa-phone-alt" onclick="startCall('voice')"></i>
+            <i class="fas fa-video" onclick="startCall('video')"></i>
         </div>
     </header>
 
-    <div class="floating-add" id="fabAddFriend" onclick="location.href='Friends.html'">
+    <div class="floating-add" onclick="openModule('add-friend.html')">
         <i class="fas fa-user-plus"></i>
     </div>
 
     <div class="chat-container" id="chatBox"></div>
 
-    <div id="stickerPanel" class="sticker-panel">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <b style="color:var(--primary); font-weight: 800;">Elite Animated Emojis</b>
-            <i class="fas fa-times-circle" onclick="toggleStickers()" style="color:#cbd5e1; font-size: 22px; cursor: pointer;"></i>
-        </div>
-        <div class="sticker-grid" id="stickerGrid"></div>
-    </div>
-
     <div class="input-area">
         <div class="input-wrapper">
-            <i class="far fa-face-smile-beam" style="color:#64748b; font-size:24px; cursor: pointer;" onclick="toggleStickers()"></i>
-            <input type="text" id="messageInput" placeholder="Type a message..." oninput="checkInput()">
-            <i class="fas fa-paperclip" style="color:#64748b; cursor: pointer; font-size: 20px;"></i>
+            <i class="far fa-face-smile" style="color:#64748b; font-size:20px; cursor:pointer;" onclick="openStickers()"></i>
+            <div id="recordLabel" class="record-ui">
+                <i class="fas fa-microphone"></i> <span id="recordTimer">00:00</span>
+            </div>
+            <input type="text" id="messageInput" placeholder="Type a message..." oninput="checkInput()" onkeypress="if(event.key==='Enter') handleAction()">
         </div>
-        <button class="action-btn" id="sendBtn" onclick="handleAction()">
+        <button class="action-btn" id="sendBtn" 
+            onmousedown="handleVoicePress(true)" 
+            onmouseup="handleVoicePress(false)"
+            ontouchstart="handleVoicePress(true)" 
+            ontouchend="handleVoicePress(false)">
             <i class="fas fa-microphone" id="btnIcon"></i>
         </button>
     </div>
@@ -156,23 +134,100 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
+        // --- FIREBASE SETUP ---
         const firebaseConfig = { databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        const myUID = localStorage.getItem('user_uid') || "TEMP_ID";
+        const myUID = localStorage.getItem('user_uid') || "TEMP_USER";
         const urlParams = new URLSearchParams(window.location.search);
         const partnerUID = urlParams.get('uid') || "Admin_CM";
-
-        // ONE-ON-ONE CHAT ID LOGIC
         const chatID = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
 
+        let isPartnerOnline = false;
+        let isRecording = false;
+        let recordStartTime;
+        let timerInterval;
+
+        // --- NAVIGATION FUNCTIONS ---
+        function openModule(file) { window.location.href = file; }
+        function openStickers() { window.location.href = `stickers.html?uid=${partnerUID}`; }
+        function startCall(type) {
+            const name = document.getElementById('chatWith').innerText;
+            const photo = document.getElementById('chatAvatar').src;
+            const file = type === 'voice' ? 'voice-call.html' : 'video-call.html';
+            window.location.href = `${file}?uid=${partnerUID}&name=${name}&photo=${photo}`;
+        }
+
+        // --- VOICE RECORDING TIMER LOGIC ---
+        function startTimer() {
+            recordStartTime = Date.now();
+            timerInterval = setInterval(() => {
+                let seconds = Math.floor((Date.now() - recordStartTime) / 1000);
+                let mins = Math.floor(seconds / 60);
+                let secs = seconds % 60;
+                document.getElementById('recordTimer').innerText = 
+                    `${mins < 10 ? '0' + mins : mins}:${secs < 10 ? '0' + secs : secs}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            document.getElementById('recordTimer').innerText = "00:00";
+        }
+
+        function handleVoicePress(pressing) {
+            const input = document.getElementById('messageInput');
+            if (input.value.trim().length > 0) {
+                if (!pressing) handleAction();
+                return;
+            }
+            if (pressing) {
+                isRecording = true;
+                updateUIForRecording(true);
+                startTimer();
+            } else {
+                if (isRecording) {
+                    const finalTime = document.getElementById('recordTimer').innerText;
+                    isRecording = false;
+                    updateUIForRecording(false);
+                    stopTimer();
+                    sendVoiceNote(finalTime);
+                }
+            }
+        }
+
+        function updateUIForRecording(active) {
+            const icon = document.getElementById('btnIcon');
+            const label = document.getElementById('recordLabel');
+            const input = document.getElementById('messageInput');
+            if (active) {
+                icon.classList.add('recording-active');
+                label.style.display = 'flex';
+                input.style.opacity = '0';
+            } else {
+                icon.classList.remove('recording-active');
+                label.style.display = 'none';
+                input.style.opacity = '1';
+            }
+        }
+
+        function sendVoiceNote(duration) {
+            database.ref('messages/' + chatID).push({
+                sender: myUID,
+                msg: "Voice Message",
+                type: 'voice',
+                duration: duration,
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            });
+        }
+
+        // --- CORE MESSENGER LOGIC ---
         function startMessenger() {
-            // Check Profile & Status
             database.ref('users/' + partnerUID).on('value', snap => {
                 const u = snap.val();
                 if(u) {
-                    document.getElementById('chatWith').innerText = u.username;
+                    document.getElementById('chatWith').innerText = u.username || "Elite User";
                     if(u.profilePhoto) document.getElementById('chatAvatar').src = u.profilePhoto;
                 }
             });
@@ -181,29 +236,47 @@
                 const s = snap.val();
                 const dot = document.getElementById('statusText');
                 if(s && s.state === 'online') {
+                    isPartnerOnline = true;
                     dot.innerText = "Online";
                     dot.classList.add('online-dot');
                 } else {
+                    isPartnerOnline = false;
                     dot.innerText = "Offline";
                     dot.classList.remove('online-dot');
                 }
             });
 
-            // Load Private Messages
             database.ref('messages/' + chatID).on('value', snap => {
                 const chatBox = document.getElementById('chatBox');
                 chatBox.innerHTML = "";
                 snap.forEach(child => {
                     const d = child.val();
                     const isMe = d.sender === myUID;
-                    chatBox.innerHTML += `
-                        <div class="message ${isMe ? 'sent' : 'received'} animate__animated animate__fadeInUp">
-                            ${d.type === 'sticker' ? `<img src="${d.msg}" width="100">` : d.msg}
-                            <div class="msg-footer">
-                                <span>${d.time}</span>
-                                ${isMe ? '<i class="fas fa-check-double" style="color:rgba(255,255,255,0.7)"></i>' : ''}
-                            </div>
-                        </div>`;
+                    const tickClass = isPartnerOnline ? "tick-blue" : "tick-grey";
+
+                    if (d.type === 'voice') {
+                        chatBox.innerHTML += `
+                            <div class="message ${isMe ? 'sent' : 'received'}">
+                                <div class="voice-player">
+                                    <i class="fas fa-play-circle"></i>
+                                    <div class="voice-progress"></div>
+                                    <span class="voice-duration">${d.duration || '00:00'}</span>
+                                </div>
+                                <div class="msg-footer">
+                                    <span>${d.time}</span>
+                                    ${isMe ? `<i class="fas fa-check-double ${tickClass}"></i>` : ''}
+                                </div>
+                            </div>`;
+                    } else {
+                        chatBox.innerHTML += `
+                            <div class="message ${isMe ? 'sent' : 'received'}">
+                                ${d.type === 'sticker' ? `<img src="${d.msg}" class="sticker-img">` : d.msg}
+                                <div class="msg-footer">
+                                    <span>${d.time}</span>
+                                    ${isMe ? `<i class="fas fa-check-double ${tickClass}"></i>` : ''}
+                                </div>
+                            </div>`;
+                    }
                 });
                 chatBox.scrollTop = chatBox.scrollHeight;
             });
@@ -211,9 +284,8 @@
 
         function handleAction() {
             const input = document.getElementById('messageInput');
-            const btn = document.getElementById('btnIcon');
-            if (btn.className.includes("fa-paper-plane")) {
-                const text = input.value.trim();
+            const text = input.value.trim();
+            if (text !== "") {
                 database.ref('messages/' + chatID).push({
                     sender: myUID,
                     msg: text,
@@ -229,41 +301,6 @@
             const input = document.getElementById('messageInput');
             const icon = document.getElementById('btnIcon');
             icon.className = input.value.trim().length > 0 ? "fas fa-paper-plane" : "fas fa-microphone";
-        }
-
-        function toggleStickers() {
-            const panel = document.getElementById('stickerPanel');
-            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-            if(panel.style.display === 'block') {
-                const grid = document.getElementById('stickerGrid');
-                grid.innerHTML = "";
-                const stickers = [
-                    'https://fonts.gstatic.com/s/e/notoemoji/latest/1f602/512.gif',
-                    'https://fonts.gstatic.com/s/e/notoemoji/latest/1f62d/512.gif',
-                    'https://fonts.gstatic.com/s/e/notoemoji/latest/1f60d/512.gif',
-                    'https://fonts.gstatic.com/s/e/notoemoji/latest/1f632/512.gif',
-                    'https://fonts.gstatic.com/s/e/notoemoji/latest/1f44b/512.gif',
-                    'https://fonts.gstatic.com/s/e/notoemoji/latest/1f525/512.gif'
-                ];
-                stickers.forEach(url => grid.innerHTML += `<img src="${url}" class="sticker-img" onclick="sendSticker('${url}')">`);
-            }
-        }
-
-        function sendSticker(url) {
-            database.ref('messages/' + chatID).push({
-                sender: myUID,
-                msg: url,
-                type: 'sticker',
-                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-            });
-            toggleStickers();
-        }
-
-        function toggleSidebar() {
-            const sb = document.getElementById('sidebar');
-            const ov = document.getElementById('overlay');
-            sb.classList.toggle('active');
-            ov.style.display = sb.classList.contains('active') ? 'block' : 'none';
         }
 
         document.addEventListener('DOMContentLoaded', startMessenger);
