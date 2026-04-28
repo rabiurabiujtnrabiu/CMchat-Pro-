@@ -18,9 +18,9 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #1e293b; padding-bottom: 80px; }
 
-        /* --- HEADER --- */
+        /* --- MODERN HEADER --- */
         .main-header {
-            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
             padding: 15px 20px; display: flex; justify-content: space-between; 
             align-items: center; position: sticky; top: 0; z-index: 1000;
             border-bottom: 1px solid #e2e8f0;
@@ -31,55 +31,59 @@
         #feedContainer { max-width: 600px; margin: 0 auto; padding: 12px; }
 
         .post-card {
-            background: white; border-radius: 20px; padding: 16px;
-            margin-bottom: 16px; border: 1px solid #f1f5f9;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            background: white; border-radius: 24px; padding: 16px;
+            margin-bottom: 18px; border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            animation: fadeIn 0.5s ease;
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         .user-meta { display: flex; align-items: center; gap: 12px; }
         .avatar { 
-            width: 45px; height: 45px; border-radius: 15px; 
+            width: 48px; height: 48px; border-radius: 16px; 
             background: var(--primary-gradient); color: white;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 18px;
+            font-weight: 800; font-size: 20px; box-shadow: 0 4px 10px rgba(0,98,255,0.2);
         }
-        .user-details b { font-size: 15px; color: #1e293b; }
-        .user-details small { font-size: 11px; color: #94a3b8; display: block; }
+        .user-details b { font-size: 15px; color: #1e293b; letter-spacing: -0.2px; }
+        .user-details small { font-size: 12px; color: #94a3b8; display: block; margin-top: 1px; }
 
-        .post-text { font-size: 15px; line-height: 1.6; color: #334155; margin-bottom: 12px; }
+        .post-text { font-size: 15px; line-height: 1.6; color: #334155; margin-bottom: 12px; white-space: pre-wrap; }
 
-        /* --- MEDIA DISPLAY --- */
-        .media-container { width: 100%; border-radius: 15px; overflow: hidden; background: #f8fafc; }
-        .post-img { width: 100%; height: auto; display: block; object-fit: cover; max-height: 500px; }
-        .post-video { width: 100%; border-radius: 15px; background: #000; outline: none; }
+        /* --- MEDIA DISPLAY (1-1-1 Layout) --- */
+        .media-stack { display: flex; flex-direction: column; gap: 12px; }
+        .media-container { width: 100%; border-radius: 18px; overflow: hidden; background: #f1f5f9; border: 1px solid #f1f5f9; }
+        .post-img { width: 100%; height: auto; display: block; object-fit: cover; max-height: 550px; }
+        .post-video { width: 100%; border-radius: 18px; background: #000; outline: none; display: block; }
 
         /* --- ACTIONS --- */
         .post-footer {
             display: flex; justify-content: space-between;
-            padding-top: 15px; margin-top: 10px; border-top: 1px solid #f1f5f9;
+            padding-top: 16px; margin-top: 12px; border-top: 1px solid #f8fafc;
         }
         .action-btn { 
-            display: flex; align-items: center; gap: 6px; 
-            color: #64748b; font-size: 13px; font-weight: 700; cursor: pointer;
-            transition: 0.2s;
+            display: flex; align-items: center; gap: 8px; 
+            color: #64748b; font-size: 14px; font-weight: 700; cursor: pointer;
+            transition: 0.2s; padding: 8px 12px; border-radius: 12px;
         }
-        .action-btn:active { transform: scale(0.9); }
-        .action-btn.liked { color: #ef4444; }
+        .action-btn:active { background: #f1f5f9; transform: scale(0.95); }
         .action-btn i { font-size: 18px; }
+        .like-active { color: #ef4444; }
 
-        .delete-icon { color: #cbd5e1; cursor: pointer; transition: 0.2s; }
-        .delete-icon:hover { color: #ef4444; }
+        .delete-icon { color: #cbd5e1; cursor: pointer; padding: 8px; transition: 0.2s; border-radius: 50%; }
+        .delete-icon:hover { color: #ef4444; background: #fef2f2; }
 
         /* --- FLOATING ADD BUTTON --- */
         .fab {
             position: fixed; bottom: 30px; right: 25px;
-            width: 55px; height: 55px; border-radius: 18px;
+            width: 60px; height: 60px; border-radius: 20px;
             background: var(--primary-gradient); color: white;
             display: flex; align-items: center; justify-content: center;
-            font-size: 22px; box-shadow: 0 8px 20px rgba(0, 98, 255, 0.3);
-            cursor: pointer; z-index: 100;
+            font-size: 24px; box-shadow: 0 10px 25px rgba(0, 98, 255, 0.4);
+            cursor: pointer; z-index: 100; transition: 0.3s;
         }
+        .fab:active { transform: rotate(90deg) scale(0.9); }
     </style>
 </head>
 <body>
@@ -100,7 +104,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
             projectId: "cmchat-pro"
@@ -108,42 +111,54 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 1. Live Feed Listener
+        // 1. Live Feed Listener (Babban Sirrin Live Update)
         db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
             const container = document.getElementById('feedContainer');
-            container.innerHTML = '';
+            
+            if (snapshot.empty) {
+                container.innerHTML = `<div style="text-align:center; margin-top:100px; color:#94a3b8;">
+                    <i class="fas fa-stream" style="font-size:40px; margin-bottom:10px;"></i>
+                    <p>No elite posts yet, Commander.</p>
+                </div>`;
+                return;
+            }
 
+            container.innerHTML = '';
             snapshot.forEach(doc => {
-                const post = doc.data();
-                const postId = doc.id;
-                renderPost(postId, post);
+                renderPost(doc.id, doc.data());
             });
+        }, error => {
+            console.error("Snapshot error:", error);
         });
 
         // 2. Render Post Function
         function renderPost(id, data) {
             const container = document.getElementById('feedContainer');
             
-            // Handle Media Rendering
+            // GYARA: Handle Base64 Media Rendering
             let mediaHtml = '';
             if (data.media && data.media.length > 0) {
+                mediaHtml = '<div class="media-stack">';
                 data.media.forEach(m => {
+                    // Muna amfani da m.data domin karanta asalin hoton daga Firestore
+                    const source = m.url || m.data; 
                     if (m.type === 'image') {
-                        mediaHtml += `<div class="media-container"><img src="${m.url || m.data}" class="post-img"></div>`;
+                        mediaHtml += `<div class="media-container"><img src="${source}" class="post-img" loading="lazy"></div>`;
                     } else if (m.type === 'video') {
-                        mediaHtml += `<div class="media-container"><video controls class="post-video"><source src="${m.url || m.data}"></video></div>`;
+                        mediaHtml += `<div class="media-container"><video controls class="post-video"><source src="${source}"></video></div>`;
                     }
                 });
+                mediaHtml += '</div>';
             }
 
             const postCard = `
-                <div class="post-card">
+                <div class="post-card" id="post-${id}">
                     <div class="post-header">
                         <div class="user-meta">
                             <div class="avatar">${(data.username || 'C')[0]}</div>
                             <div class="user-details">
                                 <b>${data.username || 'Commander CM'}</b>
-                                <small>${data.timestamp ? timeSince(data.timestamp.toDate()) : 'just now'}</small>
+                                <small>${data.timestamp ? timeSince(data.timestamp.toDate()) : 'publishing...'}</small>
                             </div>
                         </div>
                         <i class="fas fa-trash-alt delete-icon" onclick="deletePost('${id}')"></i>
@@ -156,10 +171,10 @@
                         <div class="action-btn" onclick="handleLike('${id}', ${data.likes || 0})">
                             <i class="far fa-heart"></i> <span>${data.likes || 0}</span>
                         </div>
-                        <div class="action-btn">
-                            <i class="far fa-comment"></i> <span>Comment</span>
+                        <div class="action-btn" onclick="Swal.fire('Coming Soon', 'Comments feature is under development.', 'info')">
+                            <i class="far fa-comment"></i> <span>${data.comments || 0}</span>
                         </div>
-                        <div class="action-btn" onclick="sharePost('${data.text}')">
+                        <div class="action-btn" onclick="sharePost('${data.text}', '${id}')">
                             <i class="far fa-paper-plane"></i>
                         </div>
                     </div>
@@ -171,48 +186,60 @@
         // 3. Live Actions
         async function handleLike(id, currentLikes) {
             try {
+                // Update Firestore live
                 await db.collection('posts').doc(id).update({
-                    likes: currentLikes + 1
+                    likes: (currentLikes || 0) + 1
                 });
             } catch (e) { console.error("Like failed", e); }
         }
 
         async function deletePost(id) {
-            Swal.fire({
-                title: 'Delete Post?',
-                text: "Commander, this will be removed forever!",
+            const result = await Swal.fire({
+                title: 'Delete Elite Post?',
+                text: "Commander, this action cannot be undone!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
-                confirmButtonText: 'Yes, delete it!'
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    await db.collection('posts').doc(id).delete();
-                    Swal.fire('Deleted!', '', 'success');
-                }
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
             });
+
+            if (result.isConfirmed) {
+                try {
+                    await db.collection('posts').doc(id).delete();
+                    Swal.fire({ icon: 'success', title: 'Deleted', timer: 1000, showConfirmButton: false });
+                } catch (err) {
+                    Swal.fire('Error', 'Failed to delete post.', 'error');
+                }
+            }
         }
 
-        function sharePost(text) {
+        function sharePost(text, id) {
+            const shareData = {
+                title: 'CMchat Pro',
+                text: text || 'Check out this post on CMchat Pro!',
+                url: window.location.href + '#post-' + id
+            };
             if (navigator.share) {
-                navigator.share({ title: 'CMchat Pro', text: text, url: window.location.href });
+                navigator.share(shareData);
             } else {
-                Swal.fire('Shared!', 'Link copied to clipboard.', 'info');
+                Swal.fire('Link Copied', 'Post link copied to clipboard!', 'success');
             }
         }
 
         function timeSince(date) {
             const seconds = Math.floor((new Date() - date) / 1000);
             let interval = seconds / 31536000;
-            if (interval > 1) return Math.floor(interval) + "y";
+            if (interval > 1) return Math.floor(interval) + "y ago";
             interval = seconds / 2592000;
-            if (interval > 1) return Math.floor(interval) + "m";
+            if (interval > 1) return Math.floor(interval) + "m ago";
             interval = seconds / 86400;
-            if (interval > 1) return Math.floor(interval) + "d";
+            if (interval > 1) return Math.floor(interval) + "d ago";
             interval = seconds / 3600;
-            if (interval > 1) return Math.floor(interval) + "h";
+            if (interval > 1) return Math.floor(interval) + "h ago";
             interval = seconds / 60;
-            if (interval > 1) return Math.floor(interval) + "min";
+            if (interval > 1) return Math.floor(interval) + "min ago";
             return "just now";
         }
     </script>
