@@ -16,7 +16,7 @@
             --bg: #f8fafc; 
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: #1e293b; height: 100vh; overflow: hidden; }
+        body { background: #ffffff; color: #1e293b; height: 100vh; overflow: hidden; }
 
         /* --- MODERN HEADER --- */
         .post-header {
@@ -39,31 +39,29 @@
         .privacy-badge { font-size: 11px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 6px; margin-top: 2px; display: inline-block; }
 
         /* --- CONTENT AREA --- */
-        .content-area { padding: 10px 20px; overflow-y: auto; height: calc(100vh - 200px); }
+        .content-area { padding: 10px 20px; overflow-y: auto; height: calc(100vh - 220px); }
         textarea {
             width: 100%; border: none; outline: none; font-size: 18px;
             min-height: 80px; resize: none; color: #334155; line-height: 1.6;
         }
 
-        /* --- MODERN MEDIA PREVIEW (GRID) --- */
-        .media-preview {
-            margin-top: 15px; display: none; 
-            grid-template-columns: repeat(3, 1fr); gap: 8px;
+        /* --- GRID PREVIEW --- */
+        #mediaPreview {
+            margin-top: 15px; display: grid; 
+            grid-template-columns: repeat(3, 1fr); gap: 10px;
         }
         .media-item-box {
             position: relative; aspect-ratio: 1/1; border-radius: 12px;
-            overflow: hidden; background: #f1f5f9; border: 1.5px solid var(--primary);
+            overflow: hidden; background: #f1f5f9; border: 2px solid #e2e8f0;
         }
         .media-item-box img, .media-item-box video { width: 100%; height: 100%; object-fit: cover; }
-        
-        .mark-selected { position: absolute; top: 5px; right: 5px; color: var(--primary); font-size: 16px; background: white; border-radius: 50%; z-index: 5; }
-        .remove-specific { position: absolute; top: 5px; left: 5px; color: #ef4444; background: white; border-radius: 50%; padding: 2px; cursor: pointer; z-index: 5; font-size: 14px; }
+        .remove-specific { position: absolute; top: 5px; left: 5px; color: #ef4444; background: white; border-radius: 50%; padding: 2px; cursor: pointer; z-index: 10; font-size: 14px; }
 
         /* --- BOTTOM TOOLS --- */
         .bottom-tools {
             position: fixed; bottom: 0; width: 100%;
             background: white; border-top: 1px solid #f1f5f9;
-            padding: 20px 20px 35px; border-radius: 30px 30px 0 0;
+            padding: 15px 20px 30px; border-radius: 25px 25px 0 0;
             box-shadow: 0 -10px 25px rgba(0,0,0,0.05);
         }
         .tool-grid { display: flex; justify-content: space-around; align-items: center; }
@@ -81,7 +79,7 @@
 
     <div class="progress-overlay" id="loadingOverlay">
         <div class="loader"></div>
-        <p style="margin-top: 15px; font-weight: 800; color: #1e293b; letter-spacing: 0.5px;" id="statusText">PUBLISHING POST...</p>
+        <p style="margin-top: 15px; font-weight: 800; color: #1e293b;">PUBLISHING POST...</p>
     </div>
 
     <div class="post-header">
@@ -100,8 +98,7 @@
 
     <div class="content-area">
         <textarea id="postInput" placeholder="What's on your elite mind, Commander?" oninput="validate()"></textarea>
-        <div id="mediaPreview" class="media-preview">
-            </div>
+        <div id="mediaPreview"></div>
     </div>
 
     <div class="bottom-tools">
@@ -109,12 +106,12 @@
             <label class="tool-item">
                 <div class="tool-icon" style="color: #45bd62;"><i class="fas fa-images"></i></div>
                 <span>Photo</span>
-                <input type="file" id="imageInput" hidden accept="image/*" multiple onchange="previewFiles(this, 'image')">
+                <input type="file" id="imageInput" hidden accept="image/*" multiple onchange="processMedia(this, 'image')">
             </label>
             <label class="tool-item">
                 <div class="tool-icon" style="color: #f02849;"><i class="fas fa-video"></i></div>
                 <span>Video</span>
-                <input type="file" id="videoInput" hidden accept="video/*" multiple onchange="previewFiles(this, 'video')">
+                <input type="file" id="videoInput" hidden accept="video/*" multiple onchange="processMedia(this, 'video')">
             </label>
             <div class="tool-item"><div class="tool-icon" style="color: #f59e0b;"><i class="fas fa-tags"></i></div><span>Tag</span></div>
             <div class="tool-item"><div class="tool-icon" style="color: #1877f2;"><i class="fas fa-location-dot"></i></div><span>Check-in</span></div>
@@ -123,18 +120,15 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
-            projectId: "cmchat-pro",
-            storageBucket: "cmchat-pro.appspot.com"
+            projectId: "cmchat-pro"
         };
         
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const storage = firebase.storage();
 
         let selectedMediaFiles = [];
 
@@ -144,33 +138,34 @@
             btn.disabled = !(text || selectedMediaFiles.length > 0);
         }
 
-        function previewFiles(input, type) {
+        function processMedia(input, type) {
             const files = Array.from(input.files);
             const preview = document.getElementById('mediaPreview');
-            preview.style.display = 'grid';
 
             files.forEach(file => {
-                const url = URL.createObjectURL(file);
-                selectedMediaFiles.push({ file, type });
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64Data = e.target.result;
+                    selectedMediaFiles.push({ data: base64Data, type: type });
 
-                const box = document.createElement('div');
-                box.className = 'media-item-box';
-                box.innerHTML = `
-                    <i class="fas fa-times-circle remove-specific" onclick="removeThis(this)"></i>
-                    <i class="fas fa-check-circle mark-selected"></i>
-                    ${type === 'image' ? `<img src="${url}">` : `<video src="${url}#t=0.1" muted></video>`}
-                `;
-                preview.appendChild(box);
+                    const box = document.createElement('div');
+                    box.className = 'media-item-box';
+                    box.innerHTML = `
+                        <i class="fas fa-times-circle remove-specific" onclick="removeMediaItem(this, '${base64Data}')"></i>
+                        ${type === 'image' ? `<img src="${base64Data}">` : `<video src="${base64Data}#t=0.1" muted></video>`}
+                    `;
+                    preview.appendChild(box);
+                    validate();
+                };
+                reader.readAsDataURL(file);
             });
-            validate();
+            input.value = '';
         }
 
-        function removeThis(btn) {
+        function removeMediaItem(btn, base64) {
             const box = btn.parentElement;
-            const index = Array.from(box.parentElement.children).indexOf(box);
-            selectedMediaFiles.splice(index, 1);
+            selectedMediaFiles = selectedMediaFiles.filter(item => item.data !== base64);
             box.remove();
-            if (selectedMediaFiles.length === 0) document.getElementById('mediaPreview').style.display = 'none';
             validate();
         }
 
@@ -183,33 +178,26 @@
             overlay.style.display = 'flex';
 
             try {
-                let mediaUrls = [];
-
-                for (let item of selectedMediaFiles) {
-                    const ref = storage.ref(`posts/${Date.now()}_${item.file.name}`);
-                    const upload = await ref.put(item.file);
-                    const url = await upload.ref.getDownloadURL();
-                    mediaUrls.push({ url, type: item.type });
-                }
-
+                // Ajiye a Firestore kai tsaye (Baya bukatar Storage)
                 await db.collection('posts').add({
                     text: text,
-                    media: mediaUrls,
-                    postImg: mediaUrls.length > 0 ? mediaUrls[0].url : "", // Fallback for old system
-                    type: mediaUrls.length > 0 ? mediaUrls[0].type : "text",
+                    media: selectedMediaFiles, // Wannan yana dauke da Base64 data
+                    postImg: selectedMediaFiles.length > 0 ? selectedMediaFiles[0].data : "",
+                    type: selectedMediaFiles.length > 0 ? selectedMediaFiles[0].type : "text",
                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                     username: "Commander CM",
                     likes: 0
                 });
 
                 overlay.style.display = 'none';
-                Swal.fire({ icon: 'success', title: 'Elite Share!', text: 'Your post is now live.', timer: 1500, showConfirmButton: false });
-                setTimeout(() => window.location.href = 'Dashboard.html', 1500);
+                await Swal.fire({ icon: 'success', title: 'Elite Published!', timer: 1500, showConfirmButton: false });
+                window.location.href = 'Dashboard.html';
 
             } catch (err) {
                 overlay.style.display = 'none';
-                Swal.fire({ icon: 'error', title: 'Upload Failed', text: 'Please check your connection.' });
                 btn.disabled = false;
+                console.error(err);
+                Swal.fire({ icon: 'error', title: 'Upload Failed', text: 'Check Firestore Rules.' });
             }
         }
     </script>
