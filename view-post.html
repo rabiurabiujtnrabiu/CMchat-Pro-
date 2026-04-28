@@ -7,153 +7,127 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
-        :root { 
-            --primary: #0062ff; 
-            --primary-gradient: linear-gradient(135deg, #0062ff, #00d2ff);
-            --bg: #f1f5f9; /* Kyautataccen background */
-        }
+        :root { --primary: #0062ff; --bg: #000000; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: #1e293b; padding-bottom: 80px; }
+        
+        body { background: var(--bg); color: #ffffff; overflow-x: hidden; }
 
-        /* --- MODERN HEADER --- */
+        /* --- HEADER --- */
         .main-header {
-            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px);
             padding: 15px 20px; display: flex; justify-content: space-between; 
             align-items: center; position: sticky; top: 0; z-index: 1000;
-            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            border-bottom: 0.5px solid #1e293b;
         }
-        .logo { font-size: 22px; font-weight: 800; color: var(--primary); letter-spacing: -1px; }
+        .header-actions { display: flex; gap: 20px; align-items: center; }
+        .upload-icon { color: var(--primary); font-size: 22px; cursor: pointer; }
 
-        /* --- FEED --- */
-        #feedContainer { max-width: 600px; margin: 0 auto; padding: 12px; }
+        #feedContainer { width: 100%; max-width: 600px; margin: 0 auto; }
 
+        /* --- POST CARD --- */
         .post-card {
-            background: white; border-radius: 24px; padding: 16px;
-            margin-bottom: 18px; border: 1px solid rgba(241, 245, 249, 0.5);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
-            animation: fadeIn 0.5s ease;
+            background: #000; width: 100% !important;
+            margin-bottom: 15px !important; border: none !important;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-        .user-meta { display: flex; align-items: center; gap: 12px; }
-        .avatar { 
-            width: 45px; height: 45px; border-radius: 14px; 
-            background: var(--primary-gradient); color: white;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 18px; box-shadow: 0 4px 10px rgba(0,98,255,0.2);
+        .post-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; }
+        .user-meta { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; }
+        .user-details b { font-size: 14px; color: #fff; }
+        .user-details small { font-size: 11px; color: #64748b; display: block; }
+
+        .post-text { font-size: 15px; padding: 0 15px 12px 15px; color: #f8fafc; line-height: 1.4; }
+
+        /* --- MEDIA GYARARRE (NO PLAY ICON) --- */
+        .media-stack { width: 100% !important; }
+        .media-container { width: 100% !important; background: #000 !important; position: relative; margin: 0 !important; padding: 0 !important; }
+        .post-img, .post-video { 
+            width: 100% !important; 
+            display: block !important; 
+            border-radius: 0 !important; 
+            border: none !important;
+            max-height: 85vh; 
+            object-fit: contain;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
-        .user-details b { font-size: 15px; color: #1e293b; letter-spacing: -0.2px; }
-        .user-details small { font-size: 11px; color: #94a3b8; display: block; margin-top: 1px; }
 
-        .post-text { font-size: 15px; line-height: 1.6; color: #334155; margin-bottom: 12px; white-space: pre-wrap; padding: 0 4px; }
+        /* CIRE PLAY BUTTON NA TSAKIYA A BROWSER */
+        video::-webkit-media-controls-start-playback-button { display: none !important; -webkit-appearance: none; }
+        video::-webkit-media-controls-panel { background-image: none !important; }
 
-        /* --- MEDIA DISPLAY (Cloudinary Optimized) --- */
-        .media-stack { display: flex; flex-direction: column; gap: 10px; }
-        .media-container { width: 100%; border-radius: 20px; overflow: hidden; background: #000; position: relative; }
-        .post-img { width: 100%; height: auto; display: block; object-fit: cover; max-height: 500px; border-radius: 20px; }
-        .post-video { width: 100%; border-radius: 20px; display: block; max-height: 500px; }
-
-        /* --- ACTIONS --- */
-        .post-footer {
-            display: flex; justify-content: space-around;
-            padding-top: 15px; margin-top: 10px; border-top: 1px solid #f1f5f9;
-        }
-        .action-btn { 
-            display: flex; align-items: center; gap: 8px; 
-            color: #64748b; font-size: 14px; font-weight: 700; cursor: pointer;
-            transition: 0.2s; padding: 8px 15px; border-radius: 12px;
-        }
-        .action-btn:active { background: #f1f5f9; transform: scale(0.9); }
-        .action-btn i { font-size: 19px; }
-        .like-active { color: #ef4444; }
-
-        .delete-icon { color: #cbd5e1; cursor: pointer; padding: 8px; transition: 0.2s; border-radius: 50%; }
-        .delete-icon:hover { color: #ef4444; background: #fef2f2; }
-
-        /* --- FLOATING ADD BUTTON --- */
-        .fab {
-            position: fixed; bottom: 30px; right: 25px;
-            width: 65px; height: 65px; border-radius: 22px;
-            background: var(--primary-gradient); color: white;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 26px; box-shadow: 0 15px 30px rgba(0, 98, 255, 0.4);
-            cursor: pointer; z-index: 100; transition: 0.3s;
-        }
-        .fab:hover { transform: scale(1.05); }
+        .post-footer { display: flex; justify-content: space-around; padding: 15px 0; border-bottom: 0.5px solid #1e293b; }
+        .action-btn { color: #94a3b8; font-size: 13px; display: flex; align-items: center; gap: 6px; font-weight: 600; }
+        .action-btn i { font-size: 20px; }
     </style>
 </head>
 <body>
 
     <header class="main-header">
-        <div class="logo">CMchat <span style="color:#1e293b">PRO</span></div>
-        <div style="font-size: 20px; color: #64748b;"><i class="fas fa-search"></i></div>
+        <div style="font-weight: 800; font-size: 22px; color: var(--primary); letter-spacing: -1px;">CMchat <span style="color:#fff">PRO</span></div>
+        <div class="header-actions">
+            <i class="fas fa-plus-square upload-icon" onclick="window.location.href='upload.html'"></i>
+            <i class="fas fa-search" style="color:#64748b; font-size: 20px;"></i>
+        </div>
     </header>
 
-    <div id="feedContainer">
-        </div>
-
-    <div class="fab" onclick="window.location.href='upload.html'">
-        <i class="fas fa-plus"></i>
-    </div>
+    <div id="feedContainer"></div>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY",
-            projectId: "cmchat-pro"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", projectId: "cmchat-pro" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 1. Live Feed Listener
+        // --- AUTO-STOP LOGIC (INTERSECTION OBSERVER) ---
+        const videoObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                // Idan videon ya fita daga screen da kashi 50%
+                if (!entry.isIntersecting || entry.intersectionRatio < 0.5) {
+                    const video = entry.target;
+                    if (video.tagName === 'VIDEO' && !video.paused) {
+                        video.pause();
+                        video.controls = false; // Boye controls idan ya tsaya
+                    }
+                }
+            });
+        }, { threshold: [0, 0.5] });
+
+        function observeVideos() {
+            document.querySelectorAll('.post-video').forEach(v => videoObserver.observe(v));
+        }
+
         db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
             const container = document.getElementById('feedContainer');
-            
-            if (snapshot.empty) {
-                container.innerHTML = `<div style="text-align:center; margin-top:100px; color:#94a3b8;">
-                    <i class="fas fa-stream" style="font-size:40px; margin-bottom:10px;"></i>
-                    <p>No elite posts yet, Commander.</p>
-                </div>`;
-                return;
-            }
-
             container.innerHTML = '';
-            snapshot.forEach(doc => {
-                renderPost(doc.id, doc.data());
-            });
-        }, error => {
-            console.error("Snapshot error:", error);
+            snapshot.forEach(doc => renderPost(doc.id, doc.data()));
+            observeVideos(); // Kunna observer bayan lodi
         });
 
-        // 2. Render Post Function (GYARARRE)
         function renderPost(id, data) {
             const container = document.getElementById('feedContainer');
-            
-            // GYARA NA GASKIYA: Media Rendering for Cloudinary
             let mediaHtml = '';
+
             if (data.media && data.media.length > 0) {
                 mediaHtml = '<div class="media-stack">';
                 data.media.forEach(m => {
-                    // Muna duba m.url kai tsaye domin Cloudinary ne
-                    const source = m.url; 
+                    const source = m.url;
                     if (m.type === 'image') {
-                        mediaHtml += `
-                            <div class="media-container">
-                                <img src="${source}" class="post-img" loading="lazy" 
-                                     onclick="window.open('${source}', '_blank')">
-                            </div>`;
+                        mediaHtml += `<div class="media-container"><img src="${source}" class="post-img"></div>`;
                     } else if (m.type === 'video') {
+                        const posterUrl = source.replace(/\.[^/.]+$/, ".jpg");
+                        // SMART CLICK: Play/Pause ba tare da middle icon ba
                         mediaHtml += `
                             <div class="media-container">
-                                <video controls class="post-video">
-                                    <source src="${source}">
-                                    Your browser does not support the video tag.
+                                <video class="post-video" 
+                                       poster="${posterUrl}" 
+                                       preload="metadata"
+                                       onclick="this.paused ? (this.play(), this.controls=true) : (this.pause(), this.controls=false)">
+                                    <source src="${source}" type="video/mp4">
                                 </video>
                             </div>`;
                     }
@@ -161,96 +135,34 @@
                 mediaHtml += '</div>';
             }
 
-            const postCard = `
-                <div class="post-card" id="post-${id}">
+            container.innerHTML += `
+                <div class="post-card">
                     <div class="post-header">
                         <div class="user-meta">
                             <div class="avatar">${(data.username || 'C')[0]}</div>
                             <div class="user-details">
                                 <b>${data.username || 'Commander CM'}</b>
-                                <small>${data.timestamp ? timeSince(data.timestamp.toDate()) : 'just now'}</small>
+                                <small>${data.timestamp ? timeSince(data.timestamp.toDate()) : 'now'}</small>
                             </div>
                         </div>
-                        <i class="fas fa-trash-alt delete-icon" onclick="deletePost('${id}')"></i>
+                        <i class="fas fa-ellipsis-v" style="color:#475569; font-size: 14px;"></i>
                     </div>
-
-                    <div class="post-text">${data.text || ''}</div>
+                    ${data.text ? `<div class="post-text">${data.text}</div>` : ''}
                     ${mediaHtml}
-
                     <div class="post-footer">
-                        <div class="action-btn" onclick="handleLike('${id}', ${data.likes || 0})">
-                            <i class="far fa-heart"></i> <span>${data.likes || 0}</span>
-                        </div>
-                        <div class="action-btn" onclick="Swal.fire('Coming Soon', 'Comments feature is under development.', 'info')">
-                            <i class="far fa-comment"></i> <span>${data.comments || 0}</span>
-                        </div>
-                        <div class="action-btn" onclick="sharePost('${data.text}', '${id}')">
-                            <i class="far fa-paper-plane"></i>
-                        </div>
+                        <div class="action-btn"><i class="far fa-heart"></i> ${data.likes || 0}</div>
+                        <div class="action-btn"><i class="far fa-comment"></i> ${data.comments || 0}</div>
+                        <div class="action-btn"><i class="far fa-paper-plane"></i></div>
                     </div>
-                </div>
-            `;
-            container.innerHTML += postCard;
-        }
-
-        // 3. Actions
-        async function handleLike(id, currentLikes) {
-            try {
-                await db.collection('posts').doc(id).update({
-                    likes: (currentLikes || 0) + 1
-                });
-            } catch (e) { console.error("Like failed", e); }
-        }
-
-        async function deletePost(id) {
-            const result = await Swal.fire({
-                title: 'Delete Elite Post?',
-                text: "Commander, this action cannot be undone!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#64748b',
-                confirmButtonText: 'Yes, Delete',
-                cancelButtonText: 'Cancel',
-                background: '#fff',
-                color: '#1e293b'
-            });
-
-            if (result.isConfirmed) {
-                try {
-                    await db.collection('posts').doc(id).delete();
-                    Swal.fire({ icon: 'success', title: 'Post Deleted', timer: 1000, showConfirmButton: false });
-                } catch (err) {
-                    Swal.fire('Error', 'Failed to delete post.', 'error');
-                }
-            }
-        }
-
-        function sharePost(text, id) {
-            if (navigator.share) {
-                navigator.share({
-                    title: 'CMchat Pro',
-                    text: text,
-                    url: window.location.href
-                });
-            } else {
-                Swal.fire('Share', 'Copy the URL to share this elite content!', 'info');
-            }
+                </div>`;
         }
 
         function timeSince(date) {
             const seconds = Math.floor((new Date() - date) / 1000);
-            let interval = seconds / 31536000;
-            if (interval > 1) return Math.floor(interval) + "y ago";
-            interval = seconds / 2592000;
-            if (interval > 1) return Math.floor(interval) + "m ago";
-            interval = seconds / 86400;
-            if (interval > 1) return Math.floor(interval) + "d ago";
-            interval = seconds / 3600;
-            if (interval > 1) return Math.floor(interval) + "h ago";
-            interval = seconds / 60;
-            if (interval > 1) return Math.floor(interval) + "min ago";
-            return "just now";
+            if (seconds < 60) return "just now";
+            if (seconds < 3600) return Math.floor(seconds/60) + "m ago";
+            if (seconds < 86400) return Math.floor(seconds/3600) + "h ago";
+            return Math.floor(seconds/86400) + "d ago";
         }
     </script>
 </body>

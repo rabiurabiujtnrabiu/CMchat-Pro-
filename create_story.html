@@ -5,97 +5,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Elite Story Lab | CMchat PRO</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
+    
     <style>
-        :root { --primary-gradient: linear-gradient(135deg, #0062ff, #00d2ff); }
+        :root { 
+            --primary: #0062ff;
+            --glass: rgba(0, 0, 0, 0.6);
+            --border: rgba(255, 255, 255, 0.15);
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: #000; height: 100vh; color: white; overflow: hidden; position: relative; touch-action: none; }
 
         /* Story Canvas */
         #storyPreview { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            object-fit: cover; z-index: 1; opacity: 0.5; transition: 0.4s ease;
+            object-fit: cover; z-index: 1; transition: 0.5s filter ease;
         }
 
-        /* Overlay Controls */
-        .story-header { position: relative; z-index: 20; padding: 25px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .back-icon { width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); cursor: pointer; }
-        .publish-btn { background: var(--primary-gradient); color: white; border: none; padding: 12px 28px; border-radius: 25px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 98, 255, 0.4); }
+        /* Top Bar */
+        .story-header { 
+            position: absolute; top: 0; width: 100%; z-index: 30; 
+            padding: 40px 20px 20px; display: flex; justify-content: space-between; align-items: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+        }
+        .header-btn { 
+            width: 42px; height: 42px; background: var(--glass); border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            backdrop-filter: blur(15px); border: 1px solid var(--border); color: white; cursor: pointer;
+        }
+        .publish-btn { 
+            background: #fff; color: #000; border: none; padding: 10px 24px; 
+            border-radius: 25px; font-weight: 800; font-size: 14px; cursor: pointer; 
+            box-shadow: 0 4px 15px rgba(255,255,255,0.2); 
+        }
 
-        /* MULTI-LINE CAPTION SYSTEM WITH DRAG SUPPORT */
+        /* --- ADVANCED DRAGGABLE CAPTION --- */
         #draggable-caption {
-            position: absolute; z-index: 15; top: 40%; left: 5%;
-            width: 90%; text-align: center;
-            touch-action: none; /* Crucial for Drag */
-            transition: transform 0.05s linear;
+            position: absolute; z-index: 20; top: 45%; left: 0;
+            width: 100%; text-align: center;
+            cursor: move; touch-action: none;
+            will-change: transform;
         }
         .caption-input {
             background: transparent; border: none; outline: none;
-            color: white; font-size: 28px; text-align: center;
-            font-weight: 900; text-shadow: 0 4px 15px rgba(0,0,0,0.8);
-            width: 100%; caret-color: #0062ff; resize: none;
-            overflow: hidden; word-wrap: break-word;
-            display: block;
+            color: white; font-size: 32px; text-align: center;
+            font-weight: 900; text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            width: 100%; padding: 10px; caret-color: var(--primary);
+            resize: none; overflow: hidden; display: block;
         }
 
-        /* EDITING TOOLS PANEL */
+        /* Editing Tools (Right Sidebar) */
         .edit-panel {
-            position: absolute; right: 15px; top: 100px; 
-            z-index: 20; display: flex; flex-direction: column; gap: 15px;
+            position: absolute; right: 15px; top: 120px; 
+            z-index: 30; display: flex; flex-direction: column; gap: 15px;
         }
-        .edit-tool { width: 45px; height: 45px; background: rgba(0,0,0,0.5); border-radius: 12px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
+        .tool-box { 
+            width: 48px; height: 48px; background: var(--glass); border-radius: 14px; 
+            display: flex; align-items: center; justify-content: center; 
+            backdrop-filter: blur(15px); border: 1px solid var(--border); cursor: pointer;
+            font-size: 18px; color: #fff; transition: 0.2s;
+        }
+        .tool-box:active { transform: scale(0.9); }
 
-        /* BOTTOM TOOLS */
-        .story-tools { 
-            position: absolute; bottom: 0; width: 100%; z-index: 20; 
-            padding: 30px 20px; display: flex; justify-content: space-around; 
-            background: linear-gradient(to top, rgba(0,0,0,1), transparent); 
+        /* Bottom Controls */
+        .story-footer { 
+            position: absolute; bottom: 0; width: 100%; z-index: 30; 
+            padding: 30px 20px 40px; display: flex; justify-content: space-around; 
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); 
         }
-        .tool-item { text-align: center; cursor: pointer; }
-        .tool-circle { width: 55px; height: 55px; background: rgba(255,255,255,0.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
-        .tool-item span { font-size: 10px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; }
+        .footer-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+        .footer-circle { 
+            width: 60px; height: 60px; background: #fff; color: #000;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 22px; box-shadow: 0 4px 15px rgba(255,255,255,0.2);
+        }
+        .footer-item span { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #fff; letter-spacing: 1px; }
+
+        /* Status Overlay */
+        #statusOverlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; backdrop-filter: blur(10px);
+        }
     </style>
 </head>
 <body>
 
-    <img id="storyPreview" src="https://via.placeholder.com/1080x1920/000/000?text=.">
+    <div id="statusOverlay">
+        <i class="fas fa-circle-notch fa-spin" style="font-size: 40px; color: var(--primary);"></i>
+        <p style="margin-top: 15px; font-weight: 700;">Sharing your story...</p>
+    </div>
+
+    <img id="storyPreview" src="https://via.placeholder.com/1080x1920/111/111?text=.">
 
     <div class="story-header">
-        <div class="back-icon" onclick="window.history.back()"><i class="fas fa-chevron-left"></i></div>
+        <div class="header-btn" onclick="window.history.back()"><i class="fas fa-times"></i></div>
         <button id="publishBtn" class="publish-btn">Share Story</button>
     </div>
 
     <div class="edit-panel">
-        <div class="edit-tool" onclick="applyFilter('none')"><i class="fas fa-undo"></i></div>
-        <div class="edit-tool" onclick="applyFilter('grayscale(100%)')"><i class="fas fa-moon"></i></div>
-        <div class="edit-tool" onclick="applyFilter('sepia(80%)')"><i class="fas fa-palette"></i></div>
-        <div class="edit-tool" onclick="applyFilter('brightness(1.5)')"><i class="fas fa-sun"></i></div>
+        <div class="tool-box" onclick="applyFilter('none')"><i class="fas fa-undo"></i></div>
+        <div class="tool-box" onclick="applyFilter('grayscale(1)')"><i class="fas fa-moon"></i></div>
+        <div class="tool-box" onclick="applyFilter('sepia(0.8)')"><i class="fas fa-palette"></i></div>
+        <div class="tool-box" onclick="applyFilter('contrast(1.5)')"><i class="fas fa-adjust"></i></div>
     </div>
 
     <div id="draggable-caption">
-        <textarea id="caption" class="caption-input" placeholder="Aa" rows="1" oninput="autoResize(this)"></textarea>
+        <textarea id="caption" class="caption-input" placeholder="Type here..." rows="1" oninput="autoResize(this)"></textarea>
     </div>
 
-    <div class="story-tools">
-        <label for="mediaInput" class="tool-item">
-            <div class="tool-circle"><i class="fas fa-images"></i></div>
-            <span>Gallery</span>
+    <div class="story-footer">
+        <label for="mediaInput" class="footer-item">
+            <div class="footer-circle" style="background: rgba(255,255,255,0.2); color: #fff; border: 1px solid var(--border);"><i class="fas fa-image"></i></div>
+            <span>Media</span>
         </label>
-        <div class="tool-item" onclick="changeTextColor()">
-            <div class="tool-circle"><i class="fas fa-fill-drip"></i></div>
+        <div class="footer-item" onclick="changeTextColor()">
+            <div class="footer-circle"><i class="fas fa-font"></i></div>
             <span>Color</span>
         </div>
-        <div class="tool-item" onclick="location.reload()">
-            <div class="tool-circle"><i class="fas fa-sync-alt"></i></div>
+        <div class="footer-item" onclick="location.reload()">
+            <div class="footer-circle" style="background: rgba(255,30,30,0.2); color: #ff3b30; border: 1px solid rgba(255,30,30,0.3);"><i class="fas fa-trash-alt"></i></div>
             <span>Reset</span>
         </div>
     </div>
 
     <input type="file" id="mediaInput" hidden accept="image/*">
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", projectId: "cmchat-pro" };
@@ -110,68 +148,55 @@
 
         let compressedImageBase64 = "";
 
-        // AUTO RESIZE TEXTAREA
         function autoResize(el) {
             el.style.height = 'auto';
             el.style.height = el.scrollHeight + 'px';
         }
 
-        // --- ELITE DRAG ENGINE ---
-        let active = false;
-        let currentY;
-        let initialY;
-        let yOffset = 0;
+        // --- ELITE 2D DRAG ENGINE (X & Y) ---
+        let isDragging = false;
+        let startX, startY;
+        let xOffset = 0, yOffset = 0;
 
-        document.addEventListener("touchstart", dragStart, false);
-        document.addEventListener("touchend", dragEnd, false);
-        document.addEventListener("touchmove", drag, false);
+        dragBox.addEventListener("touchstart", dragStart);
+        document.addEventListener("touchend", dragEnd);
+        document.addEventListener("touchmove", drag);
 
         function dragStart(e) {
-            if (e.target === captionArea) {
-                // If typing, don't drag
-                if (document.activeElement === captionArea) return;
-                
-                initialY = e.touches[0].clientY - yOffset;
-                active = true;
-            }
+            if (document.activeElement === captionArea) return;
+            isDragging = true;
+            startX = e.touches[0].clientX - xOffset;
+            startY = e.touches[0].clientY - yOffset;
         }
 
-        function dragEnd(e) {
-            initialY = currentY;
-            active = false;
-        }
+        function dragEnd() { isDragging = false; }
 
         function drag(e) {
-            if (active) {
+            if (isDragging) {
                 e.preventDefault();
-                currentY = e.touches[0].clientY - initialY;
-                yOffset = currentY;
-                setTranslate(currentY, dragBox);
+                xOffset = e.touches[0].clientX - startX;
+                yOffset = e.touches[0].clientY - startY;
+                dragBox.style.transform = `translate3d(${xOffset}px, ${yOffset}px, 0)`;
             }
         }
 
-        function setTranslate(yPos, el) {
-            el.style.transform = "translate3d(0, " + yPos + "px, 0)";
-        }
+        // Filter Logic
+        function applyFilter(f) { storyPreview.style.filter = f; }
 
-        // FILTER SYSTEM
-        function applyFilter(filterValue) {
-            storyPreview.style.filter = filterValue;
-        }
-
-        // COLOR SYSTEM
-        const colors = ['#ffffff', '#0062ff', '#ff3b30', '#4cd964', '#ffcc00', '#ff2d55', '#000000'];
-        let colorIdx = 0;
+        // Color Logic
+        const colors = ['#ffffff', '#0062ff', '#ff3b30', '#4cd964', '#ffcc00', '#ff2d55', '#000000', '#a259ff'];
+        let cIdx = 0;
         function changeTextColor() {
-            colorIdx = (colorIdx + 1) % colors.length;
-            captionArea.style.color = colors[colorIdx];
+            cIdx = (cIdx + 1) % colors.length;
+            captionArea.style.color = colors[cIdx];
         }
 
+        // Media Handling
         mediaInput.onchange = e => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (event) => {
+                reader.onload = event => {
                     const img = new Image();
                     img.src = event.target.result;
                     img.onload = () => {
@@ -180,9 +205,8 @@
                         canvas.width = 1080;
                         canvas.height = (img.height * 1080) / img.width;
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        compressedImageBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                        compressedImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
                         storyPreview.src = compressedImageBase64;
-                        storyPreview.style.opacity = "1";
                     }
                 }
                 reader.readAsDataURL(file);
@@ -190,15 +214,16 @@
         };
 
         publishBtn.onclick = () => {
-            if(!compressedImageBase64) return;
-            publishBtn.innerText = "Sharing...";
-            publishBtn.disabled = true;
+            if(!compressedImageBase64) return alert("Select media first!");
+            document.getElementById('statusOverlay').style.display = 'flex';
 
             db.collection('stories').add({
                 imageUrl: compressedImageBase64,
                 caption: captionArea.value,
                 textColor: captionArea.style.color || '#ffffff',
-                yPos: yOffset, // Save drag position
+                xPos: xOffset,
+                yPos: yOffset,
+                filter: storyPreview.style.filter || 'none',
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                 owner: localStorage.getItem('username') || "Elite Member"
             }).then(() => window.history.back());

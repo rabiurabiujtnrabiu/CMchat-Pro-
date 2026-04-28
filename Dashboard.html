@@ -46,55 +46,38 @@
         .story-item { flex-shrink: 0; width: 70px; text-align: center; }
         .story-ring { width: 68px; height: 68px; border-radius: 50%; padding: 2.5px; background: var(--primary-gradient); margin-bottom: 5px; cursor: pointer; }
         .story-img { width: 100%; height: 100%; border-radius: 50%; border: 2.5px solid white; background-size: cover; background-position: center; background-color: #f1f5f9; }
-        .add-story-inner { background: #f1f5f9; border-radius: 50%; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
         .story-name { font-size: 10px; font-weight: 600; color: #64748b; display: block; overflow: hidden; text-overflow: ellipsis; }
 
         .card { background: var(--white); border-radius: 20px; padding: 18px; margin-bottom: 12px; box-shadow: var(--shadow); }
-        .post-media { width: 100%; border-radius: 12px; margin-top: 12px; max-height: 450px; object-fit: cover; cursor: pointer; }
+        .post-media { width: 100%; border-radius: 12px; margin-top: 12px; max-height: 450px; object-fit: cover; cursor: pointer; display: block; outline: none; -webkit-tap-highlight-color: transparent; }
+        
+        video::-webkit-media-controls-start-playback-button { display: none !important; -webkit-appearance: none; }
+        video::-webkit-media-controls-panel { background-image: none !important; }
+
         .post-footer { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
         .post-action { display: flex; align-items: center; gap: 5px; color: #64748b; font-size: 13px; font-weight: 600; cursor: pointer; }
-
-        .skeleton { background: #e2e8f0; position: relative; overflow: hidden; }
-        .skeleton::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: loading 1.5s infinite; }
-        @keyframes loading { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-
-        #scrollTopBtn { position: fixed; bottom: 85px; right: 20px; width: 45px; height: 45px; background: var(--primary); color: #fff; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 5px 15px rgba(0,98,255,0.4); z-index: 2500; cursor: pointer; border: none; transition: 0.3s; }
 
         .bottom-nav { position: fixed; bottom: 20px; left: 15px; right: 15px; background: #1e293b; display: flex; justify-content: space-around; padding: 12px 0; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 2000; }
         .nav-item { color: #94a3b8; font-size: 18px; text-decoration: none; display: flex; flex-direction: column; align-items: center; }
         .nav-item.active { color: #38bdf8; }
-
-        .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: white; z-index: 3000; transition: 0.3s; padding: 30px 20px; }
-        .sidebar.active { left: 0; box-shadow: 10px 0 30px rgba(0,0,0,0.1); }
-        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 2500; display: none; backdrop-filter: blur(4px); }
+        #scrollTopBtn { position: fixed; bottom: 85px; right: 20px; width: 45px; height: 45px; background: var(--primary); color: #fff; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 5px 15px rgba(0,98,255,0.4); z-index: 2500; cursor: pointer; border: none; }
     </style>
 </head>
 <body>
 
     <button id="scrollTopBtn" onclick="scrollToTop()"><i class="fas fa-chevron-up"></i></button>
 
-    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
-    <div class="sidebar" id="sidebar">
-        <h2 style="color:var(--primary); margin-bottom:20px;">Elite Menu</h2>
-        <div style="display:flex; flex-direction:column; gap:22px;">
-            <a href="Profile.html" style="text-decoration:none; color:#1e293b; font-weight:700;"><i class="fas fa-user-circle" style="margin-right:12px;"></i> Profile</a>
-            <a href="Wallet.html" style="text-decoration:none; color:#1e293b; font-weight:700;"><i class="fas fa-wallet" style="margin-right:12px;"></i> Wallet</a>
-            <a href="Settings.html" style="text-decoration:none; color:#1e293b; font-weight:700;"><i class="fas fa-cog" style="margin-right:12px;"></i> Settings</a>
-            <hr>
-            <a href="logout.html" style="text-decoration:none; color:red; font-weight:700;"><i class="fas fa-sign-out-alt" style="margin-right:12px;"></i> Logout</a>
-        </div>
-    </div>
-
     <header class="fb-header">
         <div class="header-top">
-            <div class="icon-circle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
+            <div class="icon-circle"><i class="fas fa-bars"></i></div>
             <div class="logo">CMchat PRO</div>
             <div class="header-icons">
                 <a href="Shopping.html" class="icon-circle"><i class="fas fa-shopping-bag"></i></a>
                 <a href="Friends.html" class="icon-circle"><i class="fas fa-search"></i></a>
                 <a href="Chatting.html" class="icon-circle">
                     <i class="fab fa-facebook-messenger"></i>
-                    <span class="badge-dot"></span> </a>
+                    <span class="badge-dot"></span> 
+                </a>
                 <div id="userBalance" class="balance-badge" onclick="location.href='Wallet.html'">₦0.00</div>
             </div>
         </div>
@@ -115,21 +98,13 @@
     <div class="stories-wrapper" id="storiesContainer">
         <div class="story-item">
             <a href="create_story.html" style="text-decoration: none;">
-                <div class="story-ring" style="background: #e2e8f0;"><div class="add-story-inner"><i class="fas fa-plus" style="color:var(--primary)"></i></div></div>
+                <div class="story-ring" style="background: #e2e8f0;"><div style="background:#f1f5f9;border-radius:50%;width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-plus" style="color:var(--primary)"></i></div></div>
                 <span class="story-name">Add Story</span>
             </a>
         </div>
     </div>
 
-    <div class="container" id="feedContainer">
-        <div class="card skeleton-ui">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-                <div class="skeleton" style="width:40px;height:40px;border-radius:50%"></div>
-                <div class="skeleton" style="width:100px;height:15px;border-radius:5px"></div>
-            </div>
-            <div class="skeleton" style="width:100%;height:100px;border-radius:10px"></div>
-        </div>
-    </div>
+    <div class="container" id="feedContainer"></div>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item active"><i class="fas fa-home"></i></a>
@@ -140,31 +115,13 @@
     </nav>
 
     <script>
-        function toggleSidebar() {
-            const sb = document.getElementById('sidebar');
-            const ov = document.getElementById('overlay');
-            sb.classList.toggle('active');
-            ov.style.display = sb.classList.contains('active') ? 'block' : 'none';
-        }
-
-        window.onscroll = function() {
-            let btn = document.getElementById("scrollTopBtn");
-            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-                btn.style.display = "flex";
-            } else {
-                btn.style.display = "none";
-            }
-        };
-
-        function scrollToTop() {
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        }
-
         const firebaseConfig = { apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", projectId: "cmchat-pro" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- NEW MODULAR FUNCTIONS ---
+        function scrollToTop() { window.scrollTo({top: 0, behavior: 'smooth'}); }
+
+        // --- STORY LOGIC GYARARRE (Commander CM Fix) ---
         let allStories = [];
 
         function openStoryPage(index) {
@@ -173,36 +130,47 @@
             window.location.href = 'view-story.html';
         }
 
-        function openFullPost(data) {
-            localStorage.setItem('current_view_post', JSON.stringify(data));
-            window.location.href = 'view-post.html';
-        }
-
-        // Story Logic (24h)
         const expiry24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
         db.collection('stories').where('timestamp', '>', expiry24h).orderBy('timestamp', 'desc').onSnapshot(snap => {
             const container = document.getElementById('storiesContainer');
             const addBtn = container.firstElementChild;
-            container.innerHTML = ''; container.appendChild(addBtn);
+            container.innerHTML = ''; 
+            container.appendChild(addBtn);
             
-            allStories = []; // Clear and refill
-            let index = 0;
+            allStories = []; 
+            let storyIndex = 0; // Wannan zai lissafa kowane story daidai
             
             snap.forEach(doc => {
                 const s = doc.data();
                 allStories.push(s);
                 container.innerHTML += `
-                    <div class="story-item" onclick="openStoryPage(${index})">
+                    <div class="story-item" onclick="openStoryPage(${storyIndex})">
                         <div class="story-ring">
                             <div class="story-img" style="background-image:url('${s.imageUrl}')"></div>
                         </div>
                         <span class="story-name">${s.owner || 'Elite'}</span>
                     </div>`;
-                index++;
+                storyIndex++; // Karawa kowane story lamba ta daban
             });
         });
 
-        // Feed Logic (48h)
+        // AUTO-STOP ON SCROLL
+        const videoObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting || entry.intersectionRatio < 0.5) {
+                    const v = entry.target;
+                    if (v.tagName === 'VIDEO' && !v.paused) v.pause();
+                }
+            });
+        }, { threshold: [0, 0.5] });
+
+        function observeVideos() {
+            document.querySelectorAll('.post-media').forEach(v => {
+                if (v.tagName === 'VIDEO') videoObserver.observe(v);
+            });
+        }
+
+        // Feed Logic
         const expiry48h = new Date(Date.now() - 48 * 60 * 60 * 1000);
         db.collection('posts').where('timestamp', '>', expiry48h).orderBy('timestamp', 'desc').onSnapshot(snap => {
             const feed = document.getElementById('feedContainer');
@@ -211,12 +179,20 @@
                 const p = doc.data();
                 const time = p.timestamp ? new Date(p.timestamp.toDate()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'Now';
                 
-                const postData = JSON.stringify({
-                    url: p.postImg,
-                    author: p.username || 'Elite Member',
-                    caption: p.text || '',
-                    type: p.postImg && (p.postImg.includes('video') || p.postImg.includes('.mp4')) ? 'video' : 'image'
-                }).replace(/'/g, "\\'");
+                let mediaHtml = '';
+                if (p.media && p.media.length > 0) {
+                    const m = p.media[0];
+                    if (m.type === 'image') {
+                        mediaHtml = `<img src="${m.url}" class="post-media" onclick='openFullPost(${JSON.stringify({url: m.url, author: p.username, caption: p.text, type: "image"}).replace(/'/g, "\\'")})'>`;
+                    } else if (m.type === 'video') {
+                        const posterUrl = m.url.replace(/\.[^/.]+$/, ".jpg");
+                        mediaHtml = `
+                            <video class="post-media" poster="${posterUrl}" preload="metadata" 
+                                   onclick="this.paused ? (this.play(), this.controls=true) : (this.pause(), this.controls=false)">
+                                <source src="${m.url}" type="video/mp4">
+                            </video>`;
+                    }
+                }
 
                 feed.innerHTML += `
                     <div class="card">
@@ -225,7 +201,7 @@
                             <div><h4 style="font-size:14px;font-weight:700">${p.username || 'Elite Member'}</h4><p style="font-size:11px;color:#94a3b8">${time}</p></div>
                         </div>
                         <p style="font-size:14px;color:#334155;line-height:1.6">${p.text || ''}</p>
-                        ${p.postImg ? `<img src="${p.postImg}" class="post-media" onclick='openFullPost(${postData})'>` : ''}
+                        ${mediaHtml}
                         <div class="post-footer">
                             <div class="post-action"><i class="far fa-heart"></i> Like</div>
                             <div class="post-action"><i class="far fa-comment"></i> Comment</div>
@@ -233,7 +209,13 @@
                         </div>
                     </div>`;
             });
+            observeVideos();
         });
+
+        function openFullPost(data) {
+            localStorage.setItem('current_view_post', JSON.stringify(data));
+            window.location.href = 'view-post.html';
+        }
     </script>
 </body>
 </html>
