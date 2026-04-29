@@ -20,69 +20,71 @@
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-dark); height: 100vh; display: flex; flex-direction: column; color: var(--text-main); overflow: hidden; }
+        
+        /* GYARAN SCREEN SIZE (RESPONSIVE) */
+        body { 
+            background-color: var(--bg-dark); 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            color: var(--text-main); 
+            overflow: hidden; 
+            position: fixed; 
+            width: 100%;
+        }
 
         /* --- HEADER --- */
-        .chat-header { background: var(--header-dark); padding: 10px 15px; display: flex; align-items: center; height: 65px; z-index: 1000; position: sticky; top: 0; }
-        .header-left { display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer; }
-        .user-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; background: #3b4a54; border: 1px solid rgba(255,255,255,0.1); }
-        .user-meta b { font-size: 16px; color: var(--text-main); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
-        .status-text { font-size: 11px; color: var(--text-dim); }
-        .status-text.online { color: var(--primary); }
-        .header-tools { display: flex; gap: 22px; color: var(--text-dim); font-size: 19px; padding-right: 5px; }
+        .chat-header { background: var(--header-dark); padding: 10px 15px; display: flex; align-items: center; height: 60px; z-index: 1000; flex-shrink: 0; }
+        .header-left { display: flex; align-items: center; gap: 12px; flex: 1; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #3b4a54; border: 1px solid rgba(255,255,255,0.1); }
+        .user-meta b { font-size: 15px; color: var(--text-main); display: block; }
+        .status-text { font-size: 11px; color: var(--primary); }
 
         /* --- CHAT AREA --- */
         .chat-container { 
-            flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;
+            flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-blend-mode: overlay; background-size: 400px; scroll-behavior: smooth;
+            background-blend-mode: overlay; background-size: 400px;
         }
 
-        .message { max-width: 85%; padding: 6px 10px 4px; border-radius: 12px; font-size: 14.5px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+        .message { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 14.5px; position: relative; line-height: 1.4; }
         .received { background: var(--received-bubble); align-self: flex-start; border-top-left-radius: 0; }
         .sent { background: var(--sent-bubble); align-self: flex-end; border-top-right-radius: 0; }
 
-        /* --- VOICE PLAYER UI --- */
-        .voice-wrapper { display: flex; align-items: center; gap: 10px; min-width: 200px; padding: 4px 0; }
-        .voice-avatar-box { position: relative; width: 35px; height: 35px; }
+        /* --- VOICE UI --- */
+        .voice-wrapper { display: flex; align-items: center; gap: 10px; min-width: 200px; padding: 5px 0; }
+        .voice-avatar-box { width: 35px; height: 35px; position: relative; }
         .voice-avatar { width: 100%; height: 100%; border-radius: 50%; background: #3b4a54; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; color: white; }
-        .mic-badge { position: absolute; bottom: -1px; right: -1px; font-size: 9px; color: var(--primary); background: var(--header-dark); border-radius: 50%; padding: 2px; }
-
         .play-btn { font-size: 22px; color: var(--text-dim); cursor: pointer; }
         .sent .play-btn { color: white; }
-        
-        .waveform-lite { flex: 1; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; position: relative; }
-        .waveform-lite::after { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 30%; background: var(--primary); border-radius: 2px; }
+        .waveform-lite { flex: 1; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; }
 
-        .msg-footer { display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; color: var(--text-dim); margin-top: 2px; }
-        .sent .msg-footer i { color: #53bdeb; }
+        .msg-footer { display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; color: var(--text-dim); margin-top: 4px; }
 
         /* --- INPUT BAR --- */
-        .input-area { background: var(--header-dark); padding: 10px 12px; display: flex; align-items: center; gap: 8px; position: relative; }
-        
-        .recording-hud { display: none; align-items: center; gap: 12px; flex: 1; color: #ff3b30; font-weight: 800; font-size: 14px; }
-        .rec-dot { width: 10px; height: 10px; background: #ff3b30; border-radius: 50%; animation: blink 0.8s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-        .input-wrapper { flex: 1; background: #2a3942; border-radius: 25px; padding: 0 12px; display: flex; align-items: center; height: 45px; gap: 12px; }
+        .input-area { background: var(--header-dark); padding: 10px 12px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; min-height: 60px; }
+        .input-wrapper { flex: 1; background: #2a3942; border-radius: 25px; padding: 0 12px; display: flex; align-items: center; height: 45px; gap: 10px; }
         #messageInput { border: none; background: transparent; outline: none; flex: 1; color: var(--text-main); font-size: 16px; }
         
-        .action-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); border: none; color: white; cursor: pointer; font-size: 19px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .recording-active { transform: scale(1.3); background: #ff3b30 !important; }
+        .action-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); border: none; color: white; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+        .recording-active { background: #ff3b30 !important; transform: scale(1.1); animation: blink 1s infinite; }
+        
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        .recording-hud { display: none; color: #ff3b30; font-weight: 700; flex: 1; align-items: center; gap: 10px; }
     </style>
 </head>
 <body>
 
     <header class="chat-header">
-        <div class="header-left">
-            <i class="fas fa-arrow-left" onclick="history.back()"></i>
+        <div class="header-left" onclick="history.back()">
+            <i class="fas fa-arrow-left"></i>
             <img src="https://via.placeholder.com/100" class="user-avatar" id="chatAvatar">
             <div class="user-meta">
                 <b id="chatWith">Elite Member</b> 
-                <div class="status-text" id="statusText">online</div>
+                <div class="status-text">online</div>
             </div>
         </div>
-        <div class="header-tools">
+        <div style="color:var(--text-dim); display:flex; gap:20px; font-size:18px;">
             <i class="fas fa-video"></i>
             <i class="fas fa-phone-alt"></i>
             <i class="fas fa-ellipsis-v"></i>
@@ -94,7 +96,8 @@
     <div class="input-area">
         <i class="far fa-laugh" style="color:var(--text-dim); font-size:22px;"></i>
         <div id="recHUD" class="recording-hud">
-            <div class="rec-dot"></div> <span id="recTimer">00:00</span>
+            <div style="width:10px; height:10px; background:#ff3b30; border-radius:50%;"></div>
+            <span id="recTimer">00:00</span>
         </div>
         <div class="input-wrapper" id="inputWrap">
             <input type="text" id="messageInput" placeholder="Message" oninput="checkInput()">
@@ -111,7 +114,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // --- FIREBASE INIT ---
         const firebaseConfig = { databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
@@ -120,84 +122,74 @@
         const partnerUID = new URLSearchParams(window.location.search).get('uid') || "USER_2";
         const chatID = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
 
-        // UI Selectors
         const msgInput = document.getElementById('messageInput');
-        const btnIcon = document.getElementById('btnIcon');
         const micBtn = document.getElementById('micBtn');
+        const btnIcon = document.getElementById('btnIcon');
         const hud = document.getElementById('recHUD');
         const inputWrap = document.getElementById('inputWrap');
 
         // --- VOICE ENGINE ---
         let mediaRecorder;
         let audioChunks = [];
+        let timerInt;
 
-        const VoiceEngine = {
-            async start() {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
-                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                    mediaRecorder.start();
-                } catch(e) { alert("Mic Permission Denied"); }
-            },
-            async stop() {
-                if(!mediaRecorder || mediaRecorder.state === "inactive") return;
-                mediaRecorder.stop();
-                mediaRecorder.onstop = async () => {
-                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
-                    mediaRecorder.stream.getTracks().forEach(t => t.stop());
-                    if(blob.size > 1000) this.upload(blob);
-                };
-            },
-            async upload(blob) {
-                const fd = new FormData();
-                fd.append('file', blob);
-                fd.append('upload_preset', "cmchat_pro");
-                fd.append('resource_type', 'video');
-
-                const res = await fetch(`https://api.cloudinary.com/v1_1/dyfyhzp3o/upload`, { method: 'POST', body: fd });
-                const data = await res.json();
-                if(data.secure_url) {
-                    database.ref('messages/' + chatID).push({
-                        sender: myUID,
-                        url: data.secure_url,
-                        duration: Math.floor(data.duration) + "s",
-                        type: 'voice',
-                        time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
-                        timestamp: Date.now()
-                    });
-                }
-            }
-        };
-
-        // --- UI HANDLERS ---
-        function startVoice() {
+        async function startVoice() {
             if(msgInput.value.trim().length > 0) return;
-            hud.style.display = 'flex';
-            inputWrap.style.display = 'none';
-            micBtn.classList.add('recording-active');
-            VoiceEngine.start();
-            
-            let sec = 0;
-            window.vTimer = setInterval(() => {
-                sec++;
-                let m = Math.floor(sec/60), s = sec%60;
-                document.getElementById('recTimer').innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
-            }, 1000);
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.start();
+                
+                hud.style.display = 'flex';
+                inputWrap.style.display = 'none';
+                micBtn.classList.add('recording-active');
+                
+                let sec = 0;
+                timerInt = setInterval(() => {
+                    sec++;
+                    let m = Math.floor(sec/60), s = sec%60;
+                    document.getElementById('recTimer').innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+                }, 1000);
+            } catch(e) { alert("Izinin Mic ya gaza!"); }
         }
 
-        function stopVoice() {
-            if(hud.style.display === 'none') {
+        async function stopVoice() {
+            if(!mediaRecorder || mediaRecorder.state === "inactive") {
                 if(msgInput.value.trim().length > 0) sendMessage();
                 return;
             }
-            clearInterval(window.vTimer);
+            clearInterval(timerInt);
+            mediaRecorder.stop();
             hud.style.display = 'none';
             inputWrap.style.display = 'flex';
             micBtn.classList.remove('recording-active');
-            document.getElementById('recTimer').innerText = "00:00";
-            VoiceEngine.stop();
+            
+            mediaRecorder.onstop = async () => {
+                const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                mediaRecorder.stream.getTracks().forEach(t => t.stop());
+                if(blob.size > 1000) uploadVoice(blob);
+            };
+        }
+
+        async function uploadVoice(blob) {
+            const fd = new FormData();
+            fd.append('file', blob);
+            fd.append('upload_preset', "cmchat_pro");
+            fd.append('resource_type', 'video');
+
+            const res = await fetch(`https://api.cloudinary.com/v1_1/dyfyhzp3o/upload`, { method: 'POST', body: fd });
+            const data = await res.json();
+            if(data.secure_url) {
+                database.ref('messages/' + chatID).push({
+                    sender: myUID,
+                    url: data.secure_url,
+                    type: 'voice',
+                    time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+                    timestamp: Date.now()
+                });
+            }
         }
 
         function sendMessage() {
@@ -217,7 +209,7 @@
             btnIcon.className = msgInput.value.trim().length > 0 ? "fas fa-paper-plane" : "fas fa-microphone";
         }
 
-        // --- RENDER & SYNC ---
+        // --- LIVE SYNC ---
         database.ref('messages/' + chatID).on('value', snap => {
             const box = document.getElementById('chatBox');
             box.innerHTML = "";
@@ -229,37 +221,24 @@
                         <div class="message ${isMe ? 'sent' : 'received'}">
                             <div class="voice-wrapper">
                                 <div class="voice-avatar-box">
-                                    <div class="voice-avatar">${isMe ? 'Me' : 'H'}</div>
+                                    <div class="voice-avatar">${isMe?'Me':'H'}</div>
                                     <i class="fas fa-microphone mic-badge"></i>
                                 </div>
-                                <i class="fas fa-play play-btn" onclick="playA('${d.url}', this)"></i>
+                                <i class="fas fa-play play-btn" onclick="new Audio('${d.url}').play()"></i>
                                 <div class="waveform-lite"></div>
                             </div>
-                            <div class="msg-footer">
-                                <span>${d.duration || ''} • ${d.time}</span>
-                                ${isMe ? '<i class="fas fa-check-double"></i>' : ''}
-                            </div>
+                            <div class="msg-footer"><span>${d.time}</span></div>
                         </div>`;
                 } else {
                     box.innerHTML += `
                         <div class="message ${isMe ? 'sent' : 'received'}">
                             ${d.msg}
-                            <div class="msg-footer">
-                                <span>${d.time}</span>
-                                ${isMe ? '<i class="fas fa-check-double"></i>' : ''}
-                            </div>
+                            <div class="msg-footer"><span>${d.time}</span></div>
                         </div>`;
                 }
             });
             box.scrollTop = box.scrollHeight;
         });
-
-        function playA(u, b) {
-            const a = new Audio(u);
-            b.className = "fas fa-pause play-btn";
-            a.play();
-            a.onended = () => b.className = "fas fa-play play-btn";
-        }
 
         // Partner Info
         database.ref('users/' + partnerUID).once('value', s => {
