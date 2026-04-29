@@ -12,7 +12,7 @@
     <style>
         :root { --primary: #0062ff; --bg: #0f172a; --card: #1e293b; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: white; height: 100vh; overflow: hidden; transition: opacity 0.4s ease, transform 0.4s ease; }
+        body { background: var(--bg); color: white; height: 100vh; overflow: hidden; transition: opacity 0.3s ease, transform 0.4s ease; }
 
         .header { display: flex; justify-content: space-between; padding: 15px 20px; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); background: var(--bg); position: sticky; top: 0; z-index: 100; }
         .post-btn { background: var(--primary); color: white; border: none; padding: 10px 24px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(0, 98, 255, 0.3); }
@@ -29,7 +29,6 @@
         .tool { text-align: center; color: #94a3b8; font-size: 11px; cursor: pointer; font-weight: 600; }
         .tool i { display: block; font-size: 22px; margin-bottom: 5px; color: #38bdf8; }
 
-        /* Animation don Instant Exit */
         .fade-out { opacity: 0; transform: translateY(-20px); pointer-events: none; }
     </style>
 </head>
@@ -110,15 +109,17 @@
                 window.location.href = 'Dashboard.html'; 
             }, 300);
 
-            // Aikin Upload a background
             try {
-                const uploadedUrls = [];
+                let mainMediaUrl = "";
+                let mainMediaType = "";
+
+                // Aikin Upload a background ta Cloudinary
                 for (let item of selectedFiles) {
                     const formData = new FormData();
                     formData.append('file', item.file);
                     formData.append('upload_preset', UPLOAD_PRESET);
                     
-                    // ELITE OPTIMIZATION (Rage cin Data)
+                    // RAGE CIN DATA (Elite Compression)
                     formData.append('quality', 'auto:eco'); 
                     formData.append('fetch_format', 'auto');
 
@@ -129,24 +130,26 @@
 
                     const data = await response.json();
                     if (data.secure_url) {
-                        uploadedUrls.push({ url: data.secure_url, type: item.type });
+                        mainMediaUrl = data.secure_url;
+                        mainMediaType = item.type;
                     }
                 }
 
-                // Tabbatar an tura dukkan bayanan da Dashboard yake nema
-                await db.collection('posts').add({
+                // TURAWA FIREBASE (Amfani da 'Posts' domin Dashboard ya gani)
+                await db.collection('Posts').add({
                     text: text,
-                    media: uploadedUrls,
+                    image: mainMediaType === 'image' ? mainMediaUrl : "",
+                    video: mainMediaType === 'video' ? mainMediaUrl : "",
                     username: localStorage.getItem('username') || "Commander CM",
                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                     likes: 0,
                     comments: 0,
-                    userAvatar: localStorage.getItem('userAvatar') || "" 
+                    profilePic: localStorage.getItem('profilePic') || ""
                 });
 
-                console.log("Post uploaded successfully to Dashboard.");
+                console.log("Elite Success: Post is live on Dashboard!");
             } catch (err) {
-                console.error("Background Upload Failed:", err);
+                console.error("Background Error:", err);
             }
         }
     </script>
