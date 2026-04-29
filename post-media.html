@@ -7,6 +7,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
         :root { --primary: #0062ff; --bg: #0f172a; --card: #1e293b; }
@@ -42,8 +43,8 @@
     </div>
 
     <div class="bottom-tools">
-        <label><i class="fas fa-image tool-icon"></i><input type="file" id="imgInp" hidden accept="image/*" multiple onchange="handleFiles(this, 'image')"></label>
-        <label><i class="fas fa-play-circle tool-icon" style="color: #10b981;"></i><input type="file" id="vidInp" hidden accept="video/*" onchange="handleFiles(this, 'video')"></label>
+        <label><i class="fas fa-image tool-icon"></i><input type="file" hidden accept="image/*" multiple onchange="handleFiles(this, 'image')"></label>
+        <label><i class="fas fa-play-circle tool-icon" style="color: #10b981;"></i><input type="file" hidden accept="video/*" onchange="handleFiles(this, 'video')"></label>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -76,25 +77,24 @@
             checkInput();
         }
 
-        // --- SILENT BACKGROUND ENGINE ---
         async function processUpload() {
             const text = document.getElementById('postText').value.trim();
-            const filesToUpload = [...selectedFiles]; 
+            
+            Swal.fire({
+                title: 'Syncing Elite Post',
+                text: 'Please wait while we optimize your media...',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => { Swal.showLoading(); }
+            });
 
-            // 1. RUFE MODAL DIN NAN TAKE
-            // Wannan zai sa user ya koma Dashboard ba tare da yaga wani popup ba
-            if(window.parent && window.parent.closePostEngine) {
-                window.parent.closePostEngine();
-            }
-
-            // 2. FARA LODAWA A ƁOYE
             try {
                 const uploadedMedia = [];
-                for (let item of filesToUpload) {
+                for (let item of selectedFiles) {
                     const formData = new FormData();
                     formData.append('file', item.file);
                     formData.append('upload_preset', UPLOAD_PRESET);
-                    formData.append('quality', '60'); 
+                    formData.append('quality', '60'); // High speed compression
                     formData.append('fetch_format', 'auto');
 
                     const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, {
@@ -102,12 +102,9 @@
                         body: formData
                     });
                     const data = await response.json();
-                    if (data.secure_url) {
-                        uploadedMedia.push({ url: data.secure_url, type: item.type });
-                    }
+                    if (data.secure_url) uploadedMedia.push({ url: data.secure_url, type: item.type });
                 }
 
-                // 3. AIKAWA FIREBASE
                 await db.collection('posts').add({
                     text: text,
                     username: localStorage.getItem('username') || "Commander CM",
@@ -117,13 +114,15 @@
                     media: uploadedMedia
                 });
 
-                // 4. REFRESH DASHBOARD A ƁOYE DOMIN GANIN SABON POST
-                if(window.parent) {
-                    window.parent.location.reload();
-                }
+                // --- SUCCESS INTERACTION ---
+                // 1. Gaya wa Dashboard ya rufe modal din
+                window.parent.closePostEngine();
+                
+                // 2. Refresh Dashboard domin ganin sabon post
+                window.parent.location.reload();
 
             } catch (err) {
-                console.error("Silent Upload Error:", err);
+                Swal.fire('Error', 'Upload failed. Check connection.', 'error');
             }
         }
     </script>
