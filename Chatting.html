@@ -20,7 +20,7 @@
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-dark); height: 730px; display: flex; flex-direction: column; color: var(--text-main); overflow: hidden; }
+        body { background-color: var(--bg-dark); height: 100vh; display: flex; flex-direction: column; color: var(--text-main); overflow: hidden; }
 
         /* --- HEADER --- */
         .chat-header { background: var(--header-dark); padding: 10px 15px; display: flex; align-items: center; height: 65px; z-index: 1000; position: sticky; top: 0; }
@@ -42,19 +42,17 @@
         .received { background: var(--received-bubble); align-self: flex-start; border-top-left-radius: 0; }
         .sent { background: var(--sent-bubble); align-self: flex-end; border-top-right-radius: 0; }
 
-        /* --- VOICE WAVEFORM PLAYER --- */
-        .voice-wrapper { display: flex; align-items: center; gap: 10px; min-width: 220px; padding: 4px 0; }
-        .voice-avatar-box { position: relative; width: 38px; height: 38px; }
-        .voice-avatar { width: 100%; height: 100%; border-radius: 50%; background: #3b4a54; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: white; }
-        .mic-badge { position: absolute; bottom: -1px; right: -1px; font-size: 10px; color: var(--primary); background: var(--bg-dark); border-radius: 50%; padding: 2px; }
+        /* --- VOICE PLAYER UI --- */
+        .voice-wrapper { display: flex; align-items: center; gap: 10px; min-width: 200px; padding: 4px 0; }
+        .voice-avatar-box { position: relative; width: 35px; height: 35px; }
+        .voice-avatar { width: 100%; height: 100%; border-radius: 50%; background: #3b4a54; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; color: white; }
+        .mic-badge { position: absolute; bottom: -1px; right: -1px; font-size: 9px; color: var(--primary); background: var(--header-dark); border-radius: 50%; padding: 2px; }
 
-        .play-btn { font-size: 22px; color: var(--text-dim); cursor: pointer; transition: 0.2s; }
+        .play-btn { font-size: 22px; color: var(--text-dim); cursor: pointer; }
         .sent .play-btn { color: white; }
         
-        .waveform { flex: 1; display: flex; align-items: center; gap: 2px; height: 25px; }
-        .wave-bar { width: 2px; background: rgba(255,255,255,0.2); border-radius: 1px; transition: 0.2s; }
-        .wave-bar.active { background: var(--primary) !important; animation: pulseWave 0.5s infinite; }
-        @keyframes pulseWave { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .waveform-lite { flex: 1; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; position: relative; }
+        .waveform-lite::after { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 30%; background: var(--primary); border-radius: 2px; }
 
         .msg-footer { display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; color: var(--text-dim); margin-top: 2px; }
         .sent .msg-footer i { color: #53bdeb; }
@@ -62,65 +60,58 @@
         /* --- INPUT BAR --- */
         .input-area { background: var(--header-dark); padding: 10px 12px; display: flex; align-items: center; gap: 8px; position: relative; }
         
-        .recording-hud { display: none; align-items: center; gap: 12px; flex: 1; color: #ff3b30; font-weight: 800; font-size: 14px; padding-left: 10px; }
+        .recording-hud { display: none; align-items: center; gap: 12px; flex: 1; color: #ff3b30; font-weight: 800; font-size: 14px; }
         .rec-dot { width: 10px; height: 10px; background: #ff3b30; border-radius: 50%; animation: blink 0.8s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
         .input-wrapper { flex: 1; background: #2a3942; border-radius: 25px; padding: 0 12px; display: flex; align-items: center; height: 45px; gap: 12px; }
         #messageInput { border: none; background: transparent; outline: none; flex: 1; color: var(--text-main); font-size: 16px; }
         
-        .action-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); border: none; color: white; cursor: pointer; font-size: 19px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.3); transition: 0.2s; }
-        .action-btn:active { transform: scale(0.9); }
-        .icon-btn { color: var(--text-dim); font-size: 20px; cursor: pointer; transition: 0.2s; }
-        .icon-btn:active { color: white; }
+        .action-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); border: none; color: white; cursor: pointer; font-size: 19px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .recording-active { transform: scale(1.3); background: #ff3b30 !important; }
     </style>
 </head>
 <body>
 
     <header class="chat-header">
-        <div class="header-left" onclick="window.location.href='Profile.html'">
-            <i class="fas fa-arrow-left icon-btn" onclick="history.back(); event.stopPropagation();"></i>
+        <div class="header-left">
+            <i class="fas fa-arrow-left" onclick="history.back()"></i>
             <img src="https://via.placeholder.com/100" class="user-avatar" id="chatAvatar">
-            <div class="user-info">
+            <div class="user-meta">
                 <b id="chatWith">Elite Member</b> 
                 <div class="status-text" id="statusText">online</div>
             </div>
         </div>
         <div class="header-tools">
-            <i class="fas fa-video" onclick="window.location.href='video-call.html'"></i>
-            <i class="fas fa-phone-alt" onclick="window.location.href='voice-call.html'"></i>
-            <i class="fas fa-ellipsis-v" onclick="window.location.href='sidebar.html'"></i>
+            <i class="fas fa-video"></i>
+            <i class="fas fa-phone-alt"></i>
+            <i class="fas fa-ellipsis-v"></i>
         </div>
     </header>
 
     <div class="chat-container" id="chatBox"></div>
 
     <div class="input-area">
-        <i class="far fa-laugh icon-btn" onclick="window.location.href='stickers.html'"></i>
+        <i class="far fa-laugh" style="color:var(--text-dim); font-size:22px;"></i>
         <div id="recHUD" class="recording-hud">
             <div class="rec-dot"></div> <span id="recTimer">00:00</span>
-            <span style="color:#8696a0; font-size:11px; font-weight:400; margin-left:10px;">Slide up to lock</span>
         </div>
         <div class="input-wrapper" id="inputWrap">
             <input type="text" id="messageInput" placeholder="Message" oninput="checkInput()">
-            <i class="fas fa-paperclip icon-btn" style="transform: rotate(45deg);"></i>
-            <label for="camInput"><i class="fas fa-camera icon-btn"></i></label>
-            <input type="file" id="camInput" hidden accept="image/*" onchange="handleImage(this)">
+            <i class="fas fa-paperclip" style="color:var(--text-dim); transform:rotate(45deg);"></i>
         </div>
-        <button class="action-btn" id="sendBtn" 
-                onmousedown="handleVoiceStart()" 
-                onmouseup="handleVoiceStop()"
-                ontouchstart="handleVoiceStart()" 
-                ontouchend="handleVoiceStop()">
+        <button class="action-btn" id="micBtn" 
+                onmousedown="startVoice()" onmouseup="stopVoice()"
+                ontouchstart="startVoice()" ontouchend="stopVoice()">
             <i class="fas fa-microphone" id="btnIcon"></i>
         </button>
     </div>
 
-    <script src="voice-handler.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
+        // --- FIREBASE INIT ---
         const firebaseConfig = { databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
@@ -129,13 +120,104 @@
         const partnerUID = new URLSearchParams(window.location.search).get('uid') || "USER_2";
         const chatID = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
 
-        // UI Helpers
+        // UI Selectors
         const msgInput = document.getElementById('messageInput');
         const btnIcon = document.getElementById('btnIcon');
+        const micBtn = document.getElementById('micBtn');
         const hud = document.getElementById('recHUD');
         const inputWrap = document.getElementById('inputWrap');
 
-        // --- REAL-TIME CHAT ---
+        // --- VOICE ENGINE ---
+        let mediaRecorder;
+        let audioChunks = [];
+
+        const VoiceEngine = {
+            async start() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    mediaRecorder.start();
+                } catch(e) { alert("Mic Permission Denied"); }
+            },
+            async stop() {
+                if(!mediaRecorder || mediaRecorder.state === "inactive") return;
+                mediaRecorder.stop();
+                mediaRecorder.onstop = async () => {
+                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                    mediaRecorder.stream.getTracks().forEach(t => t.stop());
+                    if(blob.size > 1000) this.upload(blob);
+                };
+            },
+            async upload(blob) {
+                const fd = new FormData();
+                fd.append('file', blob);
+                fd.append('upload_preset', "cmchat_pro");
+                fd.append('resource_type', 'video');
+
+                const res = await fetch(`https://api.cloudinary.com/v1_1/dyfyhzp3o/upload`, { method: 'POST', body: fd });
+                const data = await res.json();
+                if(data.secure_url) {
+                    database.ref('messages/' + chatID).push({
+                        sender: myUID,
+                        url: data.secure_url,
+                        duration: Math.floor(data.duration) + "s",
+                        type: 'voice',
+                        time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+                        timestamp: Date.now()
+                    });
+                }
+            }
+        };
+
+        // --- UI HANDLERS ---
+        function startVoice() {
+            if(msgInput.value.trim().length > 0) return;
+            hud.style.display = 'flex';
+            inputWrap.style.display = 'none';
+            micBtn.classList.add('recording-active');
+            VoiceEngine.start();
+            
+            let sec = 0;
+            window.vTimer = setInterval(() => {
+                sec++;
+                let m = Math.floor(sec/60), s = sec%60;
+                document.getElementById('recTimer').innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+            }, 1000);
+        }
+
+        function stopVoice() {
+            if(hud.style.display === 'none') {
+                if(msgInput.value.trim().length > 0) sendMessage();
+                return;
+            }
+            clearInterval(window.vTimer);
+            hud.style.display = 'none';
+            inputWrap.style.display = 'flex';
+            micBtn.classList.remove('recording-active');
+            document.getElementById('recTimer').innerText = "00:00";
+            VoiceEngine.stop();
+        }
+
+        function sendMessage() {
+            const text = msgInput.value.trim();
+            database.ref('messages/' + chatID).push({
+                sender: myUID,
+                msg: text,
+                type: 'text',
+                time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+                timestamp: Date.now()
+            });
+            msgInput.value = "";
+            checkInput();
+        }
+
+        function checkInput() {
+            btnIcon.className = msgInput.value.trim().length > 0 ? "fas fa-paper-plane" : "fas fa-microphone";
+        }
+
+        // --- RENDER & SYNC ---
         database.ref('messages/' + chatID).on('value', snap => {
             const box = document.getElementById('chatBox');
             box.innerHTML = "";
@@ -143,7 +225,21 @@
                 const d = child.val();
                 const isMe = d.sender === myUID;
                 if(d.type === 'voice') {
-                    box.innerHTML += renderVoiceMessage(isMe, d);
+                    box.innerHTML += `
+                        <div class="message ${isMe ? 'sent' : 'received'}">
+                            <div class="voice-wrapper">
+                                <div class="voice-avatar-box">
+                                    <div class="voice-avatar">${isMe ? 'Me' : 'H'}</div>
+                                    <i class="fas fa-microphone mic-badge"></i>
+                                </div>
+                                <i class="fas fa-play play-btn" onclick="playA('${d.url}', this)"></i>
+                                <div class="waveform-lite"></div>
+                            </div>
+                            <div class="msg-footer">
+                                <span>${d.duration || ''} • ${d.time}</span>
+                                ${isMe ? '<i class="fas fa-check-double"></i>' : ''}
+                            </div>
+                        </div>`;
                 } else {
                     box.innerHTML += `
                         <div class="message ${isMe ? 'sent' : 'received'}">
@@ -158,82 +254,16 @@
             box.scrollTop = box.scrollHeight;
         });
 
-        function renderVoiceMessage(isMe, d) {
-            const initial = d.sender_name ? d.sender_name[0] : 'E';
-            return `
-                <div class="message ${isMe ? 'sent' : 'received'}">
-                    <div class="voice-wrapper">
-                        <div class="voice-avatar-box">
-                            <div class="voice-avatar">${initial}</div>
-                            <i class="fas fa-microphone mic-badge"></i>
-                        </div>
-                        <i class="fas fa-play play-btn" onclick="playAudio('${d.url}', this)"></i>
-                        <div class="waveform">
-                            ${Array(22).fill('<div class="wave-bar" style="height:'+(5+Math.random()*15)+'px"></div>').join('')}
-                        </div>
-                    </div>
-                    <div class="msg-footer">
-                        <span>${d.duration || '0:00'} • ${d.time}</span>
-                        ${isMe ? '<i class="fas fa-check-double"></i>' : ''}
-                    </div>
-                </div>`;
+        function playA(u, b) {
+            const a = new Audio(u);
+            b.className = "fas fa-pause play-btn";
+            a.play();
+            a.onended = () => b.className = "fas fa-play play-btn";
         }
 
-        function checkInput() {
-            btnIcon.className = msgInput.value.trim().length > 0 ? "fas fa-paper-plane" : "fas fa-microphone";
-        }
-
-        // --- LIVE ACTION HANDLERS ---
-        function handleVoiceStart() {
-            if(msgInput.value.trim().length > 0) return;
-            hud.style.display = 'flex';
-            inputWrap.style.display = 'none';
-            // Kira engine ɗinka daga voice-handler.js
-            if(window.VoiceManager) VoiceManager.start();
-            
-            let sec = 0;
-            window.recTimer = setInterval(() => {
-                sec++;
-                let m = Math.floor(sec/60), s = sec%60;
-                document.getElementById('recTimer').innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
-            }, 1000);
-        }
-
-        function handleVoiceStop() {
-            if(hud.style.display === 'none') {
-                if(msgInput.value.trim().length > 0) sendMessage();
-                return;
-            }
-            clearInterval(window.recTimer);
-            hud.style.display = 'none';
-            inputWrap.style.display = 'flex';
-            document.getElementById('recTimer').innerText = "00:00";
-            if(window.VoiceManager) VoiceManager.stop(chatID, myUID);
-        }
-
-        function sendMessage() {
-            const text = msgInput.value.trim();
-            database.ref('messages/' + chatID).push({
-                sender: myUID,
-                msg: text,
-                type: 'text',
-                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                timestamp: Date.now()
-            });
-            msgInput.value = "";
-            checkInput();
-        }
-
-        function playAudio(url, btn) {
-            const audio = new Audio(url);
-            btn.className = "fas fa-pause play-btn";
-            audio.play();
-            audio.onended = () => btn.className = "fas fa-play play-btn";
-        }
-
-        // Partner Init
-        database.ref('users/' + partnerUID).once('value', snap => {
-            const u = snap.val();
+        // Partner Info
+        database.ref('users/' + partnerUID).once('value', s => {
+            const u = s.val();
             if(u) {
                 document.getElementById('chatWith').innerText = u.username;
                 document.getElementById('chatAvatar').src = u.profilePhoto || 'https://via.placeholder.com/100';
