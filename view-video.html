@@ -3,30 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Elite Reels | CMchat Pro</title>
+    <title>Elite Watch | CMchat Pro</title>
     
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <style>
-        :root { --primary: #0062ff; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --fb-blue: #0062ff; --glass: rgba(0, 0, 0, 0.6); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         
-        body { 
-            background: #000; 
-            height: 100vh; 
-            overflow: hidden; /* Muna toshe asalin scroll na body */
-        }
+        body { background: #000; height: 100vh; overflow: hidden; }
 
         /* --- VERTICAL SCROLL CONTAINER --- */
-        #videoContainer {
+        #videoFeed {
             height: 100vh;
             overflow-y: scroll;
-            scroll-snap-type: y mandatory; /* Wannan shi ne sirrin TikTok scroll */
+            scroll-snap-type: y mandatory;
             scrollbar-width: none;
+            scroll-behavior: smooth;
         }
-        #videoContainer::-webkit-scrollbar { display: none; }
+        #videoFeed::-webkit-scrollbar { display: none; }
 
-        .video-page {
+        .reel-container {
             height: 100vh;
             width: 100vw;
             scroll-snap-align: start;
@@ -37,121 +38,173 @@
             justify-content: center;
         }
 
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
+        video { width: 100%; height: 100%; object-fit: contain; }
 
-        /* --- UI OVERLAYS (Like, Share, Info) --- */
-        .overlay {
+        /* --- FACEBOOK STYLE UI OVERLAYS --- */
+        .video-info {
             position: absolute; bottom: 0; left: 0; width: 100%;
-            padding: 100px 20px 40px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
-            pointer-events: none;
-            z-index: 10;
+            padding: 80px 20px 30px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.85));
+            pointer-events: none; z-index: 10;
         }
-        .overlay * { pointer-events: auto; }
+        .video-info * { pointer-events: auto; }
 
-        .side-actions {
-            position: absolute; right: 15px; bottom: 120px;
+        .author-box { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .author-img { width: 38px; height: 38px; border-radius: 50%; background: #2e3339; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; }
+        .author-name { font-weight: 700; font-size: 15px; color: white; }
+        .follow-btn { background: var(--fb-blue); color: #fff; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+
+        .description { font-size: 14px; color: #f1f1f1; margin-bottom: 15px; max-width: 85%; line-height: 1.4; }
+
+        /* --- SIDE ACTIONS (FB STYLE) --- */
+        .side-bar {
+            position: absolute; right: 12px; bottom: 100px;
             display: flex; flex-direction: column; gap: 20px;
-            z-index: 20;
+            align-items: center; z-index: 20;
         }
-        .action-item { text-align: center; color: white; cursor: pointer; }
-        .action-item i { font-size: 30px; margin-bottom: 5px; }
+        .btn-action { text-align: center; color: white; cursor: pointer; }
+        .btn-action i { font-size: 28px; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5)); }
+        .btn-action span { display: block; font-size: 12px; font-weight: 600; margin-top: 5px; }
+        .liked i { color: #ff3b30; }
 
-        .ads-mini {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            padding: 10px; border-radius: 12px;
-            margin-top: 10px; display: flex; align-items: center; gap: 10px;
+        .top-nav {
+            position: fixed; top: 0; width: 100%; padding: 40px 20px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: linear-gradient(rgba(0,0,0,0.6), transparent); z-index: 100;
         }
+        .back-btn { color: white; font-size: 22px; text-decoration: none; }
 
-        .back-btn {
-            position: fixed; top: 20px; left: 20px;
-            z-index: 100; color: white; font-size: 20px;
-            background: rgba(0,0,0,0.3); width: 40px; height: 40px;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        .fb-ad-box {
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+            padding: 10px; border-radius: 10px; border-left: 4px solid #febd00;
+            display: flex; align-items: center; gap: 10px; margin-top: 5px;
         }
     </style>
 </head>
 <body>
 
-    <a href="javascript:history.back()" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+    <div class="top-nav">
+        <a href="javascript:history.back()" class="back-btn"><i class="fas fa-chevron-left"></i></a>
+        <i class="fas fa-search" style="color: white; font-size: 20px;"></i>
+    </div>
 
-    <div id="videoContainer">
+    <div id="videoFeed">
         </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
     <script>
+        // FIREBASE CONFIG
         const firebaseConfig = { apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", projectId: "cmchat-pro" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 1. DAUKO DUKKAN VIDEOS DAGA FIREBASE
-        async function loadFeed() {
-            const container = document.getElementById('videoContainer');
-            const snap = await db.collection('posts').orderBy('timestamp', 'desc').limit(10).get();
-            
-            container.innerHTML = '';
-            
-            snap.forEach(doc => {
-                const p = doc.data();
-                if (p.media && p.media[0].type === 'video') {
-                    const videoUrl = p.media[0].url;
-                    
-                    const videoElement = `
-                        <div class="video-page">
-                            <video class="main-video" loop playsinline preload="metadata">
-                                <source src="${videoUrl}" type="video/mp4">
-                            </video>
-                            
-                            <div class="side-actions">
-                                <div class="action-item"><i class="fas fa-heart"></i><span>1</span></div>
-                                <div class="action-item"><i class="fas fa-comment"></i><span>0</span></div>
-                                <div class="action-item"><i class="fas fa-share"></i></div>
-                            </div>
+        // 1. LOAD LIVE FEED FROM FIREBASE
+        async function loadLiveFeed() {
+            const feedContainer = document.getElementById('videoFeed');
+            const clickedVideo = JSON.parse(localStorage.getItem('current_video_view'));
 
-                            <div class="overlay">
-                                <h4 style="font-weight:800; margin-bottom:5px;">@${p.username}</h4>
-                                <p style="font-size:14px; color:#ddd;">${p.text || ''}</p>
-                                <div class="ads-mini">
-                                    <span style="background:#febd00; color:black; font-size:10px; padding:2px 5px; border-radius:4px; font-weight:900;">AD</span>
-                                    <span style="font-size:12px;">Elite Web Services - 50% Off</span>
-                                </div>
-                            </div>
-                        </div>`;
-                    container.insertAdjacentHTML('beforeend', videoElement);
+            // Load All Video Posts
+            db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snap => {
+                feedContainer.innerHTML = '';
+                
+                // Put the clicked video first for zero delay
+                if (clickedVideo) {
+                    addVideoToFeed(clickedVideo, true);
                 }
-            });
 
-            setupObserver();
+                snap.forEach(doc => {
+                    const p = doc.data();
+                    const postId = doc.id;
+                    if (p.media && p.media[0].type === 'video') {
+                        // Skip if it's the already added clicked video
+                        if (clickedVideo && p.media[0].url === clickedVideo.url) return;
+                        addVideoToFeed({...p, id: postId}, false);
+                    }
+                });
+                setupObserver();
+            });
         }
 
-        // 2. OBSERVER DOMIN PLAY/PAUSE NAN TAKE (Don gudun delay)
+        function addVideoToFeed(p, isInitial) {
+            const feedContainer = document.getElementById('videoFeed');
+            const url = isInitial ? p.url : p.media[0].url;
+            const user = isInitial ? (p.author || p.username) : p.username;
+            const text = isInitial ? p.caption : (p.text || '');
+            const likes = p.likes || 0;
+            const comments = p.comments || 0;
+            const postId = p.id || 'temp';
+
+            const reelHTML = `
+                <div class="reel-container" data-id="${postId}">
+                    <video class="v-player" loop playsinline preload="${isInitial ? 'auto' : 'metadata'}">
+                        <source src="${url}" type="video/mp4">
+                    </video>
+
+                    <div class="side-bar">
+                        <div class="btn-action" onclick="liveLike('${postId}', this)">
+                            <i class="fas fa-thumbs-up"></i>
+                            <span class="l-count">${likes}</span>
+                        </div>
+                        <div class="btn-action">
+                            <i class="fas fa-comment"></i>
+                            <span>${comments}</span>
+                        </div>
+                        <div class="btn-action" onclick="shareVideo('${url}')">
+                            <i class="fas fa-share"></i>
+                            <span>Share</span>
+                        </div>
+                    </div>
+
+                    <div class="video-info">
+                        <div class="author-box">
+                            <div class="author-img">${user[0].toUpperCase()}</div>
+                            <span class="author-name">${user}</span>
+                            <span class="follow-btn">Follow</span>
+                        </div>
+                        <p class="description">${text}</p>
+                        <div class="fb-ad-box">
+                            <span style="background:#febd00; color:#000; font-size:10px; padding:2px 5px; border-radius:4px; font-weight:900;">AD</span>
+                            <div style="flex:1"><p style="font-size:12px; font-weight:700; color:white;">Elite Hosting - High Speed Servers</p></div>
+                        </div>
+                    </div>
+                </div>`;
+            feedContainer.insertAdjacentHTML('beforeend', reelHTML);
+        }
+
+        // 2. LIVE LIKE SYSTEM (Firestore Sync)
+        function liveLike(postId, element) {
+            if (postId === 'temp') return;
+            const postRef = db.collection('posts').doc(postId);
+            
+            element.classList.toggle('liked');
+            const increment = element.classList.contains('liked') ? 1 : -1;
+
+            postRef.update({
+                likes: firebase.firestore.FieldValue.increment(increment)
+            });
+        }
+
+        // 3. SMART AUTOPLAY ENGINE
         function setupObserver() {
-            const options = { threshold: 0.8 };
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     const video = entry.target.querySelector('video');
                     if (entry.isIntersecting) {
-                        video.play().catch(e => {});
+                        video.play().catch(() => {});
                     } else {
                         video.pause();
-                        video.currentTime = 0; // Maida shi farko idan an wuce
                     }
                 });
-            }, options);
+            }, { threshold: 0.8 });
 
-            document.querySelectorAll('.video-page').forEach(page => {
-                observer.observe(page);
-            });
+            document.querySelectorAll('.reel-container').forEach(reel => observer.observe(reel));
         }
 
-        loadFeed();
+        function shareVideo(url) {
+            if (navigator.share) navigator.share({ url: url });
+        }
+
+        // Run Engine
+        loadLiveFeed();
     </script>
 </body>
 </html>
