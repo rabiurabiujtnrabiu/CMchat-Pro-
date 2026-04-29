@@ -3,174 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Elite Video View | CMchat Pro</title>
+    <title>Elite Reels | CMchat Pro</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
     <style>
-        :root { --primary: #0062ff; --glass: rgba(255, 255, 255, 0.15); }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        :root { --primary: #0062ff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        body { background: #000; color: white; height: 100vh; overflow: hidden; }
-
-        /* --- VIDEO CONTAINER --- */
-        .video-wrapper { position: relative; width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; }
-        
-        /* Fast Loading Video Style */
-        #mainVideo { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: contain; 
-            background: #000;
-            transition: opacity 0.3s;
+        body { 
+            background: #000; 
+            height: 100vh; 
+            overflow: hidden; /* Muna toshe asalin scroll na body */
         }
 
-        /* --- OVERLAY COMPONENTS --- */
-        .overlay { 
-            position: absolute; bottom: 0; left: 0; width: 100%; 
-            padding: 100px 20px 40px; 
-            background: linear-gradient(transparent, rgba(0,0,0,0.9)); 
-            display: flex; flex-direction: column; gap: 8px; 
-            pointer-events: none; z-index: 10;
+        /* --- VERTICAL SCROLL CONTAINER --- */
+        #videoContainer {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory; /* Wannan shi ne sirrin TikTok scroll */
+            scrollbar-width: none;
+        }
+        #videoContainer::-webkit-scrollbar { display: none; }
+
+        .video-page {
+            height: 100vh;
+            width: 100vw;
+            scroll-snap-align: start;
+            position: relative;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* --- UI OVERLAYS (Like, Share, Info) --- */
+        .overlay {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            padding: 100px 20px 40px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            pointer-events: none;
+            z-index: 10;
         }
         .overlay * { pointer-events: auto; }
 
-        .user-info h4 { font-size: 17px; font-weight: 800; color: #fff; text-shadow: 0 1px 5px rgba(0,0,0,0.5); }
-        .video-desc { font-size: 14px; color: #f1f5f9; line-height: 1.4; max-width: 85%; }
-
-        /* --- RIGHT ACTION SIDEBAR --- */
-        .side-actions { 
-            position: absolute; right: 12px; bottom: 110px; 
-            display: flex; flex-direction: column; gap: 22px; 
-            align-items: center; z-index: 100; 
+        .side-actions {
+            position: absolute; right: 15px; bottom: 120px;
+            display: flex; flex-direction: column; gap: 20px;
+            z-index: 20;
         }
-        .action-item { text-align: center; cursor: pointer; }
-        .action-item i { font-size: 30px; color: #fff; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3)); }
-        .action-item span { display: block; font-size: 12px; font-weight: 700; margin-top: 4px; }
-        .action-item.liked i { color: #ff3b30; }
+        .action-item { text-align: center; color: white; cursor: pointer; }
+        .action-item i { font-size: 30px; margin-bottom: 5px; }
 
-        /* --- ADS BOX (Professional Style) --- */
-        .ads-container { 
-            background: rgba(255, 255, 255, 0.1); 
-            backdrop-filter: blur(15px); 
-            padding: 10px 15px; border-radius: 12px; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            margin-top: 10px; display: flex; align-items: center; gap: 12px; 
-            animation: slideUp 0.5s ease;
+        .ads-mini {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 10px; border-radius: 12px;
+            margin-top: 10px; display: flex; align-items: center; gap: 10px;
         }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .ads-badge { background: #febd00; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px; }
 
-        .top-nav { position: absolute; top: 40px; left: 20px; z-index: 1000; }
-        .back-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; backdrop-filter: blur(5px); }
-
-        /* --- LOADING SPINNER (Only for slow networks) --- */
-        #videoLoader {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 40px; color: var(--primary); display: none; z-index: 5;
+        .back-btn {
+            position: fixed; top: 20px; left: 20px;
+            z-index: 100; color: white; font-size: 20px;
+            background: rgba(0,0,0,0.3); width: 40px; height: 40px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
         }
     </style>
 </head>
 <body>
 
-    <div class="top-nav">
-        <a href="javascript:history.back()" class="back-btn"><i class="fas fa-chevron-left"></i></a>
-    </div>
+    <a href="javascript:history.back()" class="back-btn"><i class="fas fa-arrow-left"></i></a>
 
-    <div class="video-wrapper">
-        <div id="videoLoader"><i class="fas fa-circle-notch fa-spin"></i></div>
-        
-        <video id="mainVideo" autoplay loop playsinline preload="auto">
-            <source src="" type="video/mp4">
-        </video>
-
-        <div class="side-actions">
-            <div class="action-item" id="likeBtn" onclick="toggleLike()">
-                <i class="fas fa-heart"></i>
-                <span id="likeCount">0</span>
-            </div>
-            <div class="action-item" onclick="showComments()">
-                <i class="fas fa-comment-dots"></i>
-                <span id="commentCount">0</span>
-            </div>
-            <div class="action-item" onclick="shareVideo()">
-                <i class="fas fa-share"></i>
-                <span>Share</span>
-            </div>
+    <div id="videoContainer">
         </div>
 
-        <div class="overlay">
-            <div class="user-info">
-                <h4 id="videoAuthor">@Commander_Elite</h4>
-                <p class="video-desc" id="videoText">Loading elite content...</p>
-            </div>
-
-            <div class="ads-container" onclick="window.open('https://cmchat.pro/ads', '_blank')">
-                <span class="ads-badge">Ad</span>
-                <div style="flex:1">
-                    <p style="font-size: 13px; font-weight: 800;">Elite Web Services</p>
-                    <p style="font-size: 11px; color: #e2e8f0;">Power your apps with CM Servers</p>
-                </div>
-                <i class="fas fa-external-link-alt" style="font-size: 12px; color: #94a3b8;"></i>
-            </div>
-        </div>
-    </div>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", projectId: "cmchat-pro" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        const videoPlayer = document.getElementById('mainVideo');
-        const loader = document.getElementById('videoLoader');
-
-        // --- 1. INSTANT DATA LOAD ---
-        function initVideo() {
-            const data = JSON.parse(localStorage.getItem('current_video_view'));
-            if (!data) return history.back();
-
-            // Set text data immediately
-            document.getElementById('videoAuthor').innerText = `@${data.author || 'Elite_Member'}`;
-            document.getElementById('videoText').innerText = data.caption || '';
+        // 1. DAUKO DUKKAN VIDEOS DAGA FIREBASE
+        async function loadFeed() {
+            const container = document.getElementById('videoContainer');
+            const snap = await db.collection('posts').orderBy('timestamp', 'desc').limit(10).get();
             
-            // Set video source
-            videoPlayer.src = data.url;
+            container.innerHTML = '';
             
-            // Optimization: Start playing immediately
-            videoPlayer.load();
-            videoPlayer.play().catch(e => {
-                console.log("Autoplay blocked, waiting for interaction");
+            snap.forEach(doc => {
+                const p = doc.data();
+                if (p.media && p.media[0].type === 'video') {
+                    const videoUrl = p.media[0].url;
+                    
+                    const videoElement = `
+                        <div class="video-page">
+                            <video class="main-video" loop playsinline preload="metadata">
+                                <source src="${videoUrl}" type="video/mp4">
+                            </video>
+                            
+                            <div class="side-actions">
+                                <div class="action-item"><i class="fas fa-heart"></i><span>1</span></div>
+                                <div class="action-item"><i class="fas fa-comment"></i><span>0</span></div>
+                                <div class="action-item"><i class="fas fa-share"></i></div>
+                            </div>
+
+                            <div class="overlay">
+                                <h4 style="font-weight:800; margin-bottom:5px;">@${p.username}</h4>
+                                <p style="font-size:14px; color:#ddd;">${p.text || ''}</p>
+                                <div class="ads-mini">
+                                    <span style="background:#febd00; color:black; font-size:10px; padding:2px 5px; border-radius:4px; font-weight:900;">AD</span>
+                                    <span style="font-size:12px;">Elite Web Services - 50% Off</span>
+                                </div>
+                            </div>
+                        </div>`;
+                    container.insertAdjacentHTML('beforeend', videoElement);
+                }
+            });
+
+            setupObserver();
+        }
+
+        // 2. OBSERVER DOMIN PLAY/PAUSE NAN TAKE (Don gudun delay)
+        function setupObserver() {
+            const options = { threshold: 0.8 };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const video = entry.target.querySelector('video');
+                    if (entry.isIntersecting) {
+                        video.play().catch(e => {});
+                    } else {
+                        video.pause();
+                        video.currentTime = 0; // Maida shi farko idan an wuce
+                    }
+                });
+            }, options);
+
+            document.querySelectorAll('.video-page').forEach(page => {
+                observer.observe(page);
             });
         }
 
-        // --- 2. LOADING STATE MANAGEMENT ---
-        videoPlayer.onwaiting = () => { loader.style.display = 'block'; };
-        videoPlayer.onplaying = () => { loader.style.display = 'none'; };
-        videoPlayer.oncanplay = () => { loader.style.display = 'none'; };
-
-        // --- 3. ENGAGEMENT LOGIC ---
-        function toggleLike() {
-            const btn = document.getElementById('likeBtn');
-            btn.classList.toggle('liked');
-            const count = document.getElementById('likeCount');
-            let current = parseInt(count.innerText);
-            count.innerText = btn.classList.contains('liked') ? current + 1 : current - 1;
-        }
-
-        function shareVideo() {
-            if (navigator.share) {
-                navigator.share({ title: 'Elite Video', url: window.location.href });
-            } else {
-                alert("Link copied!");
-            }
-        }
-
-        // Start everything
-        initVideo();
+        loadFeed();
     </script>
 </body>
 </html>
