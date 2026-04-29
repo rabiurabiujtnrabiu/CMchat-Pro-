@@ -61,6 +61,10 @@
         .nav-item { color: #94a3b8; font-size: 18px; text-decoration: none; display: flex; flex-direction: column; align-items: center; }
         .nav-item.active { color: #38bdf8; }
         #scrollTopBtn { position: fixed; bottom: 85px; right: 20px; width: 45px; height: 45px; background: var(--primary); color: #fff; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 5px 15px rgba(0,98,255,0.4); z-index: 2500; cursor: pointer; border: none; }
+
+        /* Skeleton Animation */
+        @keyframes skeleton-loading { 0% { background-color: #f1f5f9; } 100% { background-color: #e2e8f0; } }
+        .skeleton { animation: skeleton-loading 1s linear infinite alternate; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -69,7 +73,7 @@
 
     <header class="fb-header">
         <div class="header-top">
-            <div class="icon-circle"><i class="fas fa-bars"></i></div>
+            <div class="icon-circle" onclick="location.href='Settings.html'"><i class="fas fa-bars"></i></div>
             <div class="logo">CMchat PRO</div>
             <div class="header-icons">
                 <a href="Shopping.html" class="icon-circle"><i class="fas fa-shopping-bag"></i></a>
@@ -104,7 +108,12 @@
         </div>
     </div>
 
-    <div class="container" id="feedContainer"></div>
+    <div class="container" id="feedContainer">
+        <div id="initialLoader" style="padding: 15px;">
+            <div class="card skeleton" style="height: 200px; margin-bottom: 12px; opacity: 0.5;"></div>
+            <div class="card skeleton" style="height: 200px; opacity: 0.5;"></div>
+        </div>
+    </div>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item active"><i class="fas fa-home"></i></a>
@@ -121,8 +130,61 @@
 
         function scrollToTop() { window.scrollTo({top: 0, behavior: 'smooth'}); }
 
-        // --- STORY LOGIC GYARARRE (Commander CM Fix) ---
+        // --- OPTIMISTIC RENDERING ENGINE ---
+        function checkOptimisticPost() {
+            const data = localStorage.getItem('recent_optimistic_post');
+            if (data) {
+                const p = JSON.parse(data);
+                const feed = document.getElementById('feedContainer');
+                
+                let mediaHtml = '';
+                if (p.media && p.media.length > 0) {
+                    const m = p.media[0];
+                    mediaHtml = m.type === 'image' 
+                        ? `<img src="${m.url}" class="post-media" style="filter: brightness(0.8)">` 
+                        : `<video src="${m.url}" class="post-media" muted autoplay loop></video>`;
+                }
+
+                const optHtml = `
+                    <div class="card" id="optPost" style="border-left: 4px solid var(--primary);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+                            <div style="display:flex; align-items:center; gap:12px">
+                                <div style="width:40px;height:40px;border-radius:50%;background:var(--primary-gradient);color:white;display:flex;align-items:center;justify-content:center;font-weight:800">${p.username[0]}</div>
+                                <div><h4 style="font-size:14px;font-weight:700">${p.username}</h4><p style="font-size:11px;color:var(--primary)">Uploading...</p></div>
+                            </div>
+                            <i class="fas fa-circle-notch fa-spin" style="color:var(--primary)"></i>
+                        </div>
+                        <p style="font-size:14px;color:#334155;line-height:1.6">${p.text}</p>
+                        ${mediaHtml}
+                    </div>`;
+                
+                const loader = document.getElementById('initialLoader');
+                if(loader) loader.remove();
+                feed.insertAdjacentHTML('afterbegin', optHtml);
+            }
+        }
+
+        // --- STORY LOGIC ---
         let allStories = [];
+        const expiry24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        db.collection('stories').where('timestamp', '>', expiry24h).orderBy('timestamp', 'desc').onSnapshot(snap => {
+            const container = document.getElementById('storiesContainer');
+            const addBtn = container.firstElementChild;
+            container.innerHTML = ''; 
+            container.appendChild(addBtn);
+            allStories = []; 
+            let storyIndex = 0;
+            snap.forEach(doc => {
+                const s = doc.data();
+                allStories.push(s);
+                container.innerHTML += `
+                    <div class="story-item" onclick="openStoryPage(${storyIndex})">
+                        <div class="story-ring"><div class="story-img" style="background-image:url('${s.imageUrl}')"></div></div>
+                        <span class="story-name">${s.owner || 'Elite'}</span>
+                    </div>`;
+                storyIndex++;
+            });
+        });
 
         function openStoryPage(index) {
             localStorage.setItem('all_stories', JSON.stringify(allStories));
@@ -130,67 +192,38 @@
             window.location.href = 'view-story.html';
         }
 
-        const expiry24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
-        db.collection('stories').where('timestamp', '>', expiry24h).orderBy('timestamp', 'desc').onSnapshot(snap => {
-            const container = document.getElementById('storiesContainer');
-            const addBtn = container.firstElementChild;
-            container.innerHTML = ''; 
-            container.appendChild(addBtn);
-            
-            allStories = []; 
-            let storyIndex = 0; // Wannan zai lissafa kowane story daidai
-            
-            snap.forEach(doc => {
-                const s = doc.data();
-                allStories.push(s);
-                container.innerHTML += `
-                    <div class="story-item" onclick="openStoryPage(${storyIndex})">
-                        <div class="story-ring">
-                            <div class="story-img" style="background-image:url('${s.imageUrl}')"></div>
-                        </div>
-                        <span class="story-name">${s.owner || 'Elite'}</span>
-                    </div>`;
-                storyIndex++; // Karawa kowane story lamba ta daban
-            });
-        });
-
-        // AUTO-STOP ON SCROLL
-        const videoObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (!entry.isIntersecting || entry.intersectionRatio < 0.5) {
-                    const v = entry.target;
-                    if (v.tagName === 'VIDEO' && !v.paused) v.pause();
-                }
-            });
-        }, { threshold: [0, 0.5] });
-
-        function observeVideos() {
-            document.querySelectorAll('.post-media').forEach(v => {
-                if (v.tagName === 'VIDEO') videoObserver.observe(v);
-            });
-        }
-
-        // Feed Logic
+        // --- FEED LOGIC (LIVE) ---
         const expiry48h = new Date(Date.now() - 48 * 60 * 60 * 1000);
         db.collection('posts').where('timestamp', '>', expiry48h).orderBy('timestamp', 'desc').onSnapshot(snap => {
             const feed = document.getElementById('feedContainer');
-            feed.innerHTML = ''; 
+            const loader = document.getElementById('initialLoader');
+            if(loader) loader.remove();
+
+            // Clear old posts but keep optimistic one if syncing
+            const optPost = document.getElementById('optPost');
+            feed.innerHTML = '';
+            if(optPost) feed.appendChild(optPost);
+
             snap.forEach(doc => {
                 const p = doc.data();
-                const time = p.timestamp ? new Date(p.timestamp.toDate()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'Now';
                 
+                // If this real post matches the optimistic one, remove the optimistic placeholder
+                if (localStorage.getItem('recent_optimistic_post')) {
+                    const localP = JSON.parse(localStorage.getItem('recent_optimistic_post'));
+                    if (p.text === localP.text && p.username === localP.username) {
+                        localStorage.removeItem('recent_optimistic_post');
+                        if(optPost) optPost.remove();
+                    }
+                }
+
+                const time = p.timestamp ? new Date(p.timestamp.toDate()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'Now';
                 let mediaHtml = '';
                 if (p.media && p.media.length > 0) {
                     const m = p.media[0];
                     if (m.type === 'image') {
-                        mediaHtml = `<img src="${m.url}" class="post-media" onclick='openFullPost(${JSON.stringify({url: m.url, author: p.username, caption: p.text, type: "image"}).replace(/'/g, "\\'")})'>`;
+                        mediaHtml = `<img src="${m.url}" class="post-media" loading="lazy" onclick='openFullPost(${JSON.stringify({url: m.url, author: p.username, caption: p.text, type: "image"}).replace(/'/g, "\\'")})'>`;
                     } else if (m.type === 'video') {
-                        const posterUrl = m.url.replace(/\.[^/.]+$/, ".jpg");
-                        mediaHtml = `
-                            <video class="post-media" poster="${posterUrl}" preload="metadata" 
-                                   onclick="this.paused ? (this.play(), this.controls=true) : (this.pause(), this.controls=false)">
-                                <source src="${m.url}" type="video/mp4">
-                            </video>`;
+                        mediaHtml = `<video class="post-media" preload="none" onclick="this.paused ? this.play() : this.pause()"><source src="${m.url}" type="video/mp4"></video>`;
                     }
                 }
 
@@ -212,10 +245,28 @@
             observeVideos();
         });
 
+        // Initialize Observer
+        const videoObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting && entry.target.tagName === 'VIDEO') entry.target.pause();
+            });
+        }, { threshold: 0.5 });
+
+        function observeVideos() {
+            document.querySelectorAll('video').forEach(v => videoObserver.observe(v));
+        }
+
         function openFullPost(data) {
             localStorage.setItem('current_view_post', JSON.stringify(data));
             window.location.href = 'view-post.html';
         }
+
+        // Run on start
+        checkOptimisticPost();
+        
+        window.onscroll = function() {
+            document.getElementById("scrollTopBtn").style.display = (window.pageYOffset > 500) ? "flex" : "none";
+        };
     </script>
 </body>
 </html>
