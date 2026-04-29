@@ -12,50 +12,79 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <style>
-        :root { --primary: #0062ff; --glass: rgba(255, 255, 255, 0.1); }
+        :root { --primary: #0062ff; --glass: rgba(255, 255, 255, 0.15); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         
         body { background: #000; color: white; height: 100vh; overflow: hidden; }
 
         /* --- VIDEO CONTAINER --- */
         .video-wrapper { position: relative; width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; }
-        video { width: 100%; height: 100%; object-fit: contain; }
+        
+        /* Fast Loading Video Style */
+        #mainVideo { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; 
+            background: #000;
+            transition: opacity 0.3s;
+        }
 
         /* --- OVERLAY COMPONENTS --- */
-        .overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 80px 20px 40px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .overlay { 
+            position: absolute; bottom: 0; left: 0; width: 100%; 
+            padding: 100px 20px 40px; 
+            background: linear-gradient(transparent, rgba(0,0,0,0.9)); 
+            display: flex; flex-direction: column; gap: 8px; 
+            pointer-events: none; z-index: 10;
+        }
         .overlay * { pointer-events: auto; }
 
-        .user-info h4 { font-size: 16px; font-weight: 800; margin-bottom: 5px; color: #fff; }
-        .video-desc { font-size: 14px; color: #e2e8f0; line-height: 1.4; max-width: 80%; }
+        .user-info h4 { font-size: 17px; font-weight: 800; color: #fff; text-shadow: 0 1px 5px rgba(0,0,0,0.5); }
+        .video-desc { font-size: 14px; color: #f1f5f9; line-height: 1.4; max-width: 85%; }
 
         /* --- RIGHT ACTION SIDEBAR --- */
-        .side-actions { position: absolute; right: 15px; bottom: 120px; display: flex; flex-direction: column; gap: 20px; align-items: center; z-index: 100; }
-        .action-item { text-align: center; cursor: pointer; transition: 0.3s; }
-        .action-item i { font-size: 28px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        .action-item span { display: block; font-size: 12px; font-weight: 700; margin-top: 5px; }
+        .side-actions { 
+            position: absolute; right: 12px; bottom: 110px; 
+            display: flex; flex-direction: column; gap: 22px; 
+            align-items: center; z-index: 100; 
+        }
+        .action-item { text-align: center; cursor: pointer; }
+        .action-item i { font-size: 30px; color: #fff; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3)); }
+        .action-item span { display: block; font-size: 12px; font-weight: 700; margin-top: 4px; }
         .action-item.liked i { color: #ff3b30; }
 
-        /* --- ADS BOX --- */
-        .ads-container { background: var(--glass); backdrop-filter: blur(10px); padding: 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); margin-top: 15px; display: flex; align-items: center; gap: 10px; }
-        .ads-badge { background: #ff9500; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+        /* --- ADS BOX (Professional Style) --- */
+        .ads-container { 
+            background: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(15px); 
+            padding: 10px 15px; border-radius: 12px; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            margin-top: 10px; display: flex; align-items: center; gap: 12px; 
+            animation: slideUp 0.5s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .ads-badge { background: #febd00; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px; }
 
-        /* --- NAVIGATION --- */
-        .top-nav { position: absolute; top: 20px; left: 20px; z-index: 1000; }
-        .back-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--glass); display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; backdrop-filter: blur(10px); }
+        .top-nav { position: absolute; top: 40px; left: 20px; z-index: 1000; }
+        .back-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; backdrop-filter: blur(5px); }
 
-        /* --- COMMENT SECTION (HIDDEN BY DEFAULT) --- */
-        #commentPanel { position: fixed; bottom: 0; left: 0; width: 100%; height: 60%; background: white; border-radius: 20px 20px 0 0; color: #1e293b; transform: translateY(100%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2000; padding: 20px; }
-        #commentPanel.active { transform: translateY(0); }
+        /* --- LOADING SPINNER (Only for slow networks) --- */
+        #videoLoader {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 40px; color: var(--primary); display: none; z-index: 5;
+        }
     </style>
 </head>
 <body>
 
     <div class="top-nav">
-        <a href="javascript:history.back()" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+        <a href="javascript:history.back()" class="back-btn"><i class="fas fa-chevron-left"></i></a>
     </div>
 
     <div class="video-wrapper">
-        <video id="mainVideo" autoplay loop playsinline>
+        <div id="videoLoader"><i class="fas fa-circle-notch fa-spin"></i></div>
+        
+        <video id="mainVideo" autoplay loop playsinline preload="auto">
             <source src="" type="video/mp4">
         </video>
 
@@ -64,7 +93,7 @@
                 <i class="fas fa-heart"></i>
                 <span id="likeCount">0</span>
             </div>
-            <div class="action-item" onclick="toggleComments()">
+            <div class="action-item" onclick="showComments()">
                 <i class="fas fa-comment-dots"></i>
                 <span id="commentCount">0</span>
             </div>
@@ -76,28 +105,18 @@
 
         <div class="overlay">
             <div class="user-info">
-                <h4 id="videoAuthor">@Elite_Commander</h4>
-                <p class="video-desc" id="videoText">Experience the next generation of social interaction.</p>
+                <h4 id="videoAuthor">@Commander_Elite</h4>
+                <p class="video-desc" id="videoText">Loading elite content...</p>
             </div>
 
-            <div class="ads-container" onclick="location.href='https://google.com'">
+            <div class="ads-container" onclick="window.open('https://cmchat.pro/ads', '_blank')">
                 <span class="ads-badge">Ad</span>
                 <div style="flex:1">
-                    <p style="font-size: 12px; font-weight: 800;">Elite Hosting Pro</p>
-                    <p style="font-size: 10px; color: #cbd5e1;">Get 50% off on all elite servers today!</p>
+                    <p style="font-size: 13px; font-weight: 800;">Elite Web Services</p>
+                    <p style="font-size: 11px; color: #e2e8f0;">Power your apps with CM Servers</p>
                 </div>
-                <i class="fas fa-external-link-alt" style="font-size: 12px; color: #cbd5e1;"></i>
+                <i class="fas fa-external-link-alt" style="font-size: 12px; color: #94a3b8;"></i>
             </div>
-        </div>
-    </div>
-
-    <div id="commentPanel">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h3 style="font-weight:800;">Comments</h3>
-            <i class="fas fa-times" onclick="toggleComments()"></i>
-        </div>
-        <div id="commentList" style="height:80%; overflow-y:auto;">
-            <p style="text-align:center; color:#94a3b8; margin-top:20px;">No comments yet. Be the first!</p>
         </div>
     </div>
 
@@ -106,48 +125,52 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 1. LOAD VIDEO DATA FROM DASHBOARD
-        const videoData = JSON.parse(localStorage.getItem('current_video_view'));
-        if (videoData) {
-            document.getElementById('mainVideo').src = videoData.url;
-            document.getElementById('videoAuthor').innerText = `@${videoData.username.replace(/\s+/g, '_')}`;
-            document.getElementById('videoText').innerText = videoData.text;
+        const videoPlayer = document.getElementById('mainVideo');
+        const loader = document.getElementById('videoLoader');
+
+        // --- 1. INSTANT DATA LOAD ---
+        function initVideo() {
+            const data = JSON.parse(localStorage.getItem('current_video_view'));
+            if (!data) return history.back();
+
+            // Set text data immediately
+            document.getElementById('videoAuthor').innerText = `@${data.author || 'Elite_Member'}`;
+            document.getElementById('videoText').innerText = data.caption || '';
+            
+            // Set video source
+            videoPlayer.src = data.url;
+            
+            // Optimization: Start playing immediately
+            videoPlayer.load();
+            videoPlayer.play().catch(e => {
+                console.log("Autoplay blocked, waiting for interaction");
+            });
         }
 
-        // 2. LIVE LIKE LOGIC
-        let isLiked = false;
+        // --- 2. LOADING STATE MANAGEMENT ---
+        videoPlayer.onwaiting = () => { loader.style.display = 'block'; };
+        videoPlayer.onplaying = () => { loader.style.display = 'none'; };
+        videoPlayer.oncanplay = () => { loader.style.display = 'none'; };
+
+        // --- 3. ENGAGEMENT LOGIC ---
         function toggleLike() {
             const btn = document.getElementById('likeBtn');
+            btn.classList.toggle('liked');
             const count = document.getElementById('likeCount');
-            isLiked = !isLiked;
-            
-            if (isLiked) {
-                btn.classList.add('liked');
-                count.innerText = parseInt(count.innerText) + 1;
-                // Nan zaka iya hada Firebase Update
+            let current = parseInt(count.innerText);
+            count.innerText = btn.classList.contains('liked') ? current + 1 : current - 1;
+        }
+
+        function shareVideo() {
+            if (navigator.share) {
+                navigator.share({ title: 'Elite Video', url: window.location.href });
             } else {
-                btn.classList.remove('liked');
-                count.innerText = parseInt(count.innerText) - 1;
+                alert("Link copied!");
             }
         }
 
-        // 3. COMMENT PANEL LOGIC
-        function toggleComments() {
-            document.getElementById('commentPanel').classList.toggle('active');
-        }
-
-        // 4. SHARING LOGIC
-        async function shareVideo() {
-            try {
-                await navigator.share({
-                    title: 'CMchat Pro Video',
-                    text: videoData.text,
-                    url: window.location.href
-                });
-            } catch (err) {
-                alert("Link copied to clipboard!");
-            }
-        }
+        // Start everything
+        initVideo();
     </script>
 </body>
 </html>
