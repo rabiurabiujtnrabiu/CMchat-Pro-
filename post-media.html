@@ -101,25 +101,22 @@
             const text = document.getElementById('postText').value.trim();
             const submitBtn = document.getElementById('submitBtn');
 
-            // --- INSTANT ACTION ---
+            // --- INSTANT ACTION: Redirect zuwa Dashboard ---
             document.body.classList.add('fade-out');
-            
-            // Redirect nan take zuwa Dashboard
             setTimeout(() => {
-                window.location.href = 'Dashboard.html'; 
+                window.location.href = 'index.html'; 
             }, 300);
 
             try {
-                let mainMediaUrl = "";
-                let mainMediaType = "";
+                const uploadedMedia = [];
 
-                // Aikin Upload a background ta Cloudinary
+                // 1. Aikin Upload zuwa Cloudinary (Background)
                 for (let item of selectedFiles) {
                     const formData = new FormData();
                     formData.append('file', item.file);
                     formData.append('upload_preset', UPLOAD_PRESET);
                     
-                    // RAGE CIN DATA (Elite Compression)
+                    // Optimization don rage cin data
                     formData.append('quality', 'auto:eco'); 
                     formData.append('fetch_format', 'auto');
 
@@ -130,16 +127,18 @@
 
                     const data = await response.json();
                     if (data.secure_url) {
-                        mainMediaUrl = data.secure_url;
-                        mainMediaType = item.type;
+                        uploadedMedia.push({ 
+                            url: data.secure_url, 
+                            type: item.type 
+                        });
                     }
                 }
 
-                // TURAWA FIREBASE (Amfani da 'Posts' domin Dashboard ya gani)
-                await db.collection('Posts').add({
+                // 2. TURAWA FIREBASE (Sync tare da Dashboard)
+                // Na mayar da collection din 'posts' yadda Dashboard dinka yake nema
+                await db.collection('posts').add({
                     text: text,
-                    image: mainMediaType === 'image' ? mainMediaUrl : "",
-                    video: mainMediaType === 'video' ? mainMediaUrl : "",
+                    media: uploadedMedia,
                     username: localStorage.getItem('username') || "Commander CM",
                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                     likes: 0,
