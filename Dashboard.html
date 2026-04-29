@@ -51,9 +51,6 @@
         .card { background: var(--white); border-radius: 20px; padding: 18px; margin-bottom: 12px; box-shadow: var(--shadow); }
         .post-media { width: 100%; border-radius: 12px; margin-top: 12px; max-height: 450px; object-fit: cover; cursor: pointer; display: block; outline: none; -webkit-tap-highlight-color: transparent; }
         
-        video::-webkit-media-controls-start-playback-button { display: none !important; -webkit-appearance: none; }
-        video::-webkit-media-controls-panel { background-image: none !important; }
-
         .post-footer { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
         .post-action { display: flex; align-items: center; gap: 5px; color: #64748b; font-size: 13px; font-weight: 600; cursor: pointer; }
 
@@ -61,6 +58,10 @@
         .nav-item { color: #94a3b8; font-size: 18px; text-decoration: none; display: flex; flex-direction: column; align-items: center; }
         .nav-item.active { color: #38bdf8; }
         #scrollTopBtn { position: fixed; bottom: 85px; right: 20px; width: 45px; height: 45px; background: var(--primary); color: #fff; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 5px 15px rgba(0,98,255,0.4); z-index: 2500; cursor: pointer; border: none; }
+
+        /* --- POST ENGINE MODAL STYLE --- */
+        #engineModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; }
+        #engineFrame { width: 100%; height: 100%; border: none; }
 
         /* Skeleton Animation */
         @keyframes skeleton-loading { 0% { background-color: #f1f5f9; } 100% { background-color: #e2e8f0; } }
@@ -70,6 +71,10 @@
 <body>
 
     <button id="scrollTopBtn" onclick="scrollToTop()"><i class="fas fa-chevron-up"></i></button>
+
+    <div id="engineModal">
+        <iframe id="engineFrame" src=""></iframe>
+    </div>
 
     <header class="fb-header">
         <div class="header-top">
@@ -87,8 +92,8 @@
         </div>
         <div class="post-input-container">
             <div class="user-avatar" id="headerAvatar"></div>
-            <div class="fake-input" onclick="window.location.href='post-media.html'">What's on your elite mind?</div>
-            <a href="post-media.html" class="icon-circle" style="background:none;"><i class="fas fa-image" style="color: #10b981; font-size: 20px;"></i></a>
+            <div class="fake-input" onclick="openPostEngine()">What's on your elite mind?</div>
+            <a href="javascript:void(0)" onclick="openPostEngine()" class="icon-circle" style="background:none;"><i class="fas fa-image" style="color: #10b981; font-size: 20px;"></i></a>
         </div>
     </header>
 
@@ -130,13 +135,26 @@
 
         function scrollToTop() { window.scrollTo({top: 0, behavior: 'smooth'}); }
 
-        // --- OPTIMISTIC RENDERING ENGINE ---
+        // --- POST ENGINE LOGIC ---
+        function openPostEngine() {
+            const modal = document.getElementById('engineModal');
+            const frame = document.getElementById('engineFrame');
+            frame.src = 'post-media.html'; // Calling the file
+            modal.style.display = 'block';
+        }
+
+        // Dashboard can call this from within iframe
+        function closePostEngine() {
+            document.getElementById('engineModal').style.display = 'none';
+            document.getElementById('engineFrame').src = '';
+        }
+
+        // --- OPTIMISTIC RENDERING ---
         function checkOptimisticPost() {
             const data = localStorage.getItem('recent_optimistic_post');
             if (data) {
                 const p = JSON.parse(data);
                 const feed = document.getElementById('feedContainer');
-                
                 let mediaHtml = '';
                 if (p.media && p.media.length > 0) {
                     const m = p.media[0];
@@ -144,20 +162,7 @@
                         ? `<img src="${m.url}" class="post-media" style="filter: brightness(0.8)">` 
                         : `<video src="${m.url}" class="post-media" muted autoplay loop></video>`;
                 }
-
-                const optHtml = `
-                    <div class="card" id="optPost" style="border-left: 4px solid var(--primary);">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
-                            <div style="display:flex; align-items:center; gap:12px">
-                                <div style="width:40px;height:40px;border-radius:50%;background:var(--primary-gradient);color:white;display:flex;align-items:center;justify-content:center;font-weight:800">${p.username[0]}</div>
-                                <div><h4 style="font-size:14px;font-weight:700">${p.username}</h4><p style="font-size:11px;color:var(--primary)">Uploading...</p></div>
-                            </div>
-                            <i class="fas fa-circle-notch fa-spin" style="color:var(--primary)"></i>
-                        </div>
-                        <p style="font-size:14px;color:#334155;line-height:1.6">${p.text}</p>
-                        ${mediaHtml}
-                    </div>`;
-                
+                const optHtml = `<div class="card" id="optPost" style="border-left:4px solid var(--primary);"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:50%;background:var(--primary-gradient);color:white;display:flex;align-items:center;justify-content:center;font-weight:800">${p.username[0]}</div><div><h4 style="font-size:14px;font-weight:700">${p.username}</h4><p style="font-size:11px;color:var(--primary)">Uploading...</p></div></div><i class="fas fa-circle-notch fa-spin" style="color:var(--primary)"></i></div><p style="font-size:14px;color:#334155;line-height:1.6">${p.text}</p>${mediaHtml}</div>`;
                 const loader = document.getElementById('initialLoader');
                 if(loader) loader.remove();
                 feed.insertAdjacentHTML('afterbegin', optHtml);
@@ -177,11 +182,7 @@
             snap.forEach(doc => {
                 const s = doc.data();
                 allStories.push(s);
-                container.innerHTML += `
-                    <div class="story-item" onclick="openStoryPage(${storyIndex})">
-                        <div class="story-ring"><div class="story-img" style="background-image:url('${s.imageUrl}')"></div></div>
-                        <span class="story-name">${s.owner || 'Elite'}</span>
-                    </div>`;
+                container.innerHTML += `<div class="story-item" onclick="openStoryPage(${storyIndex})"><div class="story-ring"><div class="story-img" style="background-image:url('${s.imageUrl}')"></div></div><span class="story-name">${s.owner || 'Elite'}</span></div>`;
                 storyIndex++;
             });
         });
@@ -198,16 +199,12 @@
             const feed = document.getElementById('feedContainer');
             const loader = document.getElementById('initialLoader');
             if(loader) loader.remove();
-
-            // Clear old posts but keep optimistic one if syncing
             const optPost = document.getElementById('optPost');
             feed.innerHTML = '';
             if(optPost) feed.appendChild(optPost);
 
             snap.forEach(doc => {
                 const p = doc.data();
-                
-                // If this real post matches the optimistic one, remove the optimistic placeholder
                 if (localStorage.getItem('recent_optimistic_post')) {
                     const localP = JSON.parse(localStorage.getItem('recent_optimistic_post'));
                     if (p.text === localP.text && p.username === localP.username) {
@@ -215,15 +212,25 @@
                         if(optPost) optPost.remove();
                     }
                 }
-
                 const time = p.timestamp ? new Date(p.timestamp.toDate()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'Now';
+                
                 let mediaHtml = '';
                 if (p.media && p.media.length > 0) {
                     const m = p.media[0];
                     if (m.type === 'image') {
                         mediaHtml = `<img src="${m.url}" class="post-media" loading="lazy" onclick='openFullPost(${JSON.stringify({url: m.url, author: p.username, caption: p.text, type: "image"}).replace(/'/g, "\\'")})'>`;
                     } else if (m.type === 'video') {
-                        mediaHtml = `<video class="post-media" preload="none" onclick="this.paused ? this.play() : this.pause()"><source src="${m.url}" type="video/mp4"></video>`;
+                        // PREVIEW ENGINE: Muted Autoplay, but Redirect on Click
+                        mediaHtml = `
+                            <video class="post-media" 
+                                   muted 
+                                   autoplay 
+                                   loop 
+                                   playsinline 
+                                   preload="metadata"
+                                   onclick='openFullVideo(${JSON.stringify({url: m.url, author: p.username, caption: p.text}).replace(/'/g, "\\'")})'>
+                                <source src="${m.url}" type="video/mp4">
+                            </video>`;
                     }
                 }
 
@@ -245,10 +252,12 @@
             observeVideos();
         });
 
-        // Initialize Observer
+        // Smart Video Observer
         const videoObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (!entry.isIntersecting && entry.target.tagName === 'VIDEO') entry.target.pause();
+                const v = entry.target;
+                if (!entry.isIntersecting) { v.pause(); } 
+                else { v.play().catch(e => {}); }
             });
         }, { threshold: 0.5 });
 
@@ -261,9 +270,13 @@
             window.location.href = 'view-post.html';
         }
 
-        // Run on start
+        // REDIRECT TO FULL VIDEO PAGE
+        function openFullVideo(data) {
+            localStorage.setItem('current_video_view', JSON.stringify(data));
+            window.location.href = 'view-video.html';
+        }
+
         checkOptimisticPost();
-        
         window.onscroll = function() {
             document.getElementById("scrollTopBtn").style.display = (window.pageYOffset > 500) ? "flex" : "none";
         };
