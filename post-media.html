@@ -101,22 +101,21 @@
             const text = document.getElementById('postText').value.trim();
             const submitBtn = document.getElementById('submitBtn');
 
-            // --- INSTANT ACTION: Redirect zuwa Dashboard ---
+            // --- INSTANT ACTION: Redirect zuwa Dashboard.html ---
             document.body.classList.add('fade-out');
             setTimeout(() => {
-                window.location.href = 'index.html'; 
+                window.location.href = 'Dashboard.html'; 
             }, 300);
 
             try {
                 const uploadedMedia = [];
 
-                // 1. Aikin Upload zuwa Cloudinary (Background)
+                // 1. Cloudinary Upload a background
                 for (let item of selectedFiles) {
                     const formData = new FormData();
                     formData.append('file', item.file);
                     formData.append('upload_preset', UPLOAD_PRESET);
                     
-                    // Optimization don rage cin data
                     formData.append('quality', 'auto:eco'); 
                     formData.append('fetch_format', 'auto');
 
@@ -134,8 +133,7 @@
                     }
                 }
 
-                // 2. TURAWA FIREBASE (Sync tare da Dashboard)
-                // Na mayar da collection din 'posts' yadda Dashboard dinka yake nema
+                // 2. Firebase Update zuwa folder "posts" (p karama)
                 await db.collection('posts').add({
                     text: text,
                     media: uploadedMedia,
@@ -146,7 +144,7 @@
                     profilePic: localStorage.getItem('profilePic') || ""
                 });
 
-                console.log("Elite Success: Post is live on Dashboard!");
+                console.log("Elite Success: Post is live on Dashboard.html!");
             } catch (err) {
                 console.error("Background Error:", err);
             }
