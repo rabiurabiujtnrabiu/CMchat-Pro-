@@ -5,112 +5,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CMchat Pro - Elite Messenger</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root { 
-            --primary: #0062ff; 
-            --primary-gradient: linear-gradient(135deg, #0062ff, #00d2ff);
-            --bg-chat: #f0f2f5; 
-            --white: #ffffff; 
-            --shadow: 0 2px 10px rgba(0,0,0,0.08);
+            --bg-dark: #0b141a;
+            --header-dark: #202c33;
+            --sent-bubble: #005c4b;
+            --received-bubble: #202c33;
+            --text-main: #e9edef;
+            --text-dim: #8696a0;
+            --primary: #00a884;
         }
         
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        html, body { height: 100%; width: 100%; overflow: hidden; background: var(--bg-chat); }
-        body { display: flex; flex-direction: column; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-dark); height: 100vh; display: flex; flex-direction: column; color: var(--text-main); overflow: hidden; }
 
-        /* --- SIDEBAR --- */
-        .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: white; z-index: 3000; transition: 0.3s; padding: 30px 20px; }
-        .sidebar.active { left: 0; box-shadow: 10px 0 30px rgba(0,0,0,0.1); }
-        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 2500; display: none; backdrop-filter: blur(4px); }
+        /* --- HEADER --- */
+        .chat-header { background: var(--header-dark); padding: 10px 15px; display: flex; align-items: center; height: 65px; z-index: 1000; position: sticky; top: 0; }
+        .header-left { display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer; }
+        .user-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; background: #3b4a54; border: 1px solid rgba(255,255,255,0.1); }
+        .user-meta b { font-size: 16px; color: var(--text-main); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
+        .status-text { font-size: 11px; color: var(--text-dim); }
+        .status-text.online { color: var(--primary); }
+        .header-tools { display: flex; gap: 22px; color: var(--text-dim); font-size: 19px; padding-right: 5px; }
 
-        /* --- HEADER (SIDEBAR ONLY, NO BACK BUTTON) --- */
-        .chat-header { 
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
-            padding: 10px 15px; display: flex; align-items: center; height: 75px; 
-            border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 1000; position: sticky; top: 0;
+        /* --- CHAT AREA --- */
+        .chat-container { 
+            flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+            background-blend-mode: overlay; background-size: 400px; scroll-behavior: smooth;
         }
-        .header-left { display: flex; align-items: center; gap: 15px; flex: 1; }
-        .sidebar-toggle { padding: 10px; color:#64748b; cursor:pointer; font-size: 20px; }
-        .user-info { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-        .user-avatar { width: 48px; height: 48px; border-radius: 16px; object-fit: cover; background: #e2e8f0; }
-        .user-meta b { font-size: 16px; color: #1e293b; font-weight: 800; }
-        .status-dot { font-size: 12px; color: #94a3b8; }
 
-        .header-tools { display: flex; gap: 18px; color: #64748b; font-size: 18px; padding-right: 10px; }
+        .message { max-width: 85%; padding: 6px 10px 4px; border-radius: 12px; font-size: 14.5px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+        .received { background: var(--received-bubble); align-self: flex-start; border-top-left-radius: 0; }
+        .sent { background: var(--sent-bubble); align-self: flex-end; border-top-right-radius: 0; }
 
-        /* --- CHAT BUBBLES --- */
-        .chat-container { flex: 1; padding: 20px 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .message { max-width: 78%; padding: 12px 16px; border-radius: 20px; font-size: 14.5px; box-shadow: var(--shadow); }
-        .received { background: var(--white); align-self: flex-start; border-bottom-left-radius: 4px; color: #334155; }
-        .sent { background: var(--primary-gradient); align-self: flex-end; border-bottom-right-radius: 4px; color: white; }
+        /* --- VOICE WAVEFORM PLAYER --- */
+        .voice-wrapper { display: flex; align-items: center; gap: 10px; min-width: 220px; padding: 4px 0; }
+        .voice-avatar-box { position: relative; width: 38px; height: 38px; }
+        .voice-avatar { width: 100%; height: 100%; border-radius: 50%; background: #3b4a54; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: white; }
+        .mic-badge { position: absolute; bottom: -1px; right: -1px; font-size: 10px; color: var(--primary); background: var(--bg-dark); border-radius: 50%; padding: 2px; }
+
+        .play-btn { font-size: 22px; color: var(--text-dim); cursor: pointer; transition: 0.2s; }
+        .sent .play-btn { color: white; }
         
-        /* --- FLOATING ADD FRIEND --- */
-        .floating-add {
-            position: fixed; bottom: 100px; right: 20px; 
-            width: 55px; height: 55px; background: var(--primary-gradient);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 20px; box-shadow: 0 8px 20px rgba(0,98,255,0.3);
-            z-index: 2000; cursor: pointer;
-        }
+        .waveform { flex: 1; display: flex; align-items: center; gap: 2px; height: 25px; }
+        .wave-bar { width: 2px; background: rgba(255,255,255,0.2); border-radius: 1px; transition: 0.2s; }
+        .wave-bar.active { background: var(--primary) !important; animation: pulseWave 0.5s infinite; }
+        @keyframes pulseWave { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        /* --- INPUT AREA --- */
-        .input-area { padding: 12px 15px; background: white; display: flex; align-items: center; gap: 10px; border-top: 1px solid #edf2f7; }
-        .input-wrapper { flex: 1; background: #f1f5f9; border-radius: 25px; padding: 5px 15px; display: flex; align-items: center; }
-        #messageInput { border: none; background: transparent; outline: none; flex: 1; padding: 10px; font-size: 15px; }
-        .action-btn { width: 50px; height: 50px; border-radius: 50%; background: var(--primary-gradient); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .msg-footer { display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+        .sent .msg-footer i { color: #53bdeb; }
+
+        /* --- INPUT BAR --- */
+        .input-area { background: var(--header-dark); padding: 10px 12px; display: flex; align-items: center; gap: 8px; position: relative; }
+        
+        .recording-hud { display: none; align-items: center; gap: 12px; flex: 1; color: #ff3b30; font-weight: 800; font-size: 14px; padding-left: 10px; }
+        .rec-dot { width: 10px; height: 10px; background: #ff3b30; border-radius: 50%; animation: blink 0.8s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        .input-wrapper { flex: 1; background: #2a3942; border-radius: 25px; padding: 0 12px; display: flex; align-items: center; height: 45px; gap: 12px; }
+        #messageInput { border: none; background: transparent; outline: none; flex: 1; color: var(--text-main); font-size: 16px; }
+        
+        .action-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); border: none; color: white; cursor: pointer; font-size: 19px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.3); transition: 0.2s; }
+        .action-btn:active { transform: scale(0.9); }
+        .icon-btn { color: var(--text-dim); font-size: 20px; cursor: pointer; transition: 0.2s; }
+        .icon-btn:active { color: white; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
-    
-    <div class="sidebar" id="sidebar">
-        <h2 style="color:var(--primary); margin-bottom:20px; font-weight:800;">Elite Menu</h2>
-        <div style="display:flex; flex-direction:column; gap:25px;">
-            <a href="Profile.html" style="text-decoration:none; color:#1e293b; font-weight:700;"><i class="fas fa-user-circle" style="margin-right:10px;"></i> Profile</a>
-            <a href="Wallet.html" style="text-decoration:none; color:#1e293b; font-weight:700;"><i class="fas fa-wallet" style="margin-right:10px;"></i> Wallet</a>
-            <a href="Settings.html" style="text-decoration:none; color:#1e293b; font-weight:700;"><i class="fas fa-cog" style="margin-right:10px;"></i> Settings</a>
-            <hr>
-            <a href="index.html" style="text-decoration:none; color:red; font-weight:700;"><i class="fas fa-sign-out-alt" style="margin-right:10px;"></i> Exit Chat</a>
-        </div>
-    </div>
-
     <header class="chat-header">
-        <div class="header-left">
-            <i class="fas fa-bars sidebar-toggle" onclick="toggleSidebar()"></i>
+        <div class="header-left" onclick="window.location.href='Profile.html'">
+            <i class="fas fa-arrow-left icon-btn" onclick="history.back(); event.stopPropagation();"></i>
+            <img src="https://via.placeholder.com/100" class="user-avatar" id="chatAvatar">
             <div class="user-info">
-                <img src="https://via.placeholder.com/100" class="user-avatar" id="chatAvatar">
-                <div class="user-meta">
-                    <b id="chatWith">User</b> 
-                    <div class="status-dot" id="statusText">Offline</div>
-                </div>
+                <b id="chatWith">Elite Member</b> 
+                <div class="status-text" id="statusText">online</div>
             </div>
         </div>
         <div class="header-tools">
-            <i class="fas fa-phone-alt" onclick="window.location.href='voice-call.html'"></i>
             <i class="fas fa-video" onclick="window.location.href='video-call.html'"></i>
+            <i class="fas fa-phone-alt" onclick="window.location.href='voice-call.html'"></i>
+            <i class="fas fa-ellipsis-v" onclick="window.location.href='sidebar.html'"></i>
         </div>
     </header>
-
-    <div class="floating-add" onclick="window.location.href='add-friend.html'">
-        <i class="fas fa-user-plus"></i>
-    </div>
 
     <div class="chat-container" id="chatBox"></div>
 
     <div class="input-area">
-        <div class="input-wrapper">
-            <i class="far fa-face-smile" style="color:#64748b; font-size:22px;" onclick="window.location.href='stickers.html'"></i>
-            <input type="text" id="messageInput" placeholder="Type a message..." oninput="checkInput()">
+        <i class="far fa-laugh icon-btn" onclick="window.location.href='stickers.html'"></i>
+        <div id="recHUD" class="recording-hud">
+            <div class="rec-dot"></div> <span id="recTimer">00:00</span>
+            <span style="color:#8696a0; font-size:11px; font-weight:400; margin-left:10px;">Slide up to lock</span>
         </div>
-        <button class="action-btn" id="sendBtn">
+        <div class="input-wrapper" id="inputWrap">
+            <input type="text" id="messageInput" placeholder="Message" oninput="checkInput()">
+            <i class="fas fa-paperclip icon-btn" style="transform: rotate(45deg);"></i>
+            <label for="camInput"><i class="fas fa-camera icon-btn"></i></label>
+            <input type="file" id="camInput" hidden accept="image/*" onchange="handleImage(this)">
+        </div>
+        <button class="action-btn" id="sendBtn" 
+                onmousedown="handleVoiceStart()" 
+                onmouseup="handleVoiceStop()"
+                ontouchstart="handleVoiceStart()" 
+                ontouchend="handleVoiceStop()">
             <i class="fas fa-microphone" id="btnIcon"></i>
         </button>
     </div>
 
+    <script src="voice-handler.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
@@ -119,21 +125,120 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        function toggleSidebar() {
-            const sb = document.getElementById('sidebar');
-            const ov = document.getElementById('overlay');
-            sb.classList.toggle('active');
-            ov.style.display = sb.classList.contains('active') ? 'block' : 'none';
+        const myUID = localStorage.getItem('user_uid') || "USER_1";
+        const partnerUID = new URLSearchParams(window.location.search).get('uid') || "USER_2";
+        const chatID = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
+
+        // UI Helpers
+        const msgInput = document.getElementById('messageInput');
+        const btnIcon = document.getElementById('btnIcon');
+        const hud = document.getElementById('recHUD');
+        const inputWrap = document.getElementById('inputWrap');
+
+        // --- REAL-TIME CHAT ---
+        database.ref('messages/' + chatID).on('value', snap => {
+            const box = document.getElementById('chatBox');
+            box.innerHTML = "";
+            snap.forEach(child => {
+                const d = child.val();
+                const isMe = d.sender === myUID;
+                if(d.type === 'voice') {
+                    box.innerHTML += renderVoiceMessage(isMe, d);
+                } else {
+                    box.innerHTML += `
+                        <div class="message ${isMe ? 'sent' : 'received'}">
+                            ${d.msg}
+                            <div class="msg-footer">
+                                <span>${d.time}</span>
+                                ${isMe ? '<i class="fas fa-check-double"></i>' : ''}
+                            </div>
+                        </div>`;
+                }
+            });
+            box.scrollTop = box.scrollHeight;
+        });
+
+        function renderVoiceMessage(isMe, d) {
+            const initial = d.sender_name ? d.sender_name[0] : 'E';
+            return `
+                <div class="message ${isMe ? 'sent' : 'received'}">
+                    <div class="voice-wrapper">
+                        <div class="voice-avatar-box">
+                            <div class="voice-avatar">${initial}</div>
+                            <i class="fas fa-microphone mic-badge"></i>
+                        </div>
+                        <i class="fas fa-play play-btn" onclick="playAudio('${d.url}', this)"></i>
+                        <div class="waveform">
+                            ${Array(22).fill('<div class="wave-bar" style="height:'+(5+Math.random()*15)+'px"></div>').join('')}
+                        </div>
+                    </div>
+                    <div class="msg-footer">
+                        <span>${d.duration || '0:00'} • ${d.time}</span>
+                        ${isMe ? '<i class="fas fa-check-double"></i>' : ''}
+                    </div>
+                </div>`;
         }
 
         function checkInput() {
-            const input = document.getElementById('messageInput');
-            const icon = document.getElementById('btnIcon');
-            icon.className = input.value.trim().length > 0 ? "fas fa-paper-plane" : "fas fa-microphone";
+            btnIcon.className = msgInput.value.trim().length > 0 ? "fas fa-paper-plane" : "fas fa-microphone";
         }
 
-        // --- CIGABA DA CORE LOGIC DINKA ---
-        // (Saka ainihin startMessenger da sauran logic dinka anan)
+        // --- LIVE ACTION HANDLERS ---
+        function handleVoiceStart() {
+            if(msgInput.value.trim().length > 0) return;
+            hud.style.display = 'flex';
+            inputWrap.style.display = 'none';
+            // Kira engine ɗinka daga voice-handler.js
+            if(window.VoiceManager) VoiceManager.start();
+            
+            let sec = 0;
+            window.recTimer = setInterval(() => {
+                sec++;
+                let m = Math.floor(sec/60), s = sec%60;
+                document.getElementById('recTimer').innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+            }, 1000);
+        }
+
+        function handleVoiceStop() {
+            if(hud.style.display === 'none') {
+                if(msgInput.value.trim().length > 0) sendMessage();
+                return;
+            }
+            clearInterval(window.recTimer);
+            hud.style.display = 'none';
+            inputWrap.style.display = 'flex';
+            document.getElementById('recTimer').innerText = "00:00";
+            if(window.VoiceManager) VoiceManager.stop(chatID, myUID);
+        }
+
+        function sendMessage() {
+            const text = msgInput.value.trim();
+            database.ref('messages/' + chatID).push({
+                sender: myUID,
+                msg: text,
+                type: 'text',
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                timestamp: Date.now()
+            });
+            msgInput.value = "";
+            checkInput();
+        }
+
+        function playAudio(url, btn) {
+            const audio = new Audio(url);
+            btn.className = "fas fa-pause play-btn";
+            audio.play();
+            audio.onended = () => btn.className = "fas fa-play play-btn";
+        }
+
+        // Partner Init
+        database.ref('users/' + partnerUID).once('value', snap => {
+            const u = snap.val();
+            if(u) {
+                document.getElementById('chatWith').innerText = u.username;
+                document.getElementById('chatAvatar').src = u.profilePhoto || 'https://via.placeholder.com/100';
+            }
+        });
     </script>
 </body>
 </html>
