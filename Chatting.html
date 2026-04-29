@@ -21,20 +21,18 @@
         
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* GYARAN SCREEN: Wannan zai sa shafin ya zauna daidai a kowace waya */
         body { 
             background-color: var(--bg-dark); 
             height: 100vh; 
-            height: 100dvh; /* Dynamic height don wayoyin zamani */
+            height: 100dvh; 
             display: flex; 
             flex-direction: column; 
             color: var(--text-main); 
             overflow: hidden; 
             width: 100%;
-            position: fixed; /* Kare tsalle-tsallen shafi idan keyboard ya fito */
+            position: fixed; 
         }
 
-        /* --- HEADER --- */
         .chat-header { background: var(--header-dark); padding: 10px 15px; display: flex; align-items: center; height: 60px; z-index: 1000; flex-shrink: 0; }
         .header-left { display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #3b4a54; border: 1px solid rgba(255,255,255,0.1); }
@@ -42,26 +40,16 @@
         .status-text { font-size: 11px; color: var(--primary); }
         .header-tools { display: flex; gap: 20px; color: var(--text-dim); font-size: 19px; }
 
-        /* --- CHAT AREA --- */
         .chat-container { 
-            flex: 1; 
-            padding: 15px; 
-            overflow-y: auto; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 8px;
+            flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-blend-mode: overlay; 
-            background-size: 400px; 
-            scroll-behavior: smooth;
-            height: 0; /* Flexbox trick don scrolling ya gyaru */
+            background-blend-mode: overlay; background-size: 400px; scroll-behavior: smooth; height: 0;
         }
 
         .message { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 14.5px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.2); line-height: 1.4; }
         .received { background: var(--received-bubble); align-self: flex-start; border-top-left-radius: 0; }
         .sent { background: var(--sent-bubble); align-self: flex-end; border-top-right-radius: 0; }
 
-        /* --- VOICE PLAYER --- */
         .voice-wrapper { display: flex; align-items: center; gap: 10px; min-width: 210px; padding: 4px 0; }
         .voice-avatar-box { position: relative; width: 35px; height: 35px; }
         .voice-avatar { width: 100%; height: 100%; border-radius: 50%; background: #3b4a54; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; color: white; }
@@ -76,9 +64,7 @@
         .msg-footer { display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; color: var(--text-dim); margin-top: 4px; }
         .sent .msg-footer i { color: #53bdeb; }
 
-        /* --- INPUT BAR --- */
         .input-area { background: var(--header-dark); padding: 10px 12px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; min-height: 62px; }
-        
         .recording-hud { display: none; align-items: center; gap: 12px; flex: 1; color: #ff3b30; font-weight: 800; font-size: 14px; }
         .rec-dot { width: 10px; height: 10px; background: #ff3b30; border-radius: 50%; animation: blink 0.8s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
@@ -131,7 +117,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // --- CONFIGURATION ---
         const firebaseConfig = { databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
@@ -147,21 +132,22 @@
         const inputWrap = document.getElementById('inputWrap');
         const chatBox = document.getElementById('chatBox');
 
-        // --- VOICE ENGINE ---
         let mediaRecorder;
         let audioChunks = [];
         let timerInterval;
+        let currentAudio = null; // Global player controller
 
         async function startVoice() {
             if(msgInput.value.trim().length > 0) return;
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
+                // CODEC FIX: Muna amfani da Opus don sauti mai inganci (HD)
+                const options = { mimeType: 'audio/webm;codecs=opus', audioBitsPerSecond: 128000 };
+                mediaRecorder = new MediaRecorder(stream, options);
                 audioChunks = [];
                 mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
                 mediaRecorder.start();
                 
-                // UI Changes
                 hud.style.display = 'flex';
                 inputWrap.style.display = 'none';
                 micBtn.classList.add('recording-active');
@@ -172,7 +158,7 @@
                     let m = Math.floor(sec/60), s = sec%60;
                     document.getElementById('recTimer').innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
                 }, 1000);
-            } catch(e) { alert("Mic Permission Error!"); }
+            } catch(e) { alert("Mic Error!"); }
         }
 
         async function stopVoice() {
@@ -182,17 +168,15 @@
             }
             clearInterval(timerInterval);
             mediaRecorder.stop();
-            
-            // UI Reset
             hud.style.display = 'none';
             inputWrap.style.display = 'flex';
             micBtn.classList.remove('recording-active');
             document.getElementById('recTimer').innerText = "00:00";
             
             mediaRecorder.onstop = async () => {
-                const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                const blob = new Blob(audioChunks, { type: 'audio/webm;codecs=opus' });
                 mediaRecorder.stream.getTracks().forEach(t => t.stop());
-                if(blob.size > 1000) uploadVoice(blob);
+                if(blob.size > 1500) uploadVoice(blob);
             };
         }
 
@@ -236,7 +220,6 @@
             btnIcon.className = msgInput.value.trim().length > 0 ? "fas fa-paper-plane" : "fas fa-microphone";
         }
 
-        // --- REAL-TIME SYNC ---
         database.ref('messages/' + chatID).on('value', snap => {
             chatBox.innerHTML = "";
             snap.forEach(child => {
@@ -272,14 +255,25 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         });
 
+        // PLAY VOICE ENGINE FIX: Kashe kowane sauti idan an danna sabo
         function playVoice(url, btn) {
-            const audio = new Audio(url);
+            if (currentAudio) {
+                currentAudio.pause();
+                document.querySelectorAll('.play-btn').forEach(b => b.className = "fas fa-play play-btn");
+                if (currentAudio.src === url && !currentAudio.paused) {
+                    currentAudio = null;
+                    return;
+                }
+            }
+            currentAudio = new Audio(url);
             btn.className = "fas fa-pause play-btn";
-            audio.play();
-            audio.onended = () => btn.className = "fas fa-play play-btn";
+            currentAudio.play();
+            currentAudio.onended = () => {
+                btn.className = "fas fa-play play-btn";
+                currentAudio = null;
+            };
         }
 
-        // Load Partner Details
         database.ref('users/' + partnerUID).once('value', s => {
             const u = s.val();
             if(u) {
