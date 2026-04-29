@@ -1,96 +1,113 @@
 // ==========================================
-// CMchat Pro - Elite Voice Engine (Live)
+// CMchat Pro - Complete Elite Voice System
 // ==========================================
 
 let mediaRecorder;
 let audioChunks = [];
 
 const VoiceManager = {
-    // 1. FARA RECORDING
-    start: async function() {
+    currentChatID: null,
+    currentUID: null,
+
+    // 1. Fara Recording
+    start: async function(chatID, myUID) {
+        this.currentChatID = chatID;
+        this.currentUID = myUID;
+
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
+            const options = { mimeType: 'audio/webm' };
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) options.mimeType = 'audio/ogg';
+
+            mediaRecorder = new MediaRecorder(stream, options);
             audioChunks = [];
 
-            mediaRecorder.ondataavailable = (e) => {
-                audioChunks.push(e.data);
-            };
-
+            mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
+            
             mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/mp4' });
-                await this.upload(audioBlob);
+                const audioBlob = new Blob(audioChunks, { type: options.mimeType });
+                if (audioBlob.size > 1000) await this.upload(audioBlob);
             };
 
             mediaRecorder.start();
-            console.log("Elite Voice: Recording Started...");
+            this.updateUI(true);
         } catch (err) {
-            alert("Mic Error: Ba a baka damar amfani da mic ba.");
-            console.error(err);
+            alert("Mic Error: Bamu damar amfani da mic.");
         }
     },
 
-    // 2. TSAIDAR DA RECORDING DA TURARWA
-    stop: function(chatID, myUID) {
+    // 2. Tsayarwa da Turawa Automatic
+    stop: function() {
         if (mediaRecorder && mediaRecorder.state !== "inactive") {
             mediaRecorder.stop();
-            // Kashe mic din bayan an gama don kiyaye batir da sirri
-            mediaRecorder.stream.getTracks().forEach(track => track.stop());
-            this.currentChatID = chatID;
-            this.currentUID = myUID;
+            this.updateUI(false);
+            setTimeout(() => {
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            }, 1000);
         }
     },
 
-    // 3. SMART UPLOAD (Cloudinary Engine)
+    // 3. Loda Muryar zuwa Cloudinary
     upload: async function(blob) {
-        const CLOUD_NAME = "dyfyhzp3o"; // Cloudinary dinka
-        const UPLOAD_PRESET = "cmchat_pro"; // Preset dinka
-
         const formData = new FormData();
         formData.append('file', blob);
-        formData.append('upload_preset', UPLOAD_PRESET);
+        formData.append('upload_preset', "cmchat_pro"); 
+        formData.append('resource_type', 'video');
 
         try {
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, {
+            const response = await fetch(`https://api.cloudinary.com/v1_1/dyfyhzp3o/upload`, {
                 method: 'POST',
                 body: formData
             });
-
             const data = await response.json();
-
-            if (data.secure_url) {
-                this.saveToFirebase(data.secure_url, data.duration);
-            }
+            if (data.secure_url) this.saveToFirebase(data.secure_url, data.duration);
         } catch (error) {
             console.error("Upload Error:", error);
-            alert("Network Error: Muryar bata tafi ba.");
         }
     },
 
-    // 4. AJIYE A FIREBASE (Live Update)
+    // 4. Ajiye a Firebase
     saveToFirebase: function(url, duration) {
         const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const durationFormatted = this.formatTime(duration);
-
         const database = firebase.database();
         database.ref('messages/' + this.currentChatID).push({
             sender: this.currentUID,
             url: url,
-            duration: durationFormatted,
+            duration: this.formatTime(duration),
             type: 'voice',
             time: timeStr,
             timestamp: Date.now(),
-            sender_name: localStorage.getItem('username') || "Elite Member"
+            sender_name: localStorage.getItem('username') || "Elite"
         });
-
-        console.log("Elite Voice: Sent Successfully!");
     },
 
-    // Gyara tsayin lokacin muryar
-    formatTime: function(seconds) {
-        if(!seconds) return "0:00";
-        let m = Math.floor(seconds / 60);
-        let s = Math.floor(seconds % 60);
-        return `${m}:${s < 10 ? '0' + s : s}`;
+    updateUI: function(isRecording) {
+        const micBtn = document.getElementById('micButton');
+        if(isRecording) {
+            micBtn.classList.add('recording-active');
+            // Zaka iya nuna "Recording..." a inda ake rubuta text
+        } else {
+            micBtn.classList.remove('recording-active');
+        }
+    },
+
+    formatTime: function(s) {
+        if(!s) return "0:00";
+        let m = Math.floor(s / 60), sec = Math.floor(s % 60);
+        return `${m}:${sec < 10 ? '0' + sec : sec}`;
     }
 };
+
+// --- Player Engine ---
+function playVoice(url, btn) {
+    const audio = new Audio(url);
+    const icon = btn.querySelector('i');
+    if (icon.classList.contains('fa-play')) {
+        audio.play();
+        icon.className = 'fas fa-pause';
+        audio.onended = () => icon.className = 'fas fa-play';
+    } else {
+        audio.pause();
+        icon.className = 'fas fa-play';
+    }
+}
