@@ -17,25 +17,27 @@
             --text-main: #e9edef;
             --text-dim: #8696a0;
             --primary: #00a884;
+            --online-glow: #00e676;
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        body { 
-            background-color: var(--bg-dark); 
-            height: 100vh; height: 100dvh; 
-            display: flex; flex-direction: column; 
-            color: var(--text-main); overflow: hidden; 
-            width: 100%; position: fixed; 
-        }
+        body { background-color: var(--bg-dark); height: 100vh; height: 100dvh; display: flex; flex-direction: column; color: var(--text-main); overflow: hidden; width: 100%; position: fixed; }
 
         .chat-header { background: var(--header-dark); padding: 10px 15px; display: flex; align-items: center; height: 60px; z-index: 1000; flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .header-left { display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #3b4a54; border: 1px solid rgba(255,255,255,0.1); }
         .user-meta b { font-size: 16px; color: var(--text-main); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
-        .status-text { font-size: 11px; color: var(--primary); }
+        
+        /* Online Status Glow Effect */
+        .status-box { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-dim); }
+        .online-dot { width: 8px; height: 8px; background: #8696a0; border-radius: 50%; }
+        .is-online .online-dot { background: var(--online-glow); box-shadow: 0 0 8px var(--online-glow); animation: glow 1.5s infinite; }
+        @keyframes glow { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        .is-online .status-txt { color: var(--online-glow); font-weight: 600; }
+
         .header-tools { display: flex; gap: 20px; color: var(--text-dim); font-size: 19px; }
-        .header-tools i { cursor: pointer; }
+        .header-tools i:active { color: var(--primary); }
 
         .chat-container { 
             flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
@@ -43,43 +45,41 @@
             background-blend-mode: overlay; background-size: 400px; scroll-behavior: smooth;
         }
 
-        /* Floating Add Friend Button */
         .fab-btn {
-            position: fixed; bottom: 80px; right: 20px;
-            width: 50px; height: 50px;
+            position: fixed; bottom: 85px; right: 20px;
+            width: 55px; height: 55px;
             background: var(--primary); border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            z-index: 99; cursor: pointer; border: none;
+            color: white; font-size: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            z-index: 999; cursor: pointer; border: none;
         }
 
-        .message { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 14.5px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+        .message { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 14.5px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.2); cursor: pointer; transition: 0.2s; }
+        .message:active { transform: scale(0.98); background: rgba(255,255,255,0.05); }
         .received { background: var(--received-bubble); align-self: flex-start; border-top-left-radius: 0; }
         .sent { background: var(--sent-bubble); align-self: flex-end; border-top-right-radius: 0; }
 
-        .voice-wrapper { display: flex; align-items: center; gap: 10px; min-width: 200px; padding: 4px 0; }
-        .play-btn { font-size: 24px; color: var(--text-dim); cursor: pointer; }
-        .sent .play-btn { color: white; }
-        
-        .waveform-lite { flex: 1; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; position: relative; }
-        .waveform-progress { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: var(--primary); border-radius: 2px; }
+        /* Action Menu */
+        #msgMenu { display: none; position: fixed; background: #232d36; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 3000; padding: 5px 0; min-width: 140px; }
+        .menu-item { padding: 12px 15px; font-size: 14px; display: flex; align-items: center; gap: 12px; color: white; }
+        .menu-item i { color: var(--text-dim); width: 20px; }
 
-        .msg-footer { display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; color: var(--text-dim); margin-top: 4px; }
-        .sent .msg-footer i { color: #53bdeb; }
+        /* Sticker Sheet */
+        #stickerSheet { position: fixed; bottom: -320px; left: 0; width: 100%; height: 300px; background: #202c33; z-index: 2000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-top: 1px solid rgba(255,255,255,0.1); padding: 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; overflow-y: auto; }
 
-        .input-area { background: var(--header-dark); padding: 10px 12px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; min-height: 62px; }
-        .recording-hud { display: none; align-items: center; gap: 12px; flex: 1; color: #ff3b30; font-weight: 800; font-size: 14px; }
-        .rec-dot { width: 10px; height: 10px; background: #ff3b30; border-radius: 50%; animation: blink 0.8s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .voice-wrapper { display: flex; align-items: center; gap: 10px; min-width: 200px; }
+        .waveform-lite { flex: 1; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; position: relative; overflow: hidden; }
+        .waveform-progress { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: var(--primary); }
 
+        .input-area { background: var(--header-dark); padding: 10px 12px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
         .input-wrapper { flex: 1; background: #2a3942; border-radius: 25px; padding: 0 12px; display: flex; align-items: center; height: 45px; gap: 12px; }
         #messageInput { border: none; background: transparent; outline: none; flex: 1; color: var(--text-main); font-size: 16px; }
         
-        .action-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); border: none; color: white; cursor: pointer; font-size: 19px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .recording-active { transform: scale(1.2); background: #ff3b30 !important; }
+        .action-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); border: none; color: white; cursor: pointer; font-size: 19px; display: flex; align-items: center; justify-content: center; }
+        .recording-active { background: #ff3b30 !important; transform: scale(1.1); }
     </style>
 </head>
-<body>
+<body onclick="hidePopups()">
 
     <header class="chat-header">
         <div class="header-left" onclick="window.location.href='Friends.html'">
@@ -87,7 +87,9 @@
             <img src="https://via.placeholder.com/100" class="user-avatar" id="chatAvatar">
             <div class="user-meta">
                 <b id="chatWith">Elite Member</b> 
-                <div class="status-text">online</div>
+                <div class="status-box" id="presenceBox">
+                    <div class="online-dot"></div> <span class="status-txt">offline</span>
+                </div>
             </div>
         </div>
         <div class="header-tools">
@@ -103,25 +105,36 @@
         <i class="fas fa-user-plus"></i>
     </button>
 
-    <div class="input-area">
-        <i class="far fa-laugh" style="color:var(--text-dim); font-size:22px;" onclick="window.location.href='stickers.html'"></i>
-        <div id="recHUD" class="recording-hud">
-            <div class="rec-dot"></div> <span id="recTimer">00:00</span>
-            <span style="color:#8696a0; font-size:11px; font-weight:400; margin-left:10px;">Recording...</span>
-        </div>
-        <div class="input-wrapper" id="inputWrap">
+    <div id="stickerSheet" onclick="event.stopPropagation()">
+        <img src="https://cdn-icons-png.flaticon.com/512/4721/4721215.png" style="width:100%" onclick="sendSticker(this.src)">
+        <img src="https://cdn-icons-png.flaticon.com/512/4721/4721200.png" style="width:100%" onclick="sendSticker(this.src)">
+        <img src="https://cdn-icons-png.flaticon.com/512/4721/4721205.png" style="width:100%" onclick="sendSticker(this.src)">
+        <img src="https://cdn-icons-png.flaticon.com/512/4721/4721210.png" style="width:100%" onclick="sendSticker(this.src)">
+    </div>
+
+    <div id="msgMenu">
+        <div class="menu-item" onclick="deleteMessage()"><i class="fas fa-trash-alt"></i> Delete</div>
+        <div class="menu-item" onclick="forwardMessage()"><i class="fas fa-share"></i> Forward</div>
+    </div>
+
+    <div class="input-area" onclick="event.stopPropagation()">
+        <i class="far fa-laugh" style="color:var(--text-dim); font-size:24px; cursor:pointer;" onclick="toggleStickers()"></i>
+        <div class="input-wrapper">
             <input type="text" id="messageInput" placeholder="Message" autocomplete="off" oninput="checkInput()">
             <i class="fas fa-paperclip" style="color:var(--text-dim); transform:rotate(45deg);"></i>
         </div>
         <button class="action-btn" id="micBtn" 
-                onmousedown="startVoice()" onmouseup="stopVoice()"
-                ontouchstart="startVoice()" ontouchend="stopVoice()">
+                onmousedown="VoiceManager.start(chatID, myUID)" 
+                onmouseup="VoiceManager.stop()"
+                ontouchstart="VoiceManager.start(chatID, myUID)" 
+                ontouchend="VoiceManager.stop()">
             <i class="fas fa-microphone" id="btnIcon"></i>
         </button>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="voice-handler.js"></script>
 
     <script>
         const firebaseConfig = { databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com" };
@@ -132,174 +145,87 @@
         const partnerUID = new URLSearchParams(window.location.search).get('uid') || "USER_DEFAULT";
         const chatID = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
 
-        const msgInput = document.getElementById('messageInput');
-        const btnIcon = document.getElementById('btnIcon');
-        const micBtn = document.getElementById('micBtn');
-        const hud = document.getElementById('recHUD');
-        const inputWrap = document.getElementById('inputWrap');
-        const chatBox = document.getElementById('chatBox');
+        let currentAudio = null, selectedMsgKey = null;
 
-        let mediaRecorder;
-        let audioChunks = [];
-        let timerInterval;
-        let currentAudio = null;
+        // PRESENCE (Online Status)
+        database.ref('status/' + partnerUID).on('value', snap => {
+            const p = document.getElementById('presenceBox');
+            if(snap.val() === 'online') p.classList.add('is-online');
+            else p.classList.remove('is-online');
+        });
+        database.ref('status/' + myUID).set('online');
+        window.onbeforeunload = () => database.ref('status/' + myUID).set('offline');
 
-        // --- VOICE RECORDER ENGINE FIX ---
-        async function startVoice() {
-            if(msgInput.value.trim().length > 0) return;
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                // Simple Opus Codec for high compatibility
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-                
-                mediaRecorder.ondataavailable = e => {
-                    if (e.data.size > 0) audioChunks.push(e.data);
-                };
-
-                mediaRecorder.start();
-                
-                hud.style.display = 'flex';
-                inputWrap.style.display = 'none';
-                micBtn.classList.add('recording-active');
-                
-                let sec = 0;
-                timerInterval = setInterval(() => {
-                    sec++;
-                    let m = Math.floor(sec/60), s = sec%60;
-                    document.getElementById('recTimer').innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
-                }, 1000);
-            } catch(e) { alert("Mic Error: Please check permissions!"); }
+        function toggleStickers() {
+            const s = document.getElementById('stickerSheet');
+            s.style.bottom = s.style.bottom === '0px' ? '-320px' : '0px';
         }
 
-        function stopVoice() {
-            if(!mediaRecorder || mediaRecorder.state === "inactive") {
-                if(msgInput.value.trim().length > 0) sendMessage();
-                return;
+        function sendSticker(url) {
+            database.ref('messages/' + chatID).push({ sender: myUID, url: url, type: 'sticker', time: getTime(), timestamp: Date.now() });
+            hidePopups();
+        }
+
+        function openMsgMenu(e, key) {
+            e.preventDefault(); e.stopPropagation();
+            selectedMsgKey = key;
+            const menu = document.getElementById('msgMenu');
+            menu.style.display = 'block';
+            menu.style.top = (e.clientY > window.innerHeight - 120 ? e.clientY - 120 : e.clientY) + 'px';
+            menu.style.left = (e.clientX > window.innerWidth - 160 ? e.clientX - 160 : e.clientX) + 'px';
+        }
+
+        function deleteMessage() { if(selectedMsgKey) database.ref('messages/' + chatID + '/' + selectedMsgKey).remove(); hidePopups(); }
+        function forwardMessage() { alert("Forwarding..."); hidePopups(); }
+        function hidePopups() { document.getElementById('msgMenu').style.display = 'none'; document.getElementById('stickerSheet').style.bottom = '-320px'; }
+        function getTime() { return new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
+
+        // MAIN CHAT LISTENER
+        database.ref('messages/' + chatID).on('value', snap => {
+            const box = document.getElementById('chatBox'); box.innerHTML = "";
+            snap.forEach(child => {
+                const d = child.val(); const isMe = d.sender === myUID; const key = child.key;
+                let html = "";
+                if(d.type === 'voice') html = `<div class="voice-wrapper"><i class="fas fa-play play-btn" id="p_${key}" onclick="play('${d.url}', '${key}')"></i><div class="waveform-lite"><div class="waveform-progress" id="b_${key}"></div></div></div>`;
+                else if(d.type === 'sticker') html = `<img src="${d.url}" style="width:120px;">`;
+                else html = d.msg;
+                
+                box.innerHTML += `<div class="message ${isMe?'sent':'received'}" oncontextmenu="openMsgMenu(event, '${key}')" onclick="openMsgMenu(event, '${key}')">
+                    ${html}<div class="msg-footer"><span>${d.time}</span> ${isMe?'<i class="fas fa-check-double"></i>':''}</div>
+                </div>`;
+            });
+            box.scrollTop = box.scrollHeight;
+        });
+
+        function play(url, key) {
+            if(currentAudio) { currentAudio.pause(); document.querySelectorAll('.play-btn').forEach(i=>i.className="fas fa-play play-btn"); if(currentAudio.src === url) {currentAudio=null; return;} }
+            currentAudio = new Audio(url); const btn = document.getElementById('p_'+key); const bar = document.getElementById('b_'+key);
+            btn.className = "fas fa-pause play-btn"; currentAudio.play();
+            currentAudio.ontimeupdate = () => bar.style.width = (currentAudio.currentTime/currentAudio.duration)*100 + "%";
+            currentAudio.onended = () => { btn.className = "fas fa-play play-btn"; bar.style.width = "0%"; currentAudio = null; };
+        }
+
+        function checkInput() { 
+            const val = document.getElementById('messageInput').value.trim();
+            if(val) {
+                document.getElementById('btnIcon').className = "fas fa-paper-plane";
+                document.getElementById('micBtn').onclick = sendMessage;
+            } else {
+                document.getElementById('btnIcon').className = "fas fa-microphone";
+                document.getElementById('micBtn').onclick = null;
             }
-            clearInterval(timerInterval);
-            mediaRecorder.stop();
-            hud.style.display = 'none';
-            inputWrap.style.display = 'flex';
-            micBtn.classList.remove('recording-active');
-
-            mediaRecorder.onstop = async () => {
-                const blob = new Blob(audioChunks, { type: 'audio/webm' });
-                mediaRecorder.stream.getTracks().forEach(t => t.stop());
-                if(blob.size > 1000) uploadVoice(blob);
-            };
-        }
-
-        async function uploadVoice(blob) {
-            btnIcon.className = "fas fa-spinner fa-spin";
-            const fd = new FormData();
-            fd.append('file', blob);
-            fd.append('upload_preset', "cmchat_pro");
-            fd.append('resource_type', 'video');
-
-            try {
-                const res = await fetch(`https://api.cloudinary.com/v1_1/dyfyhzp3o/upload`, { method: 'POST', body: fd });
-                const data = await res.json();
-                if(data.secure_url) {
-                    database.ref('messages/' + chatID).push({
-                        sender: myUID,
-                        url: data.secure_url,
-                        duration: Math.floor(data.duration || 0) + "s",
-                        type: 'voice',
-                        time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
-                        timestamp: Date.now()
-                    });
-                }
-            } catch(e) { console.error("Upload error"); }
-            finally { btnIcon.className = "fas fa-microphone"; }
         }
 
         function sendMessage() {
-            const text = msgInput.value.trim();
-            if(!text) return;
-            database.ref('messages/' + chatID).push({
-                sender: myUID,
-                msg: text,
-                type: 'text',
-                time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
-                timestamp: Date.now()
-            });
-            msgInput.value = "";
+            const val = document.getElementById('messageInput').value.trim();
+            if(!val) return;
+            database.ref('messages/' + chatID).push({ sender: myUID, msg: val, type: 'text', time: getTime(), timestamp: Date.now() });
+            document.getElementById('messageInput').value = "";
             checkInput();
         }
 
-        function checkInput() {
-            btnIcon.className = msgInput.value.trim().length > 0 ? "fas fa-paper-plane" : "fas fa-microphone";
-        }
-
-        // --- REAL-TIME MESSAGING & PROGRESS FIX ---
-        database.ref('messages/' + chatID).on('value', snap => {
-            chatBox.innerHTML = "";
-            snap.forEach(child => {
-                const d = child.val();
-                const isMe = d.sender === myUID;
-                const msgId = child.key;
-                if(d.type === 'voice') {
-                    chatBox.innerHTML += `
-                        <div class="message ${isMe ? 'sent' : 'received'}">
-                            <div class="voice-wrapper">
-                                <i class="fas fa-play play-btn" id="play_${msgId}" onclick="playVoice('${d.url}', '${msgId}')"></i>
-                                <div class="waveform-lite"><div class="waveform-progress" id="progress_${msgId}"></div></div>
-                            </div>
-                            <div class="msg-footer">
-                                <span id="timer_${msgId}">${d.duration || ''} • ${d.time}</span>
-                                ${isMe ? '<i class="fas fa-check-double"></i>' : ''}
-                            </div>
-                        </div>`;
-                } else {
-                    chatBox.innerHTML += `
-                        <div class="message ${isMe ? 'sent' : 'received'}">
-                            ${d.msg}
-                            <div class="msg-footer">
-                                <span>${d.time}</span>
-                                ${isMe ? '<i class="fas fa-check-double"></i>' : ''}
-                            </div>
-                        </div>`;
-                }
-            });
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
-
-        function playVoice(url, msgId) {
-            const btn = document.getElementById('play_' + msgId);
-            const progressBar = document.getElementById('progress_' + msgId);
-            const timerLabel = document.getElementById('timer_' + msgId);
-
-            if (currentAudio) {
-                currentAudio.pause();
-                document.querySelectorAll('.play-btn').forEach(b => b.className = "fas fa-play play-btn");
-                if (currentAudio.src === url) { currentAudio = null; return; }
-            }
-
-            currentAudio = new Audio(url);
-            btn.className = "fas fa-pause play-btn";
-            currentAudio.play();
-
-            currentAudio.ontimeupdate = () => {
-                const pct = (currentAudio.currentTime / currentAudio.duration) * 100;
-                progressBar.style.width = pct + "%";
-                timerLabel.innerText = Math.ceil(currentAudio.duration - currentAudio.currentTime) + "s left";
-            };
-
-            currentAudio.onended = () => {
-                btn.className = "fas fa-play play-btn";
-                progressBar.style.width = "0%";
-                timerLabel.innerText = "Played";
-                currentAudio = null;
-            };
-        }
-
         database.ref('users/' + partnerUID).once('value', s => {
-            const u = s.val();
-            if(u) {
-                document.getElementById('chatWith').innerText = u.username;
-                if(u.profilePhoto) document.getElementById('chatAvatar').src = u.profilePhoto;
-            }
+            const u = s.val(); if(u) { document.getElementById('chatWith').innerText = u.username; if(u.profilePhoto) document.getElementById('chatAvatar').src = u.profilePhoto; }
         });
     </script>
 </body>

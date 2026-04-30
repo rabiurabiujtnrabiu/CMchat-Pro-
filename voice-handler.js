@@ -1,5 +1,5 @@
 // ==========================================
-// CMchat Pro - Complete Elite Voice System
+// CMchat Pro - Optimized Voice Handler (Live)
 // ==========================================
 
 let mediaRecorder;
@@ -8,47 +8,64 @@ let audioChunks = [];
 const VoiceManager = {
     currentChatID: null,
     currentUID: null,
+    isRecording: false,
 
     // 1. Fara Recording
     start: async function(chatID, myUID) {
+        if (this.isRecording) return; // Kare rikicewa idan an riga an fara
+        
         this.currentChatID = chatID;
         this.currentUID = myUID;
 
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const options = { mimeType: 'audio/webm' };
-            if (!MediaRecorder.isTypeSupported(options.mimeType)) options.mimeType = 'audio/ogg';
+            
+            // Codec Fix don inganci da rashin nauyi
+            const options = { mimeType: 'audio/webm;codecs=opus' };
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) options.mimeType = 'audio/webm';
 
             mediaRecorder = new MediaRecorder(stream, options);
-            audioChunks = [];
+            audioChunks = []; // Wanke tsoffin muryoyi
 
-            mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
+            mediaRecorder.ondataavailable = (e) => { 
+                if (e.data.size > 0) audioChunks.push(e.data); 
+            };
             
             mediaRecorder.onstop = async () => {
                 const audioBlob = new Blob(audioChunks, { type: options.mimeType });
-                if (audioBlob.size > 1000) await this.upload(audioBlob);
+                // Kashe Mic din waya duka
+                stream.getTracks().forEach(track => track.stop());
+                
+                if (audioBlob.size > 2000) {
+                    await this.upload(audioBlob);
+                }
             };
 
             mediaRecorder.start();
+            this.isRecording = true;
             this.updateUI(true);
         } catch (err) {
-            alert("Mic Error: Bamu damar amfani da mic.");
+            console.error("Mic Access Error:", err);
+            alert("Mic Error: Don Allah bamu damar amfani da Microphone.");
         }
     },
 
-    // 2. Tsayarwa da Turawa Automatic
+    // 2. Tsayarwa
     stop: function() {
-        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        if (mediaRecorder && mediaRecorder.state === "recording") {
             mediaRecorder.stop();
+            this.isRecording = false;
             this.updateUI(false);
-            setTimeout(() => {
-                mediaRecorder.stream.getTracks().forEach(track => track.stop());
-            }, 1000);
         }
     },
 
-    // 3. Loda Muryar zuwa Cloudinary
+    // 3. Loda Sauti zuwa Cloudinary (Professional & Fast)
     upload: async function(blob) {
+        // Nuna alamar cewa ana tura sako (Spinner)
+        const micIcon = document.querySelector('#micBtn i');
+        const oldClass = micIcon.className;
+        micIcon.className = "fas fa-spinner fa-spin"; 
+
         const formData = new FormData();
         formData.append('file', blob);
         formData.append('upload_preset', "cmchat_pro"); 
@@ -60,34 +77,44 @@ const VoiceManager = {
                 body: formData
             });
             const data = await response.json();
-            if (data.secure_url) this.saveToFirebase(data.secure_url, data.duration);
+            if (data.secure_url) {
+                this.saveToFirebase(data.secure_url, data.duration);
+            }
         } catch (error) {
-            console.error("Upload Error:", error);
+            alert("Network Error: Muryar bata tafi ba.");
+        } finally {
+            micIcon.className = oldClass; // Maida asalin icon
         }
     },
 
     // 4. Ajiye a Firebase
     saveToFirebase: function(url, duration) {
-        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const database = firebase.database();
+        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
         database.ref('messages/' + this.currentChatID).push({
             sender: this.currentUID,
             url: url,
             duration: this.formatTime(duration),
             type: 'voice',
             time: timeStr,
-            timestamp: Date.now(),
-            sender_name: localStorage.getItem('username') || "Elite"
+            timestamp: Date.now()
         });
     },
 
-    updateUI: function(isRecording) {
-        const micBtn = document.getElementById('micButton');
-        if(isRecording) {
-            micBtn.classList.add('recording-active');
-            // Zaka iya nuna "Recording..." a inda ake rubuta text
+    updateUI: function(recording) {
+        const micBtn = document.getElementById('micBtn'); // Tabbatar ID din ya dace da na HTML
+        const hud = document.getElementById('recHUD');
+        const inputWrap = document.getElementById('inputWrap');
+
+        if(recording) {
+            if(micBtn) micBtn.classList.add('recording-active');
+            if(hud) hud.style.display = 'flex';
+            if(inputWrap) inputWrap.style.display = 'none';
         } else {
-            micBtn.classList.remove('recording-active');
+            if(micBtn) micBtn.classList.remove('recording-active');
+            if(hud) hud.style.display = 'none';
+            if(inputWrap) inputWrap.style.display = 'flex';
         }
     },
 
@@ -97,17 +124,3 @@ const VoiceManager = {
         return `${m}:${sec < 10 ? '0' + sec : sec}`;
     }
 };
-
-// --- Player Engine ---
-function playVoice(url, btn) {
-    const audio = new Audio(url);
-    const icon = btn.querySelector('i');
-    if (icon.classList.contains('fa-play')) {
-        audio.play();
-        icon.className = 'fas fa-pause';
-        audio.onended = () => icon.className = 'fas fa-play';
-    } else {
-        audio.pause();
-        icon.className = 'fas fa-play';
-    }
-}
