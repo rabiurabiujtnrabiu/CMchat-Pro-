@@ -1,5 +1,5 @@
 // ==========================================
-// CMchat Pro - Optimized Voice Handler (Live)
+// CMchat Pro - Optimized Voice Handler (Live Fix)
 // ==========================================
 
 let mediaRecorder;
@@ -12,7 +12,7 @@ const VoiceManager = {
 
     // 1. Fara Recording
     start: async function(chatID, myUID) {
-        if (this.isRecording) return; // Kare rikicewa idan an riga an fara
+        if (this.isRecording) return; 
         
         this.currentChatID = chatID;
         this.currentUID = myUID;
@@ -20,22 +20,29 @@ const VoiceManager = {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             
-            // Codec Fix don inganci da rashin nauyi
+            // Codec Fix don iPhone da Android su ga juna
             const options = { mimeType: 'audio/webm;codecs=opus' };
-            if (!MediaRecorder.isTypeSupported(options.mimeType)) options.mimeType = 'audio/webm';
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options.mimeType = 'audio/webm';
+            }
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options.mimeType = 'audio/mp4'; // Don wasu iPhone din
+            }
 
-            mediaRecorder = new MediaRecorder(stream, options);
-            audioChunks = []; // Wanke tsoffin muryoyi
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = []; 
 
             mediaRecorder.ondataavailable = (e) => { 
                 if (e.data.size > 0) audioChunks.push(e.data); 
             };
             
             mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunks, { type: options.mimeType });
-                // Kashe Mic din waya duka
+                const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+                
+                // Kashe Mic din waya domin adana batir da tsaro
                 stream.getTracks().forEach(track => track.stop());
                 
+                // Tura sako idan sautin ya kai akalla sakan 1
                 if (audioBlob.size > 2000) {
                     await this.upload(audioBlob);
                 }
@@ -46,7 +53,7 @@ const VoiceManager = {
             this.updateUI(true);
         } catch (err) {
             console.error("Mic Access Error:", err);
-            alert("Mic Error: Don Allah bamu damar amfani da Microphone.");
+            alert("Mic Error: Don Allah bamu damar amfani da Microphone a settings.");
         }
     },
 
@@ -59,17 +66,16 @@ const VoiceManager = {
         }
     },
 
-    // 3. Loda Sauti zuwa Cloudinary (Professional & Fast)
+    // 3. Loda Sauti zuwa Cloudinary
     upload: async function(blob) {
-        // Nuna alamar cewa ana tura sako (Spinner)
-        const micIcon = document.querySelector('#micBtn i');
-        const oldClass = micIcon.className;
-        micIcon.className = "fas fa-spinner fa-spin"; 
+        // Nuna alamar loading
+        const micIcon = document.getElementById('btnIcon');
+        if (micIcon) micIcon.className = "fas fa-spinner fa-spin"; 
 
         const formData = new FormData();
         formData.append('file', blob);
         formData.append('upload_preset', "cmchat_pro"); 
-        formData.append('resource_type', 'video');
+        formData.append('resource_type', 'video'); // Cloudinary yana daukar audio a matsayin video resource
 
         try {
             const response = await fetch(`https://api.cloudinary.com/v1_1/dyfyhzp3o/upload`, {
@@ -81,9 +87,10 @@ const VoiceManager = {
                 this.saveToFirebase(data.secure_url, data.duration);
             }
         } catch (error) {
-            alert("Network Error: Muryar bata tafi ba.");
+            console.error("Upload Error:", error);
+            alert("Hanyar sadarwa tana da matsala, muryar bata tafi ba.");
         } finally {
-            micIcon.className = oldClass; // Maida asalin icon
+            if (micIcon) micIcon.className = "fas fa-microphone"; 
         }
     },
 
@@ -103,18 +110,17 @@ const VoiceManager = {
     },
 
     updateUI: function(recording) {
-        const micBtn = document.getElementById('micBtn'); // Tabbatar ID din ya dace da na HTML
-        const hud = document.getElementById('recHUD');
-        const inputWrap = document.getElementById('inputWrap');
-
+        const micBtn = document.getElementById('actionBtn'); // Button din da ke HTML
         if(recording) {
-            if(micBtn) micBtn.classList.add('recording-active');
-            if(hud) hud.style.display = 'flex';
-            if(inputWrap) inputWrap.style.display = 'none';
+            if(micBtn) {
+                micBtn.style.background = "#ff3b30"; // Ja idan ana recording
+                micBtn.style.transform = "scale(1.2)";
+            }
         } else {
-            if(micBtn) micBtn.classList.remove('recording-active');
-            if(hud) hud.style.display = 'none';
-            if(inputWrap) inputWrap.style.display = 'flex';
+            if(micBtn) {
+                micBtn.style.background = "#00a884"; // Maida koren sa
+                micBtn.style.transform = "scale(1)";
+            }
         }
     },
 

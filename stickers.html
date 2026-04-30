@@ -1,133 +1,83 @@
-<div class="elite-sticker-wrapper">
-    <div class="panel-header-pro">
-        <div class="header-title">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <span>Elite Living Stickers</span>
-        </div>
-        <button class="close-panel-btn" onclick="closeAllPanels()">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
+// --- STICKER DATA (MASU SALON ZAMANI) ---
+const stickerData = {
+    special: [
+        { icon: '🌙', label: 'Happy Sallah', anim: 'anim-glow' },
+        { icon: '🎂', label: 'Happy Birthday', anim: 'anim-pulse' },
+        { icon: '🎉', label: 'Celebration', anim: 'anim-float' },
+        { icon: '✨', label: 'Murna', anim: 'anim-glow' },
+        { icon: '🎊', label: 'Happy Day', anim: 'anim-pulse' },
+        { icon: '🎁', label: 'Gift', anim: 'anim-float' },
+        { icon: '🕌', label: 'Sallah Day', anim: 'anim-glow' },
+        { icon: '🥂', label: 'Cheers', anim: 'anim-pulse' }
+    ],
+    emojis: [
+        { icon: '😂', label: 'Dariya', anim: 'anim-laugh' },
+        { icon: '😭', label: 'Kuka', anim: 'anim-float' },
+        { icon: '😡', label: 'Bacin Rai', anim: 'anim-pulse' },
+        { icon: '😍', label: 'Soyayya', anim: 'anim-heart' },
+        { icon: '🤩', label: 'Farin Ciki', anim: 'anim-glow' },
+        { icon: '🥵', label: 'Wuya', anim: 'anim-float' },
+        { icon: '😴', label: 'Barci', anim: 'anim-float' },
+        { icon: '😋', label: 'Dadi', anim: 'anim-laugh' }
+    ],
+    luxury: [
+        { icon: '💎', label: 'Diamond', anim: 'anim-glow' },
+        { icon: '👑', label: 'King', anim: 'anim-float' },
+        { icon: '🏎️', label: 'Speed', anim: 'anim-pulse' },
+        { icon: '💰', label: 'Rich', anim: 'anim-glow' },
+        { icon: '🏠', label: 'Mansion', anim: 'anim-float' },
+        { icon: '💼', label: 'Business', anim: 'anim-pulse' },
+        { icon: '🚀', label: 'Elite', anim: 'anim-glow' },
+        { icon: '🦁', label: 'Lion', anim: 'anim-float' }
+    ]
+};
 
-    <div class="sticker-tabs">
-        <div class="tab active" onclick="switchTab('special')">Special</div>
-        <div class="tab" onclick="switchTab('emojis')">Emojis</div>
-        <div class="tab" onclick="switchTab('luxury')">Luxury</div>
-    </div>
+// --- LOGIC DOMIN NUNA STICKERS ---
+function switchTab(tabName) {
+    // Canza kalar Tab din da aka taba
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
 
-    <div class="sticker-grid-pro" id="stickerGrid"></div>
-</div>
+    const grid = document.getElementById('stickerGrid');
+    grid.innerHTML = ""; // Wanke tsoffin stickers
 
-<style>
-    /* --- INTEGRATED STICKER STYLING --- */
-    .elite-sticker-wrapper { 
-        background: #ffffff; 
-        border-radius: 35px 35px 0 0; 
-        user-select: none;
-        overflow: hidden;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
+    stickerData[tabName].forEach(s => {
+        const item = document.createElement('div');
+        item.className = `sticker-item ${s.anim}`;
+        item.innerHTML = `<span>${s.icon}</span>`;
+        
+        // Idan an taba Sticker
+        item.onclick = () => {
+            sendStickerToChat(s.icon, s.label);
+        };
+        
+        grid.appendChild(item);
+    });
+}
 
-    .panel-header-pro { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        padding: 20px 25px; 
-        border-bottom: 1px solid #f1f5f9; 
-    }
+// Function na tura sticker zuwa Firebase
+function sendStickerToChat(icon, label) {
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    // Tura sako zuwa Database
+    database.ref('messages/' + chatID).push({
+        sender: myUID,
+        msg: icon, // Muna tura icon din a matsayin sticker
+        label: label,
+        type: 'sticker_emoji',
+        time: timeStr,
+        timestamp: Date.now()
+    });
 
-    .header-title { 
-        display: flex; 
-        align-items: center; 
-        gap: 12px; 
-        font-weight: 800; 
-        color: #0f172a; 
-        font-size: 16px; 
-    }
+    closeAllPanels(); // Rufe wajen stickers bayan an tura
+}
 
-    .header-title i { 
-        background: linear-gradient(135deg, #0062ff, #00d2ff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
+// Kira 'special' tab ta atomatik idan an bude
+document.addEventListener('DOMContentLoaded', () => {
+    switchTab('special');
+});
 
-    .close-panel-btn { 
-        background: #f1f5f9; 
-        border: none; 
-        width: 36px; 
-        height: 36px; 
-        border-radius: 50%; 
-        color: #64748b; 
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: 0.2s;
-    }
-
-    .sticker-tabs { 
-        display: flex; 
-        gap: 10px; 
-        padding: 15px 25px; 
-        background: #ffffff;
-        overflow-x: auto;
-        scrollbar-width: none;
-    }
-    .sticker-tabs::-webkit-scrollbar { display: none; }
-
-    .tab { 
-        font-size: 12px; 
-        font-weight: 700; 
-        color: #94a3b8; 
-        padding: 10px 20px; 
-        border-radius: 25px; 
-        cursor: pointer; 
-        background: #f8fafc;
-        white-space: nowrap;
-        transition: 0.3s;
-    }
-
-    .tab.active { 
-        background: #0062ff; 
-        color: #ffffff; 
-        box-shadow: 0 8px 20px rgba(0, 98, 255, 0.2); 
-    }
-
-    .sticker-grid-pro { 
-        display: grid; 
-        grid-template-columns: repeat(4, 1fr); 
-        gap: 12px; 
-        padding: 15px 25px 30px; 
-        overflow-y: auto;
-        flex: 1;
-    }
-
-    .sticker-item { 
-        background: #f8fafc; 
-        border-radius: 20px; 
-        padding: 15px 5px; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center;
-        cursor: pointer; 
-        transition: 0.2s;
-    }
-
-    .sticker-item:active { transform: scale(0.85); background: #ffffff; border: 1px solid #0062ff; }
-    .sticker-item span { font-size: 32px; display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); }
-
-    /* --- ANIMATION CORE --- */
-    @keyframes laugh { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-10deg) translateY(-3px); } 75% { transform: rotate(10deg) translateY(-3px); } }
-    .anim-laugh span { animation: laugh 0.6s infinite ease-in-out; }
-
-    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
-    .anim-pulse span, .anim-heart span { animation: pulse 0.8s infinite; }
-
-    @keyframes fly { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-    .anim-float span { animation: fly 2s infinite ease-in-out; }
-
-    @keyframes glow { 0%, 100% { filter: drop-shadow(0 0 2px #0062ff); } 50% { filter: drop-shadow(0 0 12px #00d2ff); } }
-    .anim-glow span { animation: glow 1.5s infinite; }
-</style>
+function closeAllPanels() {
+    // Wannan zai rufe sticker sheet din
+    document.getElementById('stickerSheet').style.bottom = '-100%';
+}
