@@ -38,8 +38,8 @@
         .header-tools { display: flex; gap: 20px; color: var(--text-dim); font-size: 19px; }
         .header-tools i { cursor: pointer; }
 
-        /* --- GYARA 3: SIDEBAR ENGINE PANEL --- */
-        #sidePanel { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: #111b21; z-index: 6000; transition: 0.4s; box-shadow: -5px 0 15px rgba(0,0,0,0.5); padding: 20px; }
+        /* --- SIDEBAR ENGINE PANEL --- */
+        #sidePanel { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: #111b21; z-index: 8000; transition: 0.4s; box-shadow: -5px 0 15px rgba(0,0,0,0.5); padding: 20px; }
         .side-item { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 15px; color: white; cursor: pointer; }
 
         .chat-container { 
@@ -48,10 +48,10 @@
             background-blend-mode: overlay; background-size: 400px;
         }
 
-        .message { max-width: 80%; padding: 8px 12px; border-radius: 15px; font-size: 15px; position: relative; width: fit-content; word-wrap: break-word; transition: 0.2s; }
+        .message { max-width: 80%; padding: 8px 12px; border-radius: 15px; font-size: 15px; position: relative; width: fit-content; word-wrap: break-word; transition: 0.2s; cursor: pointer; }
         .received { background: var(--received-bubble); align-self: flex-start; border-top-left-radius: 0; }
         .sent { background: var(--sent-bubble); align-self: flex-end; border-top-right-radius: 0; }
-        .selected-msg { background: rgba(0, 168, 132, 0.5) !important; }
+        .selected-msg { background: rgba(0, 168, 132, 0.4) !important; }
         
         .msg-footer { font-size: 10px; color: var(--text-dim); text-align: right; margin-top: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
         .sent-tick { color: var(--text-dim); font-size: 11px; }
@@ -60,18 +60,16 @@
         .voice-player { display: flex; align-items: center; gap: 10px; min-width: 180px; padding: 5px 0; }
         .play-btn { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .v-track { flex: 1; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; position: relative; }
-        .v-progress { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: #fff; border-radius: 2px; }
+        .v-progress { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: #fff; border-radius: 2px; transition: width 0.1s linear; }
 
         .fab-btn { position: fixed; bottom: 85px; right: 20px; width: 55px; height: 55px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); z-index: 999; border: none; }
 
-        /* --- GYARA 1: RECORDING HUD KASA --- */
         #recHUD { display: none; flex: 1; align-items: center; gap: 10px; color: #ff3b30; font-weight: 600; font-size: 14px; animation: blink 1s infinite; padding-left: 10px; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } }
 
         #stickerSheet { position: fixed; bottom: -400px; left: 0; width: 100%; height: 350px; background: #202c33; z-index: 2000; transition: 0.4s; border-radius: 25px 25px 0 0; padding: 15px; display: flex; flex-direction: column; }
         
-        /* --- GYARA 4: ACTION BAR (HOLD MENU) --- */
-        #actionMenu { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: var(--header-dark); z-index: 7000; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        #actionMenu { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: var(--header-dark); z-index: 9000; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
 
         .input-area { background: var(--header-dark); padding: 10px 12px; display: flex; align-items: center; gap: 8px; position: relative; height: 65px; }
         .input-wrapper { flex: 1; background: #2a3942; border-radius: 25px; padding: 0 15px; display: flex; align-items: center; height: 45px; gap: 12px; }
@@ -156,9 +154,9 @@
         const partnerUID = new URLSearchParams(window.location.search).get('uid') || "USER_DEFAULT";
         const chatID = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
 
-        let selectedMsgKey, pressTimer, isPartnerOnline = false;
+        let selectedMsgKey, pressTimer, isPartnerOnline = false, currentAudio = null;
 
-        // --- GYARA NA 2: DYNAMIC USERNAME LOGIC ---
+        // --- 1. DYNAMIC USERNAME LOGIC ---
         database.ref('users/' + partnerUID).on('value', snap => {
             const userData = snap.val();
             if(userData) {
@@ -167,7 +165,7 @@
             }
         });
 
-        // Presence Logic
+        // Presence Status
         database.ref('status/' + partnerUID).on('value', s => {
             const box = document.getElementById('presenceBox');
             const txt = box.querySelector('.status-txt');
@@ -176,46 +174,79 @@
         });
         database.ref('status/' + myUID).set('online');
 
-        // --- GYARA NA 3: SIDEBAR SLIDE-IN ENGINE ---
+        // --- 2. SIDEBAR ENGINE (SLIDE EFFECT) ---
         function toggleSidebar() {
             const sp = document.getElementById('sidePanel');
-            const currentRight = window.getComputedStyle(sp).right;
-            sp.style.right = (currentRight === '0px') ? '-280px' : '0px';
+            const isOpen = sp.style.right === '0px';
+            sp.style.right = isOpen ? '-280px' : '0px';
         }
 
         function navigate(url) { window.onbeforeunload = null; window.location.href = url; }
 
-        // --- GYARA NA 1: RECORDING HUD CONTROL ---
-        if (typeof VoiceManager !== 'undefined') {
-            const originalVoiceStart = VoiceManager.start;
-            const originalVoiceStop = VoiceManager.stop;
+        // --- 3. VOICE PLAYER (FIXED SOUND & PROGRESS) ---
+        function playVoice(url, key) {
+            const playBtn = document.getElementById('p_' + key);
+            const progress = document.getElementById('b_' + key);
 
-            VoiceManager.start = function(cid, uid) {
-                document.getElementById('inputWrap').style.display = 'none';
-                document.getElementById('recHUD').style.display = 'flex';
-                if(originalVoiceStart) originalVoiceStart.call(VoiceManager, cid, uid);
+            if (currentAudio && !currentAudio.paused) {
+                currentAudio.pause();
+                document.querySelectorAll('.play-btn i').forEach(i => i.className = "fas fa-play");
+                if (currentAudio.src === url) { currentAudio = null; return; }
+            }
+
+            currentAudio = new Audio(url);
+            playBtn.className = "fas fa-spinner fa-spin";
+
+            currentAudio.play().then(() => { playBtn.className = "fas fa-pause"; }).catch(e => { playBtn.className = "fas fa-play"; });
+
+            currentAudio.ontimeupdate = () => {
+                const pct = (currentAudio.currentTime / currentAudio.duration) * 100;
+                if(progress) progress.style.width = pct + "%";
             };
-            VoiceManager.stop = function() {
-                document.getElementById('inputWrap').style.display = 'flex';
-                document.getElementById('recHUD').style.display = 'none';
-                if(originalVoiceStop) originalVoiceStop.call(VoiceManager);
+
+            currentAudio.onended = () => {
+                playBtn.className = "fas fa-play";
+                if(progress) progress.style.width = "0%";
+                currentAudio = null;
             };
         }
 
-        // Live Messages
+        // --- 4. DIRECT DELETE (NO CONFIRMATION) ---
+        function deleteMessage() {
+            if(selectedMsgKey) {
+                database.ref('messages/' + chatID + '/' + selectedMsgKey).remove();
+                closeActionMenu();
+            }
+        }
+
+        // --- 5. ACTION MENU LOGIC ---
+        function startPress(e, key) {
+            selectedMsgKey = key;
+            pressTimer = window.setTimeout(() => {
+                document.querySelectorAll('.message').forEach(m => m.classList.remove('selected-msg'));
+                document.getElementById('msg_' + key).classList.add('selected-msg');
+                document.getElementById('actionMenu').style.display = 'flex';
+            }, 600);
+        }
+        function cancelPress() { clearTimeout(pressTimer); }
+        function closeActionMenu() {
+            document.getElementById('actionMenu').style.display = 'none';
+            document.querySelectorAll('.message').forEach(m => m.classList.remove('selected-msg'));
+            selectedMsgKey = null;
+        }
+
+        // Messages Listener
         database.ref('messages/' + chatID).on('value', snap => {
             const box = document.getElementById('chatBox');
             box.innerHTML = "";
             snap.forEach(child => {
                 const d = child.val(); const isMe = d.sender === myUID; const key = child.key;
-                let html = "";
-                if(d.type === 'voice') {
-                    html = `<div class="voice-player">
+                let html = d.type === 'voice' ? 
+                    `<div class="voice-player">
                         <div class="play-btn" onclick="playVoice('${d.url}', '${key}')"><i class="fas fa-play" id="p_${key}"></i></div>
                         <div class="v-track"><div class="v-progress" id="b_${key}"></div></div>
                         <span style="font-size:10px; opacity:0.7;">${d.duration || '0s'}</span>
-                    </div>`;
-                } else { html = `<div>${d.msg}</div>`; }
+                    </div>` : `<div>${d.msg}</div>`;
 
                 const tickClass = isPartnerOnline ? "sent-tick read-tick" : "sent-tick";
                 box.innerHTML += `<div class="message ${isMe?'sent':'received'}" id="msg_${key}"
@@ -228,45 +259,16 @@
             box.scrollTop = box.scrollHeight;
         });
 
-        // --- GYARA NA 4: ACTION BAR (HOLD GESTURE) ---
-        function startPress(e, key) {
-            selectedMsgKey = key;
-            pressTimer = window.setTimeout(() => {
-                document.querySelectorAll('.message').forEach(m => m.classList.remove('selected-msg'));
-                const target = document.getElementById('msg_' + key);
-                if(target) target.classList.add('selected-msg');
-                document.getElementById('actionMenu').style.display = 'flex';
-            }, 600); 
-        }
-        function cancelPress() { clearTimeout(pressTimer); }
-        
-        function closeActionMenu() {
-            document.getElementById('actionMenu').style.display = 'none';
-            document.querySelectorAll('.message').forEach(m => m.classList.remove('selected-msg'));
-            selectedMsgKey = null;
-        }
-
-        function deleteMessage() {
-            if(selectedMsgKey && confirm("Goge wannan sakon?")) {
-                database.ref('messages/' + chatID + '/' + selectedMsgKey).remove();
-                closeActionMenu();
-            }
-        }
-
-        function forwardMessage() { alert("An tura sakon..."); closeActionMenu(); }
-
+        // Input Control
         function checkInput() {
             const val = document.getElementById('messageInput').value.trim();
             const btn = document.getElementById('actionBtn'); const icon = document.getElementById('btnIcon');
             if(val) { 
-                icon.className = "fas fa-paper-plane"; 
-                btn.onmousedown = btn.ontouchstart = null; 
-                btn.onclick = sendMessage; 
+                icon.className = "fas fa-paper-plane"; btn.onmousedown = btn.ontouchstart = null; btn.onclick = sendMessage; 
             } else { 
-                icon.className = "fas fa-microphone"; 
-                btn.onclick = null; 
-                btn.onmousedown = btn.ontouchstart = () => { if(typeof VoiceManager !== 'undefined') VoiceManager.start(chatID, myUID); }; 
-                btn.onmouseup = btn.ontouchend = () => { if(typeof VoiceManager !== 'undefined') VoiceManager.stop(); }; 
+                icon.className = "fas fa-microphone"; btn.onclick = null; 
+                btn.onmousedown = btn.ontouchstart = () => VoiceManager.start(chatID, myUID); 
+                btn.onmouseup = btn.ontouchend = () => VoiceManager.stop();
             }
         }
         checkInput();
@@ -278,12 +280,14 @@
             document.getElementById('messageInput').value = ""; checkInput();
         }
 
+        function forwardMessage() { alert("An tura sako."); closeActionMenu(); }
         function hidePopups() { 
             document.getElementById('stickerSheet').style.bottom = '-400px'; 
-            if(document.getElementById('sidePanel').style.right === '0px') toggleSidebar();
+            document.getElementById('sidePanel').style.right = '-280px';
         }
         function toggleStickers() { const s = document.getElementById('stickerSheet'); s.style.bottom = s.style.bottom === '0px' ? '-400px' : '0px'; }
         function getTime() { return new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
+        function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
 </html>
