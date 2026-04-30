@@ -19,30 +19,25 @@
         
         body { background: var(--bg-dark); height: 100vh; overflow: hidden; position: relative; }
 
-        /* Remote Video (Wanda kake kira) - Full Screen */
+        /* Remote Video - Full Screen */
         #remote-player { 
             width: 100%; height: 100%; background: #1e293b; 
             position: absolute; top:0; left:0; z-index: 1;
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* Local Video (Kai) - Karamin box dake yawo */
+        /* Local Video - Floating Box */
         #local-player { 
             position: absolute; top: 40px; right: 20px; width: 120px; height: 180px; 
-            background: #2a3942; border-radius: 15px; border: 2px solid rgba(255,255,255,0.2);
+            background: #2a3942; border-radius: 12px; border: 2px solid rgba(255,255,255,0.2);
             z-index: 100; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
 
-        /* Info a kai */
         .call-info { 
             position: absolute; top: 45px; left: 25px; color: white; 
             z-index: 150; text-shadow: 0 2px 10px rgba(0,0,0,0.8); 
         }
-        .call-info h3 { font-size: 24px; font-weight: 600; }
-        .timer-box { font-size: 14px; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-top: 5px; }
-        .live-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulse 1s infinite; }
 
-        /* Control Buttons */
         .video-controls { 
             position: absolute; bottom: 50px; left: 0; width: 100%; 
             display: flex; justify-content: center; gap: 25px; z-index: 200;
@@ -53,27 +48,23 @@
             align-items: center; justify-content: center; font-size: 22px; 
             color: white; cursor: pointer; backdrop-filter: blur(15px);
             background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-            transition: all 0.3s ease;
+            transition: 0.3s;
         }
         .v-end { background: var(--danger); border: none; font-size: 26px; }
-        .muted-btn { background: rgba(239, 68, 68, 0.4); color: var(--danger); }
-
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        .muted-active { background: rgba(239, 68, 68, 0.4); color: var(--danger); border-color: var(--danger); }
     </style>
 </head>
 <body>
 
     <div class="call-info">
         <h3 id="vName">Elite User</h3>
-        <div class="timer-box">
-            <div class="live-dot"></div>
-            <span id="vStatus">Connecting...</span>
-        </div>
+        <p id="vStatus" style="color: #38bdf8; font-size: 14px; font-weight: 500;">Connecting Camera...</p>
     </div>
 
     <div id="remote-player">
-        <i class="fas fa-user-circle" style="font-size: 100px; color: rgba(255,255,255,0.1);"></i>
+        <i class="fas fa-user-circle" style="font-size: 100px; color: rgba(255,255,255,0.05);"></i>
     </div>
+    
     <div id="local-player"></div>
 
     <div class="video-controls">
@@ -86,7 +77,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // Configuration
         const firebaseConfig = { databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
@@ -96,42 +86,56 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         const partnerUID = urlParams.get('uid');
-        const partnerName = urlParams.get('name') || "Elite User";
-        const myUID = localStorage.getItem('user_uid');
-
-        document.getElementById('vName').innerText = partnerName;
+        
+        // Gyara: Tabbatar an samo UID din mai amfani ko da an kira shi daban a localStorage
+        const myUID = localStorage.getItem('user_uid') || localStorage.getItem('uid') || "USER_" + Math.floor(Math.random()*1000);
 
         let localTracks = { videoTrack: null, audioTrack: null };
-        let isVideoMuted = false;
-        let isAudioMuted = false;
 
-        async function joinCall() {
-            if(!myUID || !partnerUID) return;
+        // GYARA: Nemo Username live daga Firebase
+        async function fetchPartnerInfo() {
+            if (!partnerUID) return;
+            // Ina amfani da .on domin idan aka canja sunan ma ya sauya anan
+            database.ref('users/' + partnerUID).on('value', snap => {
+                if (snap.exists()) {
+                    const data = snap.val();
+                    document.getElementById('vName').innerText = data.username || data.name || "Elite User";
+                } else {
+                    document.getElementById('vName').innerText = "Elite User";
+                }
+            });
+        }
 
-            // Channel Name Logic (Dole ya zama iri daya ga Caller da Receiver)
+        async function startCall() {
+            if (!partnerUID) {
+                document.getElementById('vStatus').innerText = "Error: Partner UID missing!";
+                return;
+            }
+
+            fetchPartnerInfo();
+
             const channelName = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
 
             try {
+                // GYARA: Create Tracks kafin ma shiga channel don tabbatar camera ta bude
+                [localTracks.audioTrack, localTracks.videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
+                
+                // Nuna hotonka nan take
+                localTracks.videoTrack.play("local-player");
+                document.getElementById('vStatus').innerText = "Camera Active - Joining...";
+
                 // Join Agora
                 await client.join(APP_ID, channelName, null, null);
-
-                // Fara amfani da Mic da Camera
-                [localTracks.audioTrack, localTracks.videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
-
-                // Nuna hotonka a cikin karamin box
-                localTracks.videoTrack.play("local-player");
-
-                // Tura bayanan ga abokin hira
                 await client.publish([localTracks.audioTrack, localTracks.videoTrack]);
+                
                 document.getElementById('vStatus').innerText = "Ringing...";
 
-                // Lokacin da dayan ya shigo
                 client.on("user-published", async (user, mediaType) => {
                     await client.subscribe(user, mediaType);
                     document.getElementById('vStatus').innerText = "Live";
 
                     if (mediaType === "video") {
-                        document.getElementById('remote-player').innerHTML = ""; // Cire loading icon
+                        document.getElementById('remote-player').innerHTML = ""; 
                         user.videoTrack.play("remote-player");
                     }
                     if (mediaType === "audio") {
@@ -139,57 +143,48 @@
                     }
                 });
 
-                // Idan dayan ya fita
                 client.on("user-unpublished", () => {
-                    document.getElementById('vStatus').innerText = "Partner left";
+                    document.getElementById('vStatus').innerText = "Partner Left";
                     setTimeout(endCall, 2000);
                 });
 
             } catch (err) {
-                console.error(err);
-                alert("Please allow camera and mic access.");
+                console.error("Agora Error:", err);
+                document.getElementById('vStatus').innerText = "Camera Access Denied!";
             }
         }
 
-        // Functions na Controls
         async function toggleVideo() {
-            isVideoMuted = !isVideoMuted;
-            await localTracks.videoTrack.setEnabled(!isVideoMuted);
-            document.getElementById('camIcon').className = isVideoMuted ? "fas fa-video-slash" : "fas fa-video";
-            document.getElementById('camBtn').classList.toggle('muted-btn', isVideoMuted);
+            const isEnabled = localTracks.videoTrack.enabled;
+            await localTracks.videoTrack.setEnabled(!isEnabled);
+            document.getElementById('camIcon').className = !isEnabled ? "fas fa-video" : "fas fa-video-slash";
+            document.getElementById('camBtn').classList.toggle('muted-active', isEnabled);
         }
 
         async function toggleAudio() {
-            isAudioMuted = !isAudioMuted;
-            await localTracks.audioTrack.setEnabled(!isAudioMuted);
-            document.getElementById('micIcon').className = isAudioMuted ? "fas fa-microphone-slash" : "fas fa-microphone";
-            document.getElementById('micBtn').classList.toggle('muted-btn', isAudioMuted);
+            const isEnabled = localTracks.audioTrack.enabled;
+            await localTracks.audioTrack.setEnabled(!isEnabled);
+            document.getElementById('micIcon').className = !isEnabled ? "fas fa-microphone" : "fas fa-microphone-slash";
+            document.getElementById('micBtn').classList.toggle('muted-active', isEnabled);
         }
 
         async function endCall() {
-            // Kashe duka tracks
             if(localTracks.videoTrack) { localTracks.videoTrack.stop(); localTracks.videoTrack.close(); }
             if(localTracks.audioTrack) { localTracks.audioTrack.stop(); localTracks.audioTrack.close(); }
-            
             await client.leave();
-
-            // Sanar da Firebase
+            
             database.ref('calls/' + myUID).remove();
             database.ref('calls/' + partnerUID).remove();
 
-            // Koma shafin Chat
-            window.location.href = `Chatting.html?uid=${partnerUID}`;
+            window.location.href = "Chatting.html?uid=" + partnerUID;
         }
 
-        // Firebase Signaling (Listener)
+        // Listener don gane idan kiran ya kare
         database.ref('calls/' + myUID).on('value', snap => {
-            if (snap.exists() && snap.val().status === 'ended') {
-                endCall();
-            }
+            if (snap.exists() && snap.val().status === 'ended') endCall();
         });
 
-        // Initialize Call
-        window.onload = joinCall;
+        window.onload = startCall;
     </script>
 </body>
 </html>
