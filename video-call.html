@@ -49,14 +49,14 @@
             transition: 0.3s;
         }
         .v-end { background: var(--danger); border: none; font-size: 26px; }
-        .active-state { background: rgba(239, 68, 68, 0.4); color: var(--danger); }
+        .muted-active { background: rgba(239, 68, 68, 0.4); color: var(--danger); }
     </style>
 </head>
 <body>
 
     <div class="call-info">
         <h3 id="vName">Elite User</h3>
-        <p id="vStatus" style="color: #38bdf8; font-size: 14px; font-weight: 500;">Connecting Camera...</p>
+        <p id="vStatus" style="color: #38bdf8; font-size: 14px; font-weight: 500;">Starting System...</p>
     </div>
 
     <div id="remote-player">
@@ -84,13 +84,12 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         let partnerUID = urlParams.get('uid');
-        
-        // MUHIMMI: Tabbatar an samo UID din mai amfani (Kai)
-        const myUID = localStorage.getItem('user_uid') || "USER_" + Math.floor(Math.random()*1000);
+        if (partnerUID) partnerUID = partnerUID.trim();
+
+        const myUID = localStorage.getItem('user_uid') || localStorage.getItem('uid');
 
         let localTracks = { videoTrack: null, audioTrack: null };
 
-        // Nuna sunan mutum idan har akwai UID a URL
         function checkPartner() {
             if (partnerUID) {
                 database.ref('users/' + partnerUID).on('value', snap => {
@@ -98,8 +97,6 @@
                         document.getElementById('vName').innerText = snap.val().username || "Elite User";
                     }
                 });
-            } else {
-                document.getElementById('vStatus').innerText = "Notice: Waiting for Partner ID...";
             }
         }
 
@@ -107,14 +104,13 @@
             checkPartner();
 
             try {
-                // Fara bude Camera nan take don ya daina nuna duhu
+                // Fara kunna camera nan take
                 localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
                 localTracks.videoTrack = await AgoraRTC.createCameraVideoTrack();
 
                 await localTracks.videoTrack.play("local-player");
-                document.getElementById('vStatus').innerText = "Camera Ready";
+                document.getElementById('vStatus').innerText = "Camera Ready - Connecting...";
 
-                // Idan akwai partnerUID, sai mu shiga Agora
                 if (partnerUID) {
                     const channelName = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
                     await client.join(APP_ID, channelName, null, null);
@@ -133,8 +129,11 @@
                 });
 
             } catch (err) {
-                console.error(err);
-                document.getElementById('vStatus').innerText = "Permission Denied!";
+                console.error("Initialization Error:", err);
+                // Wannan ne zai hana kuskuren nuna "Permission Denied" alhali camera ta bude
+                if (!localTracks.videoTrack) {
+                    document.getElementById('vStatus').innerText = "Check Camera Permissions";
+                }
             }
         }
 
@@ -143,7 +142,7 @@
             const isEnabled = localTracks.videoTrack.enabled;
             await localTracks.videoTrack.setEnabled(!isEnabled);
             document.getElementById('camIcon').className = !isEnabled ? "fas fa-video" : "fas fa-video-slash";
-            document.getElementById('camBtn').classList.toggle('active-state', isEnabled);
+            document.getElementById('camBtn').classList.toggle('muted-active', isEnabled);
         }
 
         async function toggleAudio() {
@@ -151,7 +150,7 @@
             const isEnabled = localTracks.audioTrack.enabled;
             await localTracks.audioTrack.setEnabled(!isEnabled);
             document.getElementById('micIcon').className = !isEnabled ? "fas fa-microphone" : "fas fa-microphone-slash";
-            document.getElementById('micBtn').classList.toggle('active-state', isEnabled);
+            document.getElementById('micBtn').classList.toggle('muted-active', isEnabled);
         }
 
         async function endCall() {
@@ -159,8 +158,12 @@
             if(localTracks.audioTrack) { localTracks.audioTrack.stop(); localTracks.audioTrack.close(); }
             await client.leave();
             database.ref('calls/' + myUID).remove();
-            history.back();
+            window.location.href = "Chatting.html?uid=" + partnerUID;
         }
+
+        database.ref('calls/' + myUID).on('value', snap => {
+            if (snap.exists() && snap.val().status === 'ended') endCall();
+        });
 
         window.onload = initCall;
     </script>
