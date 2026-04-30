@@ -19,14 +19,12 @@
         
         body { background: var(--bg-dark); height: 100vh; overflow: hidden; position: relative; }
 
-        /* Remote Video - Full Screen */
         #remote-player { 
             width: 100%; height: 100%; background: #1e293b; 
             position: absolute; top:0; left:0; z-index: 1;
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* Local Video - Floating Box */
         #local-player { 
             position: absolute; top: 40px; right: 20px; width: 120px; height: 180px; 
             background: #2a3942; border-radius: 12px; border: 2px solid rgba(255,255,255,0.2);
@@ -44,14 +42,14 @@
         }
 
         .v-btn { 
-            width: 65px; height: 65px; border-radius: 50%; display: flex; 
+            width: 60px; height: 60px; border-radius: 50%; display: flex; 
             align-items: center; justify-content: center; font-size: 22px; 
             color: white; cursor: pointer; backdrop-filter: blur(15px);
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
             transition: 0.3s;
         }
         .v-end { background: var(--danger); border: none; font-size: 26px; }
-        .muted-active { background: rgba(239, 68, 68, 0.4); color: var(--danger); border-color: var(--danger); }
+        .active-state { background: rgba(239, 68, 68, 0.4); color: var(--danger); }
     </style>
 </head>
 <body>
@@ -85,106 +83,86 @@
         const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
 
         const urlParams = new URLSearchParams(window.location.search);
-        const partnerUID = urlParams.get('uid');
+        let partnerUID = urlParams.get('uid');
         
-        // Gyara: Tabbatar an samo UID din mai amfani ko da an kira shi daban a localStorage
-        const myUID = localStorage.getItem('user_uid') || localStorage.getItem('uid') || "USER_" + Math.floor(Math.random()*1000);
+        // MUHIMMI: Tabbatar an samo UID din mai amfani (Kai)
+        const myUID = localStorage.getItem('user_uid') || "USER_" + Math.floor(Math.random()*1000);
 
         let localTracks = { videoTrack: null, audioTrack: null };
 
-        // GYARA: Nemo Username live daga Firebase
-        async function fetchPartnerInfo() {
-            if (!partnerUID) return;
-            // Ina amfani da .on domin idan aka canja sunan ma ya sauya anan
-            database.ref('users/' + partnerUID).on('value', snap => {
-                if (snap.exists()) {
-                    const data = snap.val();
-                    document.getElementById('vName').innerText = data.username || data.name || "Elite User";
-                } else {
-                    document.getElementById('vName').innerText = "Elite User";
-                }
-            });
+        // Nuna sunan mutum idan har akwai UID a URL
+        function checkPartner() {
+            if (partnerUID) {
+                database.ref('users/' + partnerUID).on('value', snap => {
+                    if (snap.exists()) {
+                        document.getElementById('vName').innerText = snap.val().username || "Elite User";
+                    }
+                });
+            } else {
+                document.getElementById('vStatus').innerText = "Notice: Waiting for Partner ID...";
+            }
         }
 
-        async function startCall() {
-            if (!partnerUID) {
-                document.getElementById('vStatus').innerText = "Error: Partner UID missing!";
-                return;
-            }
-
-            fetchPartnerInfo();
-
-            const channelName = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
+        async function initCall() {
+            checkPartner();
 
             try {
-                // GYARA: Create Tracks kafin ma shiga channel don tabbatar camera ta bude
-                [localTracks.audioTrack, localTracks.videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
-                
-                // Nuna hotonka nan take
-                localTracks.videoTrack.play("local-player");
-                document.getElementById('vStatus').innerText = "Camera Active - Joining...";
+                // Fara bude Camera nan take don ya daina nuna duhu
+                localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+                localTracks.videoTrack = await AgoraRTC.createCameraVideoTrack();
 
-                // Join Agora
-                await client.join(APP_ID, channelName, null, null);
-                await client.publish([localTracks.audioTrack, localTracks.videoTrack]);
-                
-                document.getElementById('vStatus').innerText = "Ringing...";
+                await localTracks.videoTrack.play("local-player");
+                document.getElementById('vStatus').innerText = "Camera Ready";
+
+                // Idan akwai partnerUID, sai mu shiga Agora
+                if (partnerUID) {
+                    const channelName = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
+                    await client.join(APP_ID, channelName, null, null);
+                    await client.publish([localTracks.audioTrack, localTracks.videoTrack]);
+                    document.getElementById('vStatus').innerText = "Ringing...";
+                }
 
                 client.on("user-published", async (user, mediaType) => {
                     await client.subscribe(user, mediaType);
                     document.getElementById('vStatus').innerText = "Live";
-
                     if (mediaType === "video") {
                         document.getElementById('remote-player').innerHTML = ""; 
                         user.videoTrack.play("remote-player");
                     }
-                    if (mediaType === "audio") {
-                        user.audioTrack.play();
-                    }
-                });
-
-                client.on("user-unpublished", () => {
-                    document.getElementById('vStatus').innerText = "Partner Left";
-                    setTimeout(endCall, 2000);
+                    if (mediaType === "audio") user.audioTrack.play();
                 });
 
             } catch (err) {
-                console.error("Agora Error:", err);
-                document.getElementById('vStatus').innerText = "Camera Access Denied!";
+                console.error(err);
+                document.getElementById('vStatus').innerText = "Permission Denied!";
             }
         }
 
         async function toggleVideo() {
+            if(!localTracks.videoTrack) return;
             const isEnabled = localTracks.videoTrack.enabled;
             await localTracks.videoTrack.setEnabled(!isEnabled);
             document.getElementById('camIcon').className = !isEnabled ? "fas fa-video" : "fas fa-video-slash";
-            document.getElementById('camBtn').classList.toggle('muted-active', isEnabled);
+            document.getElementById('camBtn').classList.toggle('active-state', isEnabled);
         }
 
         async function toggleAudio() {
+            if(!localTracks.audioTrack) return;
             const isEnabled = localTracks.audioTrack.enabled;
             await localTracks.audioTrack.setEnabled(!isEnabled);
             document.getElementById('micIcon').className = !isEnabled ? "fas fa-microphone" : "fas fa-microphone-slash";
-            document.getElementById('micBtn').classList.toggle('muted-active', isEnabled);
+            document.getElementById('micBtn').classList.toggle('active-state', isEnabled);
         }
 
         async function endCall() {
             if(localTracks.videoTrack) { localTracks.videoTrack.stop(); localTracks.videoTrack.close(); }
             if(localTracks.audioTrack) { localTracks.audioTrack.stop(); localTracks.audioTrack.close(); }
             await client.leave();
-            
             database.ref('calls/' + myUID).remove();
-            database.ref('calls/' + partnerUID).remove();
-
-            window.location.href = "Chatting.html?uid=" + partnerUID;
+            history.back();
         }
 
-        // Listener don gane idan kiran ya kare
-        database.ref('calls/' + myUID).on('value', snap => {
-            if (snap.exists() && snap.val().status === 'ended') endCall();
-        });
-
-        window.onload = startCall;
+        window.onload = initCall;
     </script>
 </body>
 </html>
