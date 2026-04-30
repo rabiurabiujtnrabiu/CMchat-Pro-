@@ -17,6 +17,7 @@
             --text-main: #e9edef;
             --text-dim: #8696a0;
             --primary: #00a884;
+            --accent: #00e676;
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -39,6 +40,7 @@
         .user-meta b { font-size: 16px; color: var(--text-main); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
         .status-text { font-size: 11px; color: var(--primary); }
         .header-tools { display: flex; gap: 20px; color: var(--text-dim); font-size: 19px; }
+        .header-tools i:active { color: var(--primary); }
 
         .chat-container { 
             flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
@@ -50,6 +52,26 @@
         .received { background: var(--received-bubble); align-self: flex-start; border-top-left-radius: 0; }
         .sent { background: var(--sent-bubble); align-self: flex-end; border-top-right-radius: 0; }
 
+        /* Floating Add Friend Button */
+        .fab-btn {
+            position: fixed; bottom: 85px; right: 20px;
+            width: 55px; height: 55px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 22px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            z-index: 999;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+            border: none;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 168, 132, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(0, 168, 132, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 168, 132, 0); }
+        }
+
         .voice-wrapper { display: flex; align-items: center; gap: 10px; min-width: 210px; padding: 4px 0; }
         .voice-avatar-box { position: relative; width: 35px; height: 35px; }
         .voice-avatar { width: 100%; height: 100%; border-radius: 50%; background: #3b4a54; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; color: white; }
@@ -58,7 +80,6 @@
         .play-btn { font-size: 24px; color: var(--text-dim); cursor: pointer; min-width: 24px; text-align: center; }
         .sent .play-btn { color: white; }
         
-        /* WAVEFORM PROGRESS STYLE */
         .waveform-lite { flex: 1; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; position: relative; overflow: hidden; }
         .waveform-progress { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: var(--primary); border-radius: 2px; transition: width 0.1s linear; }
 
@@ -75,12 +96,21 @@
         
         .action-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); border: none; color: white; cursor: pointer; font-size: 19px; display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0; }
         .recording-active { transform: scale(1.2); background: #ff3b30 !important; }
+        
+        /* Privacy Alert Style */
+        #privacyAlert {
+            display: none; position: absolute; top: 70px; left: 50%; transform: translateX(-50%);
+            background: #fdf6b2; color: #723b10; padding: 8px 15px; border-radius: 20px;
+            font-size: 12px; font-weight: 600; z-index: 1001; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
     </style>
 </head>
 <body>
 
+    <div id="privacyAlert">Connect as friends to start chatting!</div>
+
     <header class="chat-header">
-        <div class="header-left" onclick="history.back()">
+        <div class="header-left" onclick="window.location.href='index.html'">
             <i class="fas fa-arrow-left"></i>
             <img src="https://via.placeholder.com/100" class="user-avatar" id="chatAvatar">
             <div class="user-meta">
@@ -89,13 +119,17 @@
             </div>
         </div>
         <div class="header-tools">
-            <i class="fas fa-video"></i>
-            <i class="fas fa-phone-alt"></i>
-            <i class="fas fa-ellipsis-v"></i>
+            <i class="fas fa-video" onclick="alert('Starting video call...')"></i>
+            <i class="fas fa-phone-alt" onclick="alert('Calling...')"></i>
+            <i class="fas fa-ellipsis-v" onclick="showSettings()"></i>
         </div>
     </header>
 
     <div class="chat-container" id="chatBox"></div>
+
+    <button class="fab-btn" onclick="window.location.href='find-friends.html'">
+        <i class="fas fa-user-plus"></i>
+    </button>
 
     <div class="input-area">
         <i class="far fa-laugh" style="color:var(--text-dim); font-size:22px;"></i>
@@ -105,7 +139,7 @@
         </div>
         <div class="input-wrapper" id="inputWrap">
             <input type="text" id="messageInput" placeholder="Message" autocomplete="off" oninput="checkInput()">
-            <i class="fas fa-paperclip" style="color:var(--text-dim); transform:rotate(45deg);"></i>
+            <i class="fas fa-paperclip" style="color:var(--text-dim); transform:rotate(45deg);" onclick="alert('Attach file...')"></i>
         </div>
         <button class="action-btn" id="micBtn" 
                 onmousedown="startVoice()" onmouseup="stopVoice()"
@@ -132,17 +166,38 @@
         const hud = document.getElementById('recHUD');
         const inputWrap = document.getElementById('inputWrap');
         const chatBox = document.getElementById('chatBox');
+        const privacyAlert = document.getElementById('privacyAlert');
 
         let mediaRecorder;
         let audioChunks = [];
         let timerInterval;
         let currentAudio = null;
+        let isFriend = true; // Default to true, will be checked via Firebase
 
+        // 1. PRIVACY CHECK: Friends only logic
+        database.ref(`friends/${myUID}/${partnerUID}`).on('value', snap => {
+            isFriend = snap.exists();
+            if(!isFriend && partnerUID !== "USER_DEFAULT") {
+                privacyAlert.style.display = 'block';
+                micBtn.disabled = true;
+                msgInput.disabled = true;
+            } else {
+                privacyAlert.style.display = 'none';
+                micBtn.disabled = false;
+                msgInput.disabled = false;
+            }
+        });
+
+        // 2. OPTIMIZED VOICE ENGINE (Low Latency & Lightweight)
         async function startVoice() {
-            if(msgInput.value.trim().length > 0) return;
+            if(msgInput.value.trim().length > 0 || !isFriend) return;
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const options = { mimeType: 'audio/webm;codecs=opus' };
+                // Bitrate reduction to 64kbps for faster loading
+                const options = { 
+                    mimeType: 'audio/webm;codecs=opus',
+                    audioBitsPerSecond: 64000 
+                };
                 mediaRecorder = new MediaRecorder(stream, options);
                 audioChunks = [];
                 mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
@@ -172,15 +227,13 @@
             mediaRecorder.onstop = async () => {
                 const blob = new Blob(audioChunks, { type: 'audio/webm;codecs=opus' });
                 mediaRecorder.stream.getTracks().forEach(t => t.stop());
-                if(blob.size > 2000) uploadVoice(blob);
+                if(blob.size > 1000) uploadVoice(blob);
             };
         }
 
         async function uploadVoice(blob) {
-            // Nuna Loading Status
             btnIcon.className = "fas fa-spinner fa-spin";
             micBtn.disabled = true;
-
             const fd = new FormData();
             fd.append('file', blob);
             fd.append('upload_preset', "cmchat_pro");
@@ -199,7 +252,7 @@
                         timestamp: Date.now()
                     });
                 }
-            } catch(e) { console.error("Cloudinary Error"); }
+            } catch(e) { console.error("Upload Failed"); }
             finally {
                 btnIcon.className = "fas fa-microphone";
                 micBtn.disabled = false;
@@ -208,7 +261,7 @@
 
         function sendMessage() {
             const text = msgInput.value.trim();
-            if(!text) return;
+            if(!text || !isFriend) return;
             database.ref('messages/' + chatID).push({
                 sender: myUID,
                 msg: text,
@@ -235,7 +288,7 @@
                         <div class="message ${isMe ? 'sent' : 'received'}">
                             <div class="voice-wrapper">
                                 <div class="voice-avatar-box">
-                                    <div class="voice-avatar">${isMe ? 'Me' : 'H'}</div>
+                                    <div class="voice-avatar">${isMe ? 'Me' : d.sender.substring(0,1)}</div>
                                     <i class="fas fa-microphone mic-badge"></i>
                                 </div>
                                 <i class="fas fa-play play-btn" id="play_${msgId}" onclick="playVoice('${d.url}', '${msgId}')"></i>
@@ -269,7 +322,6 @@
 
             if (currentAudio && !currentAudio.paused) {
                 currentAudio.pause();
-                // Reset all icons
                 document.querySelectorAll('.play-btn').forEach(b => b.className = "fas fa-play play-btn");
                 if (currentAudio.src === url) {
                     currentAudio = null;
@@ -303,6 +355,10 @@
                 if(u.profilePhoto) document.getElementById('chatAvatar').src = u.profilePhoto;
             }
         });
+
+        function showSettings() {
+            alert("Settings:\n1. Mute\n2. Clear Chat\n3. Block User");
+        }
     </script>
 </body>
 </html>
