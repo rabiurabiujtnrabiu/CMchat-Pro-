@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CMchat Pro - Elite Messenger</title>
+    <title>CMchat Pro - Elite Live</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -29,55 +29,67 @@
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #3b4a54; border: 1px solid rgba(255,255,255,0.1); }
         .user-meta b { font-size: 16px; color: var(--text-main); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
         
+        /* --- PRESENCE FIX (Cire kalar kore ta dindindin) --- */
         .status-box { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-dim); }
-        .online-dot { width: 8px; height: 8px; background: #8696a0; border-radius: 50%; }
+        .online-dot { width: 8px; height: 8px; background: #8696a0; border-radius: 50%; transition: 0.3s; }
+        
+        /* Wannan class din zai yi aiki ne kawai idan mutum yana online */
         .is-online .online-dot { background: var(--online-glow); box-shadow: 0 0 8px var(--online-glow); animation: glow 1.5s infinite; }
-        @keyframes glow { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
         .is-online .status-txt { color: var(--online-glow); font-weight: 600; }
+        @keyframes glow { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
         .header-tools { display: flex; gap: 20px; color: var(--text-dim); font-size: 19px; }
         .header-tools i { cursor: pointer; }
-        .header-tools i:active { color: var(--primary); }
 
         .chat-container { 
-            flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+            flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
             background-blend-mode: overlay; background-size: 400px;
         }
 
-        /* FAB BTN - Maido Add Friend Icon */
-        .fab-btn {
-            position: fixed; bottom: 85px; right: 20px;
-            width: 55px; height: 55px;
-            background: var(--primary); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            z-index: 999; cursor: pointer; border: none;
-        }
-
-        .message { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 14.5px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.2); user-select: none; }
+        /* --- MESSAGE BUBBLE & TICKS FIX --- */
+        .message { max-width: 80%; padding: 8px 12px; border-radius: 15px; font-size: 15px; position: relative; width: fit-content; word-wrap: break-word; }
         .received { background: var(--received-bubble); align-self: flex-start; border-top-left-radius: 0; }
         .sent { background: var(--sent-bubble); align-self: flex-end; border-top-right-radius: 0; }
-        .msg-footer { font-size: 10px; color: var(--text-dim); text-align: right; margin-top: 4px; }
+        
+        .msg-footer { font-size: 10px; color: var(--text-dim); text-align: right; margin-top: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+        /* Ticks color fix */
+        .sent-tick { color: var(--text-dim); font-size: 11px; }
+        .read-tick { color: #34b7f1; } 
 
-        #msgMenu { display: none; position: fixed; background: #232d36; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 3000; padding: 5px 0; min-width: 140px; }
+        .voice-player { display: flex; align-items: center; gap: 10px; min-width: 180px; padding: 5px 0; }
+        .play-btn { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .v-track { flex: 1; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; position: relative; }
+        .v-progress { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: #fff; border-radius: 2px; }
+
+        .fab-btn { position: fixed; bottom: 85px; right: 20px; width: 55px; height: 55px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); z-index: 999; border: none; }
+
+        #stickerSheet { position: fixed; bottom: -400px; left: 0; width: 100%; height: 350px; background: #202c33; z-index: 2000; transition: 0.4s; border-radius: 25px 25px 0 0; padding: 15px; display: flex; flex-direction: column; }
+        .sticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; overflow-y: auto; padding-top: 15px; }
+        .s-item { font-size: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        #msgMenu { display: none; position: fixed; background: #232d36; border-radius: 10px; z-index: 3000; padding: 5px 0; min-width: 140px; }
         .menu-item { padding: 12px 15px; font-size: 14px; display: flex; align-items: center; gap: 12px; color: white; cursor: pointer; }
 
-        #stickerSheet { position: fixed; bottom: -320px; left: 0; width: 100%; height: 300px; background: #202c33; z-index: 2000; transition: 0.3s; padding: 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; overflow-y: auto; }
-        
+        /* --- INPUT AREA FIX (Cire White Square a Mic) --- */
         .input-area { background: var(--header-dark); padding: 10px 12px; display: flex; align-items: center; gap: 8px; }
-        .input-wrapper { flex: 1; background: #2a3942; border-radius: 25px; padding: 0 12px; display: flex; align-items: center; height: 45px; gap: 12px; }
+        .input-wrapper { flex: 1; background: #2a3942; border-radius: 25px; padding: 0 15px; display: flex; align-items: center; height: 45px; gap: 12px; }
         #messageInput { border: none; background: transparent; outline: none; flex: 1; color: var(--text-main); font-size: 16px; }
         
-        .action-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); border: none; color: white; font-size: 19px; display: flex; align-items: center; justify-content: center; }
+        .action-btn { 
+            width: 45px; height: 45px; border-radius: 50%; 
+            background: var(--primary); border: none; color: white; 
+            font-size: 19px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; background-clip: padding-box; /* Fixes any bleeding background */
+        }
     </style>
 </head>
 <body onclick="hidePopups()">
 
     <header class="chat-header">
-        <div class="header-left" onclick="window.location.href='Friends.html'">
+        <div class="header-left" onclick="navigate('Friends.html')">
             <i class="fas fa-arrow-left"></i>
-            <img src="https://via.placeholder.com/100" class="user-avatar" id="chatAvatar">
+            <img src="https://via.placeholder.com/100" class="user-avatar" id="chatAvatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
             <div class="user-meta">
                 <b id="chatWith">Elite Member</b> 
                 <div class="status-box" id="presenceBox">
@@ -99,10 +111,7 @@
     </button>
 
     <div id="stickerSheet" onclick="event.stopPropagation()">
-        <img src="https://cdn-icons-png.flaticon.com/512/4721/4721215.png" style="width:100%" onclick="sendSticker(this.src)">
-        <img src="https://cdn-icons-png.flaticon.com/512/4721/4721200.png" style="width:100%" onclick="sendSticker(this.src)">
-        <img src="https://cdn-icons-png.flaticon.com/512/4721/4721205.png" style="width:100%" onclick="sendSticker(this.src)">
-        <img src="https://cdn-icons-png.flaticon.com/512/4721/4721210.png" style="width:100%" onclick="sendSticker(this.src)">
+        <div class="sticker-grid" id="stickerGrid"></div>
     </div>
 
     <div id="msgMenu">
@@ -135,117 +144,96 @@
         const partnerUID = new URLSearchParams(window.location.search).get('uid') || "USER_DEFAULT";
         const chatID = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
 
-        let pressTimer, selectedMsgKey;
+        let currentAudio = null, selectedMsgKey, pressTimer, isPartnerOnline = false;
 
-        // GYARAN NAVIGATION - Cire tambayar "Confirm Navigation"
-        function navigate(url) {
-            window.onbeforeunload = null; // Kashe tambayar tsaro
-            window.location.href = url;
+        // --- PRESENCE FIX (Live Listener) ---
+        database.ref('status/' + partnerUID).on('value', s => {
+            const box = document.getElementById('presenceBox');
+            const txt = box.querySelector('.status-txt');
+            if(s.val() === 'online') {
+                isPartnerOnline = true;
+                box.classList.add('is-online');
+                txt.innerText = "online";
+            } else {
+                isPartnerOnline = false;
+                box.classList.remove('is-online');
+                txt.innerText = "offline";
+            }
+        });
+        database.ref('status/' + myUID).set('online');
+
+        function navigate(url) { window.onbeforeunload = null; window.location.href = url; }
+
+        // --- LIVE MESSAGE LISTENER (Ticks Fix) ---
+        database.ref('messages/' + chatID).on('value', snap => {
+            const box = document.getElementById('chatBox');
+            box.innerHTML = "";
+            snap.forEach(child => {
+                const d = child.val(); const isMe = d.sender === myUID; const key = child.key;
+                let html = "";
+
+                if(d.type === 'voice') {
+                    html = `<div class="voice-player">
+                        <div class="play-btn" onclick="playVoice('${d.url}', '${key}')"><i class="fas fa-play" id="p_${key}"></i></div>
+                        <div class="v-track"><div class="v-progress" id="b_${key}"></div></div>
+                        <span style="font-size:10px; opacity:0.7;">${d.duration || '0:00'}</span>
+                    </div>`;
+                } else if(d.type === 'sticker_emoji') {
+                    html = `<div style="font-size:45px;">${d.msg}</div>`;
+                } else {
+                    html = `<div>${d.msg}</div>`;
+                }
+
+                // Ticks Logic: Kalar blue/kore kadai idan mutum yana online
+                const tickClass = (isPartnerOnline) ? "sent-tick read-tick" : "sent-tick";
+
+                box.innerHTML += `<div class="message ${isMe?'sent':'received'}" 
+                    ontouchstart="startPress(event, '${key}')" ontouchend="cancelPress()" 
+                    onmousedown="startPress(event, '${key}')" onmouseup="cancelPress()">
+                    ${html}
+                    <div class="msg-footer">${d.time} ${isMe?`<i class="fas fa-check-double ${tickClass}"></i>`:''}</div>
+                </div>`;
+            });
+            box.scrollTop = box.scrollHeight;
+        });
+
+        function playVoice(url, key) {
+            if(currentAudio) { currentAudio.pause(); document.querySelectorAll('.play-btn i').forEach(i=>i.className="fas fa-play"); if(currentAudio.src === url) {currentAudio=null; return;} }
+            currentAudio = new Audio(url); const icon = document.getElementById('p_'+key); const bar = document.getElementById('b_'+key);
+            icon.className = "fas fa-pause"; currentAudio.play();
+            currentAudio.ontimeupdate = () => bar.style.width = (currentAudio.currentTime/currentAudio.duration)*100 + "%";
+            currentAudio.onended = () => { icon.className = "fas fa-play"; bar.style.width = "0%"; currentAudio = null; };
         }
 
         function checkInput() {
             const val = document.getElementById('messageInput').value.trim();
-            const btn = document.getElementById('actionBtn');
-            const icon = document.getElementById('btnIcon');
-            if(val) {
-                icon.className = "fas fa-paper-plane";
-                btn.onmousedown = btn.ontouchstart = null;
-                btn.onclick = sendMessage;
-            } else {
-                icon.className = "fas fa-microphone";
-                btn.onclick = null;
-                btn.onmousedown = btn.ontouchstart = () => VoiceManager.start(chatID, myUID);
-                btn.onmouseup = btn.ontouchend = () => VoiceManager.stop();
-            }
+            const btn = document.getElementById('actionBtn'); const icon = document.getElementById('btnIcon');
+            if(val) { icon.className = "fas fa-paper-plane"; btn.onmousedown = btn.ontouchstart = null; btn.onclick = sendMessage; }
+            else { icon.className = "fas fa-microphone"; btn.onclick = null; btn.onmousedown = btn.ontouchstart = () => VoiceManager.start(chatID, myUID); btn.onmouseup = btn.ontouchend = () => VoiceManager.stop(); }
         }
         checkInput();
 
         function sendMessage() {
             const val = document.getElementById('messageInput').value.trim();
-            if(val) {
-                database.ref('messages/' + chatID).push({
-                    sender: myUID, msg: val, type: 'text', time: getTime(), timestamp: Date.now()
-                });
-                document.getElementById('messageInput').value = "";
-                checkInput();
-            }
+            if(!val) return;
+            database.ref('messages/' + chatID).push({ sender: myUID, msg: val, type: 'text', time: getTime(), timestamp: Date.now() });
+            document.getElementById('messageInput').value = ""; checkInput();
         }
 
-        function handleFile(input) {
-            if(input.files && input.files[0]) {
-                alert("Gallery opened: " + input.files[0].name);
-            }
-        }
-
-        function startPress(e, key) {
-            selectedMsgKey = key;
-            pressTimer = window.setTimeout(() => openMsgMenu(e), 800);
-        }
+        function startPress(e, key) { selectedMsgKey = key; pressTimer = window.setTimeout(() => openMsgMenu(e), 800); }
         function cancelPress() { clearTimeout(pressTimer); }
-
         function openMsgMenu(e) {
-            const menu = document.getElementById('msgMenu');
-            menu.style.display = 'block';
-            let x = e.clientX || (e.touches && e.touches[0].clientX) || 100;
-            let y = e.clientY || (e.touches && e.touches[0].clientY) || 100;
-            menu.style.top = y + 'px';
-            menu.style.left = (x > window.innerWidth/2 ? x-140 : x) + 'px';
+            const menu = document.getElementById('msgMenu'); menu.style.display = 'block';
+            let x = e.clientX || (e.touches && e.touches[0].clientX); let y = e.clientY || (e.touches && e.touches[0].clientY);
+            menu.style.top = y + 'px'; menu.style.left = (x > window.innerWidth/2 ? x-140 : x) + 'px';
         }
 
-        function hidePopups() {
-            document.getElementById('msgMenu').style.display = 'none';
-            document.getElementById('stickerSheet').style.bottom = '-320px';
-        }
-
-        function toggleStickers() {
-            const s = document.getElementById('stickerSheet');
-            s.style.bottom = s.style.bottom === '0px' ? '-320px' : '0px';
-        }
-
-        function sendSticker(url) {
-            database.ref('messages/' + chatID).push({ sender: myUID, url: url, type: 'sticker', time: getTime(), timestamp: Date.now() });
-            hidePopups();
-        }
-
-        function deleteMessage() {
-            if(selectedMsgKey) database.ref('messages/' + chatID + '/' + selectedMsgKey).remove();
-            hidePopups();
-        }
-
+        function hidePopups() { document.getElementById('msgMenu').style.display = 'none'; document.getElementById('stickerSheet').style.bottom = '-400px'; }
+        function deleteMessage() { if(selectedMsgKey) database.ref('messages/' + chatID + '/' + selectedMsgKey).remove(); hidePopups(); }
         function forwardMessage() { alert("Forwarding..."); hidePopups(); }
-
+        function handleFile(i) { if(i.files[0]) alert("File: " + i.files[0].name); }
         function getTime() { return new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
-
-        // LIVE MESSAGE LISTENER
-        database.ref('messages/' + chatID).on('value', snap => {
-            const box = document.getElementById('chatBox');
-            box.innerHTML = "";
-            snap.forEach(child => {
-                const d = child.val();
-                const isMe = d.sender === myUID;
-                const key = child.key;
-                let content = d.type === 'sticker' ? `<img src="${d.url}" style="width:100px;">` : 
-                              d.type === 'voice' ? `🎤 Voice Message` : d.msg;
-
-                box.innerHTML += `
-                    <div class="message ${isMe?'sent':'received'}" 
-                         ontouchstart="startPress(event, '${key}')" 
-                         ontouchend="cancelPress()" 
-                         onmousedown="startPress(event, '${key}')" 
-                         onmouseup="cancelPress()">
-                        ${content}
-                        <div class="msg-footer">${d.time} ${isMe?'✓✓':''}</div>
-                    </div>`;
-            });
-            box.scrollTop = box.scrollHeight;
-        });
-
-        // Online Status logic
-        database.ref('status/' + partnerUID).on('value', s => {
-            document.getElementById('presenceBox').className = s.val() === 'online' ? 'status-box is-online' : 'status-box';
-        });
-        database.ref('status/' + myUID).set('online');
-        // Mun cire window.onbeforeunload na asali don hana waccan matsalar
+        function toggleStickers() { const s = document.getElementById('stickerSheet'); s.style.bottom = s.style.bottom === '0px' ? '-400px' : '0px'; }
     </script>
 </body>
 </html>
