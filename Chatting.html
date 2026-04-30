@@ -55,11 +55,12 @@
         .voice-avatar { width: 100%; height: 100%; border-radius: 50%; background: #3b4a54; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; color: white; }
         .mic-badge { position: absolute; bottom: -1px; right: -1px; font-size: 9px; color: var(--primary); background: var(--header-dark); border-radius: 50%; padding: 2px; }
 
-        .play-btn { font-size: 24px; color: var(--text-dim); cursor: pointer; }
+        .play-btn { font-size: 24px; color: var(--text-dim); cursor: pointer; min-width: 24px; text-align: center; }
         .sent .play-btn { color: white; }
         
-        .waveform-lite { flex: 1; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; position: relative; overflow: hidden; }
-        .waveform-lite::after { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 40%; background: var(--primary); border-radius: 2px; }
+        /* WAVEFORM PROGRESS STYLE */
+        .waveform-lite { flex: 1; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; position: relative; overflow: hidden; }
+        .waveform-progress { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: var(--primary); border-radius: 2px; transition: width 0.1s linear; }
 
         .msg-footer { display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; color: var(--text-dim); margin-top: 4px; }
         .sent .msg-footer i { color: #53bdeb; }
@@ -121,7 +122,6 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // AUTH FIX: Tabbatar akwai UID koda user din bai yi login ba don gwaji
         const myUID = localStorage.getItem('user_uid') || "USER_" + Math.floor(Math.random()*1000);
         const partnerUID = new URLSearchParams(window.location.search).get('uid') || "USER_DEFAULT";
         const chatID = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
@@ -138,7 +138,6 @@
         let timerInterval;
         let currentAudio = null;
 
-        // VOICE ENGINE LIVE FIX
         async function startVoice() {
             if(msgInput.value.trim().length > 0) return;
             try {
@@ -146,14 +145,11 @@
                 const options = { mimeType: 'audio/webm;codecs=opus' };
                 mediaRecorder = new MediaRecorder(stream, options);
                 audioChunks = [];
-                
                 mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
                 mediaRecorder.start();
-                
                 hud.style.display = 'flex';
                 inputWrap.style.display = 'none';
                 micBtn.classList.add('recording-active');
-                
                 let sec = 0;
                 timerInterval = setInterval(() => {
                     sec++;
@@ -173,7 +169,6 @@
             hud.style.display = 'none';
             inputWrap.style.display = 'flex';
             micBtn.classList.remove('recording-active');
-            
             mediaRecorder.onstop = async () => {
                 const blob = new Blob(audioChunks, { type: 'audio/webm;codecs=opus' });
                 mediaRecorder.stream.getTracks().forEach(t => t.stop());
@@ -182,10 +177,14 @@
         }
 
         async function uploadVoice(blob) {
+            // Nuna Loading Status
+            btnIcon.className = "fas fa-spinner fa-spin";
+            micBtn.disabled = true;
+
             const fd = new FormData();
             fd.append('file', blob);
             fd.append('upload_preset', "cmchat_pro");
-            fd.append('resource_type', 'video'); // Requirement for audio in Cloudinary
+            fd.append('resource_type', 'video');
 
             try {
                 const res = await fetch(`https://api.cloudinary.com/v1_1/dyfyhzp3o/upload`, { method: 'POST', body: fd });
@@ -201,6 +200,10 @@
                     });
                 }
             } catch(e) { console.error("Cloudinary Error"); }
+            finally {
+                btnIcon.className = "fas fa-microphone";
+                micBtn.disabled = false;
+            }
         }
 
         function sendMessage() {
@@ -221,12 +224,12 @@
             btnIcon.className = msgInput.value.trim().length > 0 ? "fas fa-paper-plane" : "fas fa-microphone";
         }
 
-        // SYNC UI ICONS
         database.ref('messages/' + chatID).on('value', snap => {
             chatBox.innerHTML = "";
             snap.forEach(child => {
                 const d = child.val();
                 const isMe = d.sender === myUID;
+                const msgId = child.key;
                 if(d.type === 'voice') {
                     chatBox.innerHTML += `
                         <div class="message ${isMe ? 'sent' : 'received'}">
@@ -235,11 +238,13 @@
                                     <div class="voice-avatar">${isMe ? 'Me' : 'H'}</div>
                                     <i class="fas fa-microphone mic-badge"></i>
                                 </div>
-                                <i class="fas fa-play play-btn" onclick="playVoice('${d.url}', this)"></i>
-                                <div class="waveform-lite"></div>
+                                <i class="fas fa-play play-btn" id="play_${msgId}" onclick="playVoice('${d.url}', '${msgId}')"></i>
+                                <div class="waveform-lite">
+                                    <div class="waveform-progress" id="progress_${msgId}"></div>
+                                </div>
                             </div>
                             <div class="msg-footer">
-                                <span>${d.duration || ''} • ${d.time}</span>
+                                <span id="timer_${msgId}">${d.duration || ''} • ${d.time}</span>
                                 ${isMe ? '<i class="fas fa-check-double"></i>' : ''}
                             </div>
                         </div>`;
@@ -257,20 +262,36 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         });
 
-        function playVoice(url, btn) {
-            if (currentAudio) {
+        function playVoice(url, msgId) {
+            const btn = document.getElementById('play_' + msgId);
+            const progressBar = document.getElementById('progress_' + msgId);
+            const timerLabel = document.getElementById('timer_' + msgId);
+
+            if (currentAudio && !currentAudio.paused) {
                 currentAudio.pause();
+                // Reset all icons
                 document.querySelectorAll('.play-btn').forEach(b => b.className = "fas fa-play play-btn");
                 if (currentAudio.src === url) {
                     currentAudio = null;
                     return;
                 }
             }
+
             currentAudio = new Audio(url);
             btn.className = "fas fa-pause play-btn";
             currentAudio.play();
+
+            currentAudio.ontimeupdate = () => {
+                const pct = (currentAudio.currentTime / currentAudio.duration) * 100;
+                progressBar.style.width = pct + "%";
+                let remain = Math.ceil(currentAudio.duration - currentAudio.currentTime);
+                timerLabel.innerText = remain + "s remaining";
+            };
+
             currentAudio.onended = () => {
                 btn.className = "fas fa-play play-btn";
+                progressBar.style.width = "0%";
+                timerLabel.innerText = "Played";
                 currentAudio = null;
             };
         }
