@@ -33,7 +33,7 @@
             position: fixed; 
         }
 
-        .chat-header { background: var(--header-dark); padding: 10px 15px; display: flex; align-items: center; height: 60px; z-index: 1000; flex-shrink: 0; }
+        .chat-header { background: var(--header-dark); padding: 10px 15px; display: flex; align-items: center; height: 60px; z-index: 1000; flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .header-left { display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #3b4a54; border: 1px solid rgba(255,255,255,0.1); }
         .user-meta b { font-size: 16px; color: var(--text-main); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
@@ -80,7 +80,7 @@
 
     <header class="chat-header">
         <div class="header-left" onclick="history.back()">
-            <i class="fas fa-arrow-left" style="color:var(--text-dim); font-size:18px;"></i>
+            <i class="fas fa-arrow-left"></i>
             <img src="https://via.placeholder.com/100" class="user-avatar" id="chatAvatar">
             <div class="user-meta">
                 <b id="chatWith">Elite Member</b> 
@@ -121,8 +121,9 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        const myUID = localStorage.getItem('user_uid') || "USER_1";
-        const partnerUID = new URLSearchParams(window.location.search).get('uid') || "USER_2";
+        // AUTH FIX: Tabbatar akwai UID koda user din bai yi login ba don gwaji
+        const myUID = localStorage.getItem('user_uid') || "USER_" + Math.floor(Math.random()*1000);
+        const partnerUID = new URLSearchParams(window.location.search).get('uid') || "USER_DEFAULT";
         const chatID = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
 
         const msgInput = document.getElementById('messageInput');
@@ -135,16 +136,17 @@
         let mediaRecorder;
         let audioChunks = [];
         let timerInterval;
-        let currentAudio = null; // Global player controller
+        let currentAudio = null;
 
+        // VOICE ENGINE LIVE FIX
         async function startVoice() {
             if(msgInput.value.trim().length > 0) return;
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                // CODEC FIX: Muna amfani da Opus don sauti mai inganci (HD)
-                const options = { mimeType: 'audio/webm;codecs=opus', audioBitsPerSecond: 128000 };
+                const options = { mimeType: 'audio/webm;codecs=opus' };
                 mediaRecorder = new MediaRecorder(stream, options);
                 audioChunks = [];
+                
                 mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
                 mediaRecorder.start();
                 
@@ -158,7 +160,7 @@
                     let m = Math.floor(sec/60), s = sec%60;
                     document.getElementById('recTimer').innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
                 }, 1000);
-            } catch(e) { alert("Mic Error!"); }
+            } catch(e) { alert("Mic Permission Denied!"); }
         }
 
         async function stopVoice() {
@@ -171,12 +173,11 @@
             hud.style.display = 'none';
             inputWrap.style.display = 'flex';
             micBtn.classList.remove('recording-active');
-            document.getElementById('recTimer').innerText = "00:00";
             
             mediaRecorder.onstop = async () => {
                 const blob = new Blob(audioChunks, { type: 'audio/webm;codecs=opus' });
                 mediaRecorder.stream.getTracks().forEach(t => t.stop());
-                if(blob.size > 1500) uploadVoice(blob);
+                if(blob.size > 2000) uploadVoice(blob);
             };
         }
 
@@ -184,7 +185,7 @@
             const fd = new FormData();
             fd.append('file', blob);
             fd.append('upload_preset', "cmchat_pro");
-            fd.append('resource_type', 'video');
+            fd.append('resource_type', 'video'); // Requirement for audio in Cloudinary
 
             try {
                 const res = await fetch(`https://api.cloudinary.com/v1_1/dyfyhzp3o/upload`, { method: 'POST', body: fd });
@@ -199,7 +200,7 @@
                         timestamp: Date.now()
                     });
                 }
-            } catch(e) { console.error("Upload failed"); }
+            } catch(e) { console.error("Cloudinary Error"); }
         }
 
         function sendMessage() {
@@ -220,6 +221,7 @@
             btnIcon.className = msgInput.value.trim().length > 0 ? "fas fa-paper-plane" : "fas fa-microphone";
         }
 
+        // SYNC UI ICONS
         database.ref('messages/' + chatID).on('value', snap => {
             chatBox.innerHTML = "";
             snap.forEach(child => {
@@ -255,12 +257,11 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         });
 
-        // PLAY VOICE ENGINE FIX: Kashe kowane sauti idan an danna sabo
         function playVoice(url, btn) {
             if (currentAudio) {
                 currentAudio.pause();
                 document.querySelectorAll('.play-btn').forEach(b => b.className = "fas fa-play play-btn");
-                if (currentAudio.src === url && !currentAudio.paused) {
+                if (currentAudio.src === url) {
                     currentAudio = null;
                     return;
                 }
@@ -278,7 +279,7 @@
             const u = s.val();
             if(u) {
                 document.getElementById('chatWith').innerText = u.username;
-                document.getElementById('chatAvatar').src = u.profilePhoto || 'https://via.placeholder.com/100';
+                if(u.profilePhoto) document.getElementById('chatAvatar').src = u.profilePhoto;
             }
         });
     </script>
