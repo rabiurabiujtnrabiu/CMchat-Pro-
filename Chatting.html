@@ -17,21 +17,16 @@
             --text-main: #e9edef;
             --text-dim: #8696a0;
             --primary: #00a884;
-            --accent: #00e676;
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body { 
             background-color: var(--bg-dark); 
-            height: 100vh; 
-            height: 100dvh; 
-            display: flex; 
-            flex-direction: column; 
-            color: var(--text-main); 
-            overflow: hidden; 
-            width: 100%;
-            position: fixed; 
+            height: 100vh; height: 100dvh; 
+            display: flex; flex-direction: column; 
+            color: var(--text-main); overflow: hidden; 
+            width: 100%; position: fixed; 
         }
 
         .chat-header { background: var(--header-dark); padding: 10px 15px; display: flex; align-items: center; height: 60px; z-index: 1000; flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
@@ -40,48 +35,34 @@
         .user-meta b { font-size: 16px; color: var(--text-main); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
         .status-text { font-size: 11px; color: var(--primary); }
         .header-tools { display: flex; gap: 20px; color: var(--text-dim); font-size: 19px; }
-        .header-tools i:active { color: var(--primary); }
+        .header-tools i { cursor: pointer; }
 
         .chat-container { 
             flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
             background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-blend-mode: overlay; background-size: 400px; scroll-behavior: smooth; height: 0;
+            background-blend-mode: overlay; background-size: 400px; scroll-behavior: smooth;
         }
-
-        .message { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 14.5px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.2); line-height: 1.4; }
-        .received { background: var(--received-bubble); align-self: flex-start; border-top-left-radius: 0; }
-        .sent { background: var(--sent-bubble); align-self: flex-end; border-top-right-radius: 0; }
 
         /* Floating Add Friend Button */
         .fab-btn {
-            position: fixed; bottom: 85px; right: 20px;
-            width: 55px; height: 55px;
-            background: var(--primary);
-            border-radius: 50%;
+            position: fixed; bottom: 80px; right: 20px;
+            width: 50px; height: 50px;
+            background: var(--primary); border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 22px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            z-index: 999;
-            animation: pulse 2s infinite;
-            cursor: pointer;
-            border: none;
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(0, 168, 132, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(0, 168, 132, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 168, 132, 0); }
+            color: white; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 99; cursor: pointer; border: none;
         }
 
-        .voice-wrapper { display: flex; align-items: center; gap: 10px; min-width: 210px; padding: 4px 0; }
-        .voice-avatar-box { position: relative; width: 35px; height: 35px; }
-        .voice-avatar { width: 100%; height: 100%; border-radius: 50%; background: #3b4a54; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; color: white; }
-        .mic-badge { position: absolute; bottom: -1px; right: -1px; font-size: 9px; color: var(--primary); background: var(--header-dark); border-radius: 50%; padding: 2px; }
+        .message { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 14.5px; position: relative; box-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+        .received { background: var(--received-bubble); align-self: flex-start; border-top-left-radius: 0; }
+        .sent { background: var(--sent-bubble); align-self: flex-end; border-top-right-radius: 0; }
 
-        .play-btn { font-size: 24px; color: var(--text-dim); cursor: pointer; min-width: 24px; text-align: center; }
+        .voice-wrapper { display: flex; align-items: center; gap: 10px; min-width: 200px; padding: 4px 0; }
+        .play-btn { font-size: 24px; color: var(--text-dim); cursor: pointer; }
         .sent .play-btn { color: white; }
         
-        .waveform-lite { flex: 1; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; position: relative; overflow: hidden; }
-        .waveform-progress { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: var(--primary); border-radius: 2px; transition: width 0.1s linear; }
+        .waveform-lite { flex: 1; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; position: relative; }
+        .waveform-progress { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: var(--primary); border-radius: 2px; }
 
         .msg-footer { display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; color: var(--text-dim); margin-top: 4px; }
         .sent .msg-footer i { color: #53bdeb; }
@@ -94,23 +75,14 @@
         .input-wrapper { flex: 1; background: #2a3942; border-radius: 25px; padding: 0 12px; display: flex; align-items: center; height: 45px; gap: 12px; }
         #messageInput { border: none; background: transparent; outline: none; flex: 1; color: var(--text-main); font-size: 16px; }
         
-        .action-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); border: none; color: white; cursor: pointer; font-size: 19px; display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0; }
+        .action-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); border: none; color: white; cursor: pointer; font-size: 19px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .recording-active { transform: scale(1.2); background: #ff3b30 !important; }
-        
-        /* Privacy Alert Style */
-        #privacyAlert {
-            display: none; position: absolute; top: 70px; left: 50%; transform: translateX(-50%);
-            background: #fdf6b2; color: #723b10; padding: 8px 15px; border-radius: 20px;
-            font-size: 12px; font-weight: 600; z-index: 1001; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
     </style>
 </head>
 <body>
 
-    <div id="privacyAlert">Connect as friends to start chatting!</div>
-
     <header class="chat-header">
-        <div class="header-left" onclick="window.location.href='index.html'">
+        <div class="header-left" onclick="window.location.href='Friends.html'">
             <i class="fas fa-arrow-left"></i>
             <img src="https://via.placeholder.com/100" class="user-avatar" id="chatAvatar">
             <div class="user-meta">
@@ -119,27 +91,27 @@
             </div>
         </div>
         <div class="header-tools">
-            <i class="fas fa-video" onclick="alert('Starting video call...')"></i>
-            <i class="fas fa-phone-alt" onclick="alert('Calling...')"></i>
-            <i class="fas fa-ellipsis-v" onclick="showSettings()"></i>
+            <i class="fas fa-video" onclick="window.location.href='video-call.html'"></i>
+            <i class="fas fa-phone-alt" onclick="window.location.href='voice-call.html'"></i>
+            <i class="fas fa-bars" onclick="window.location.href='Sidebar.html'"></i>
         </div>
     </header>
 
     <div class="chat-container" id="chatBox"></div>
 
-    <button class="fab-btn" onclick="window.location.href='find-friends.html'">
+    <button class="fab-btn" onclick="window.location.href='Friends.html'">
         <i class="fas fa-user-plus"></i>
     </button>
 
     <div class="input-area">
-        <i class="far fa-laugh" style="color:var(--text-dim); font-size:22px;"></i>
+        <i class="far fa-laugh" style="color:var(--text-dim); font-size:22px;" onclick="window.location.href='stickers.html'"></i>
         <div id="recHUD" class="recording-hud">
             <div class="rec-dot"></div> <span id="recTimer">00:00</span>
             <span style="color:#8696a0; font-size:11px; font-weight:400; margin-left:10px;">Recording...</span>
         </div>
         <div class="input-wrapper" id="inputWrap">
             <input type="text" id="messageInput" placeholder="Message" autocomplete="off" oninput="checkInput()">
-            <i class="fas fa-paperclip" style="color:var(--text-dim); transform:rotate(45deg);" onclick="alert('Attach file...')"></i>
+            <i class="fas fa-paperclip" style="color:var(--text-dim); transform:rotate(45deg);"></i>
         </div>
         <button class="action-btn" id="micBtn" 
                 onmousedown="startVoice()" onmouseup="stopVoice()"
@@ -166,55 +138,41 @@
         const hud = document.getElementById('recHUD');
         const inputWrap = document.getElementById('inputWrap');
         const chatBox = document.getElementById('chatBox');
-        const privacyAlert = document.getElementById('privacyAlert');
 
         let mediaRecorder;
         let audioChunks = [];
         let timerInterval;
         let currentAudio = null;
-        let isFriend = true; // Default to true, will be checked via Firebase
 
-        // 1. PRIVACY CHECK: Friends only logic
-        database.ref(`friends/${myUID}/${partnerUID}`).on('value', snap => {
-            isFriend = snap.exists();
-            if(!isFriend && partnerUID !== "USER_DEFAULT") {
-                privacyAlert.style.display = 'block';
-                micBtn.disabled = true;
-                msgInput.disabled = true;
-            } else {
-                privacyAlert.style.display = 'none';
-                micBtn.disabled = false;
-                msgInput.disabled = false;
-            }
-        });
-
-        // 2. OPTIMIZED VOICE ENGINE (Low Latency & Lightweight)
+        // --- VOICE RECORDER ENGINE FIX ---
         async function startVoice() {
-            if(msgInput.value.trim().length > 0 || !isFriend) return;
+            if(msgInput.value.trim().length > 0) return;
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                // Bitrate reduction to 64kbps for faster loading
-                const options = { 
-                    mimeType: 'audio/webm;codecs=opus',
-                    audioBitsPerSecond: 64000 
-                };
-                mediaRecorder = new MediaRecorder(stream, options);
+                // Simple Opus Codec for high compatibility
+                mediaRecorder = new MediaRecorder(stream);
                 audioChunks = [];
-                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                
+                mediaRecorder.ondataavailable = e => {
+                    if (e.data.size > 0) audioChunks.push(e.data);
+                };
+
                 mediaRecorder.start();
+                
                 hud.style.display = 'flex';
                 inputWrap.style.display = 'none';
                 micBtn.classList.add('recording-active');
+                
                 let sec = 0;
                 timerInterval = setInterval(() => {
                     sec++;
                     let m = Math.floor(sec/60), s = sec%60;
                     document.getElementById('recTimer').innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
                 }, 1000);
-            } catch(e) { alert("Mic Permission Denied!"); }
+            } catch(e) { alert("Mic Error: Please check permissions!"); }
         }
 
-        async function stopVoice() {
+        function stopVoice() {
             if(!mediaRecorder || mediaRecorder.state === "inactive") {
                 if(msgInput.value.trim().length > 0) sendMessage();
                 return;
@@ -224,8 +182,9 @@
             hud.style.display = 'none';
             inputWrap.style.display = 'flex';
             micBtn.classList.remove('recording-active');
+
             mediaRecorder.onstop = async () => {
-                const blob = new Blob(audioChunks, { type: 'audio/webm;codecs=opus' });
+                const blob = new Blob(audioChunks, { type: 'audio/webm' });
                 mediaRecorder.stream.getTracks().forEach(t => t.stop());
                 if(blob.size > 1000) uploadVoice(blob);
             };
@@ -233,7 +192,6 @@
 
         async function uploadVoice(blob) {
             btnIcon.className = "fas fa-spinner fa-spin";
-            micBtn.disabled = true;
             const fd = new FormData();
             fd.append('file', blob);
             fd.append('upload_preset', "cmchat_pro");
@@ -252,16 +210,13 @@
                         timestamp: Date.now()
                     });
                 }
-            } catch(e) { console.error("Upload Failed"); }
-            finally {
-                btnIcon.className = "fas fa-microphone";
-                micBtn.disabled = false;
-            }
+            } catch(e) { console.error("Upload error"); }
+            finally { btnIcon.className = "fas fa-microphone"; }
         }
 
         function sendMessage() {
             const text = msgInput.value.trim();
-            if(!text || !isFriend) return;
+            if(!text) return;
             database.ref('messages/' + chatID).push({
                 sender: myUID,
                 msg: text,
@@ -277,6 +232,7 @@
             btnIcon.className = msgInput.value.trim().length > 0 ? "fas fa-paper-plane" : "fas fa-microphone";
         }
 
+        // --- REAL-TIME MESSAGING & PROGRESS FIX ---
         database.ref('messages/' + chatID).on('value', snap => {
             chatBox.innerHTML = "";
             snap.forEach(child => {
@@ -287,14 +243,8 @@
                     chatBox.innerHTML += `
                         <div class="message ${isMe ? 'sent' : 'received'}">
                             <div class="voice-wrapper">
-                                <div class="voice-avatar-box">
-                                    <div class="voice-avatar">${isMe ? 'Me' : d.sender.substring(0,1)}</div>
-                                    <i class="fas fa-microphone mic-badge"></i>
-                                </div>
                                 <i class="fas fa-play play-btn" id="play_${msgId}" onclick="playVoice('${d.url}', '${msgId}')"></i>
-                                <div class="waveform-lite">
-                                    <div class="waveform-progress" id="progress_${msgId}"></div>
-                                </div>
+                                <div class="waveform-lite"><div class="waveform-progress" id="progress_${msgId}"></div></div>
                             </div>
                             <div class="msg-footer">
                                 <span id="timer_${msgId}">${d.duration || ''} • ${d.time}</span>
@@ -320,13 +270,10 @@
             const progressBar = document.getElementById('progress_' + msgId);
             const timerLabel = document.getElementById('timer_' + msgId);
 
-            if (currentAudio && !currentAudio.paused) {
+            if (currentAudio) {
                 currentAudio.pause();
                 document.querySelectorAll('.play-btn').forEach(b => b.className = "fas fa-play play-btn");
-                if (currentAudio.src === url) {
-                    currentAudio = null;
-                    return;
-                }
+                if (currentAudio.src === url) { currentAudio = null; return; }
             }
 
             currentAudio = new Audio(url);
@@ -336,8 +283,7 @@
             currentAudio.ontimeupdate = () => {
                 const pct = (currentAudio.currentTime / currentAudio.duration) * 100;
                 progressBar.style.width = pct + "%";
-                let remain = Math.ceil(currentAudio.duration - currentAudio.currentTime);
-                timerLabel.innerText = remain + "s remaining";
+                timerLabel.innerText = Math.ceil(currentAudio.duration - currentAudio.currentTime) + "s left";
             };
 
             currentAudio.onended = () => {
@@ -355,10 +301,6 @@
                 if(u.profilePhoto) document.getElementById('chatAvatar').src = u.profilePhoto;
             }
         });
-
-        function showSettings() {
-            alert("Settings:\n1. Mute\n2. Clear Chat\n3. Block User");
-        }
     </script>
 </body>
 </html>
