@@ -156,16 +156,8 @@
         async function processUpload() {
             const text = document.getElementById('postText').value.trim();
             const username = localStorage.getItem('username') || "Commander CM";
-
-            // 1. Rufe modal din nan take
-            if(window.parent && window.parent.closePostEngine) {
-                window.parent.closePostEngine();
-            }
-
-            // 2. Nuna farkon loading a Dashboard
+            if(window.parent && window.parent.closePostEngine) window.parent.closePostEngine();
             if(window.parent.showUploadProgress) window.parent.showUploadProgress(5);
-
-            // 3. Background Upload
             runBackgroundUpload(text, username, [...selectedFiles]);
         }
 
@@ -173,40 +165,89 @@
             const uploadedMedia = [];
             let currentFileIndex = 0;
 
-            const uploadNext = () => {
+            const uploadNext = async () => {
                 if (currentFileIndex >= filesToUpload.length) {
                     saveToFirebase(text, username, uploadedMedia);
                     return;
                 }
 
                 const item = filesToUpload[currentFileIndex];
-                const formData = new FormData();
-                formData.append('file', item.file);
-                formData.append('upload_preset', UPLOAD_PRESET);
+                
+                if (item.type === 'video') {
+                    // Chunked Video Upload (Domin kar ya yanke)
+                    uploadVideoInChunks(item.file, (url) => {
+                        uploadedMedia.push({ url: url, type: 'video' });
+                        currentFileIndex++;
+                        uploadNext();
+                    });
+                } else {
+                    // Standard Image Upload
+                    const formData = new FormData();
+                    formData.append('file', item.file);
+                    formData.append('upload_preset', UPLOAD_PRESET);
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, true);
+                    xhr.upload.onprogress = (e) => {
+                        if (e.lengthComputable) {
+                            const percent = Math.round((e.loaded / e.total) * 100);
+                            if(window.parent.updateUploadProgress) window.parent.updateUploadProgress(percent);
+                        }
+                    };
+                    xhr.onload = () => {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.secure_url) {
+                            uploadedMedia.push({ url: data.secure_url, type: 'image' });
+                            currentFileIndex++;
+                            uploadNext();
+                        }
+                    };
+                    xhr.send(formData);
+                }
+            };
+            uploadNext();
+        }
 
+        function uploadVideoInChunks(file, callback) {
+            const chunkSize = 6000000; // 6MB guntu-guntu
+            const totalChunks = Math.ceil(file.size / chunkSize);
+            const uniqueUploadId = 'uk_' + Date.now();
+            let currentChunk = 0;
+
+            const uploadChunk = () => {
+                const start = currentChunk * chunkSize;
+                const end = Math.min(start + chunkSize, file.size);
+                const chunk = file.slice(start, end);
+                const formData = new FormData();
+                formData.append('file', chunk);
+                formData.append('upload_preset', UPLOAD_PRESET);
+                
+                const contentRange = `bytes ${start}-${end - 1}/${file.size}`;
                 const xhr = new XMLHttpRequest();
-                xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, true);
+                xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, true);
+                xhr.setRequestHeader('X-Unique-Upload-Id', uniqueUploadId);
+                xhr.setRequestHeader('Content-Range', contentRange);
 
                 xhr.upload.onprogress = (e) => {
-                    if (e.lengthComputable) {
-                        const percent = Math.round((e.loaded / e.total) * 100);
-                        if(window.parent.updateUploadProgress) window.parent.updateUploadProgress(percent);
-                    }
+                    const overallPercent = Math.round(((start + e.loaded) / file.size) * 100);
+                    if(window.parent.updateUploadProgress) window.parent.updateUploadProgress(overallPercent);
                 };
 
                 xhr.onload = () => {
-                    const data = JSON.parse(xhr.responseText);
-                    if (data.secure_url) {
-                        uploadedMedia.push({ url: data.secure_url, type: item.type });
-                        currentFileIndex++;
-                        uploadNext();
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        currentChunk++;
+                        if (currentChunk < totalChunks) {
+                            uploadChunk();
+                        } else {
+                            const data = JSON.parse(xhr.responseText);
+                            callback(data.secure_url);
+                        }
+                    } else {
+                        alert("Video upload failed. Check connection.");
                     }
                 };
-
                 xhr.send(formData);
             };
-
-            uploadNext();
+            uploadChunk();
         }
 
         async function saveToFirebase(text, username, media) {
@@ -218,7 +259,6 @@
                 comments: 0,
                 media: media
             });
-            
             if(window.parent.hideUploadProgress) window.parent.hideUploadProgress();
             if(window.parent) window.parent.location.reload();
         }
