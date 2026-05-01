@@ -30,6 +30,7 @@
             flex-direction: column;
         }
 
+        /* Header Style */
         .header { 
             display: flex; 
             justify-content: space-between; 
@@ -123,17 +124,12 @@
         <div class="tool-btn"><i class="fa-solid fa-location-dot" style="color: #ef4444;"></i></div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", projectId: "cmchat-pro" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        const CLOUD_NAME = "dyfyhzp3o"; 
-        const UPLOAD_PRESET = "cmchat_pro"; 
         let selectedFiles = [];
+
+        // Avatar Initial
+        const uname = localStorage.getItem('username') || "C";
+        document.getElementById('userInitial').innerText = uname.charAt(0).toUpperCase();
 
         function checkInput() {
             const text = document.getElementById('postText').value.trim();
@@ -144,6 +140,7 @@
             const files = Array.from(input.files);
             files.forEach(file => {
                 const objectUrl = URL.createObjectURL(file);
+                // Muna adana file din da kansa (blob) domin mu tura wa Dashboard
                 selectedFiles.push({ file: file, type: type });
                 const div = document.createElement('div');
                 div.className = 'preview-item';
@@ -153,114 +150,23 @@
             checkInput();
         }
 
-        async function processUpload() {
+        function processUpload() {
             const text = document.getElementById('postText').value.trim();
             const username = localStorage.getItem('username') || "Commander CM";
-            if(window.parent && window.parent.closePostEngine) window.parent.closePostEngine();
-            if(window.parent.showUploadProgress) window.parent.showUploadProgress(5);
-            runBackgroundUpload(text, username, [...selectedFiles]);
-        }
+            
+            // --- MATAKI NA MUSAMMAN ---
+            // Muna kiran "Global Engine" dake cikin Dashboard.html
+            if (window.parent && window.parent.startGlobalUpload) {
+                // Tura dukkan aikin zuwa ga Uba (Dashboard)
+                window.parent.startGlobalUpload(text, username, [...selectedFiles]);
+            } else {
+                alert("Error: Global Engine not found in Dashboard.");
+            }
 
-        function runBackgroundUpload(text, username, filesToUpload) {
-            const uploadedMedia = [];
-            let currentFileIndex = 0;
-
-            const uploadNext = async () => {
-                if (currentFileIndex >= filesToUpload.length) {
-                    saveToFirebase(text, username, uploadedMedia);
-                    return;
-                }
-
-                const item = filesToUpload[currentFileIndex];
-                
-                if (item.type === 'video') {
-                    // Chunked Video Upload (Domin kar ya yanke)
-                    uploadVideoInChunks(item.file, (url) => {
-                        uploadedMedia.push({ url: url, type: 'video' });
-                        currentFileIndex++;
-                        uploadNext();
-                    });
-                } else {
-                    // Standard Image Upload
-                    const formData = new FormData();
-                    formData.append('file', item.file);
-                    formData.append('upload_preset', UPLOAD_PRESET);
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, true);
-                    xhr.upload.onprogress = (e) => {
-                        if (e.lengthComputable) {
-                            const percent = Math.round((e.loaded / e.total) * 100);
-                            if(window.parent.updateUploadProgress) window.parent.updateUploadProgress(percent);
-                        }
-                    };
-                    xhr.onload = () => {
-                        const data = JSON.parse(xhr.responseText);
-                        if (data.secure_url) {
-                            uploadedMedia.push({ url: data.secure_url, type: 'image' });
-                            currentFileIndex++;
-                            uploadNext();
-                        }
-                    };
-                    xhr.send(formData);
-                }
-            };
-            uploadNext();
-        }
-
-        function uploadVideoInChunks(file, callback) {
-            const chunkSize = 6000000; // 6MB guntu-guntu
-            const totalChunks = Math.ceil(file.size / chunkSize);
-            const uniqueUploadId = 'uk_' + Date.now();
-            let currentChunk = 0;
-
-            const uploadChunk = () => {
-                const start = currentChunk * chunkSize;
-                const end = Math.min(start + chunkSize, file.size);
-                const chunk = file.slice(start, end);
-                const formData = new FormData();
-                formData.append('file', chunk);
-                formData.append('upload_preset', UPLOAD_PRESET);
-                
-                const contentRange = `bytes ${start}-${end - 1}/${file.size}`;
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, true);
-                xhr.setRequestHeader('X-Unique-Upload-Id', uniqueUploadId);
-                xhr.setRequestHeader('Content-Range', contentRange);
-
-                xhr.upload.onprogress = (e) => {
-                    const overallPercent = Math.round(((start + e.loaded) / file.size) * 100);
-                    if(window.parent.updateUploadProgress) window.parent.updateUploadProgress(overallPercent);
-                };
-
-                xhr.onload = () => {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        currentChunk++;
-                        if (currentChunk < totalChunks) {
-                            uploadChunk();
-                        } else {
-                            const data = JSON.parse(xhr.responseText);
-                            callback(data.secure_url);
-                        }
-                    } else {
-                        alert("Video upload failed. Check connection.");
-                    }
-                };
-                xhr.send(formData);
-            };
-            uploadChunk();
-        }
-
-        async function saveToFirebase(text, username, media) {
-            await db.collection('posts').add({
-                text: text,
-                username: username,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                likes: 0,
-                comments: 0,
-                media: media
-            });
-            if(window.parent.hideUploadProgress) window.parent.hideUploadProgress();
-            if(window.parent) window.parent.location.reload();
+            // Rufe shafin posting nan take kamar Facebook
+            if (window.parent && window.parent.closePostEngine) {
+                window.parent.closePostEngine();
+            }
         }
     </script>
 </body>
