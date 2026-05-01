@@ -11,7 +11,6 @@
     <style>
         :root {
             --danger: #ef4444;
-            --success: #22c55e;
             --bg-dark: #0b141a;
             --glass: rgba(255, 255, 255, 0.15);
         }
@@ -19,14 +18,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg-dark); height: 100vh; overflow: hidden; position: relative; color: white; }
 
-        /* Remote Video (Partner) */
         #remote-player { 
             width: 100%; height: 100%; background: #1e293b; 
             position: absolute; top:0; left:0; z-index: 1;
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* Local Video (Kai) */
         #local-player { 
             position: absolute; top: 120px; right: 20px; width: 110px; height: 160px; 
             background: #2a3942; border-radius: 12px; border: 2px solid rgba(255,255,255,0.2);
@@ -39,26 +36,16 @@
         }
 
         #vStatus {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 2px 8px;
-            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px 12px;
+            border-radius: 8px;
             display: inline-block;
             color: #38bdf8;
             font-size: 13px;
             margin-top: 5px;
+            font-weight: 600;
         }
 
-        /* Top Actions (Switch Camera & Speaker) */
-        .top-actions {
-            position: absolute; top: 45px; right: 25px; display: flex; gap: 15px; z-index: 200;
-        }
-        .small-btn {
-            width: 45px; height: 45px; border-radius: 50%; background: var(--glass);
-            display: flex; align-items: center; justify-content: center; font-size: 18px;
-            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
-        }
-
-        /* Bottom Controls */
         .video-controls { 
             position: absolute; bottom: 50px; left: 0; width: 100%; 
             display: flex; justify-content: center; gap: 25px; z-index: 200;
@@ -69,22 +56,16 @@
             align-items: center; justify-content: center; font-size: 22px; 
             color: white; cursor: pointer; backdrop-filter: blur(15px);
             background: var(--glass); border: 1px solid rgba(255,255,255,0.2);
-            transition: 0.3s;
         }
-        .v-end { background: var(--danger); border: none; font-size: 26px; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4); }
-        .active-red { color: var(--danger); background: rgba(239, 68, 68, 0.2); border-color: var(--danger); }
+        .v-end { background: var(--danger); border: none; font-size: 26px; }
+        .muted-active { color: var(--danger); background: rgba(239, 68, 68, 0.2); }
     </style>
 </head>
 <body>
 
     <div class="call-info">
         <h3 id="vName">Connecting...</h3>
-        <p id="vStatus">Starting Camera...</p>
-    </div>
-
-    <div class="top-actions">
-        <div class="small-btn" onclick="switchCamera()"><i class="fas fa-camera-rotate"></i></div>
-        <div class="small-btn" id="speakerBtn" onclick="toggleSpeaker()"><i class="fas fa-volume-high" id="speakerIcon"></i></div>
+        <p id="vStatus">Initializing...</p>
     </div>
 
     <div id="remote-player">
@@ -112,79 +93,50 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         let partnerUID = urlParams.get('uid');
+        // Gyara: Dauko UID ta kowane hali
         const myUID = localStorage.getItem('user_uid') || localStorage.getItem('uid');
 
         let localTracks = { videoTrack: null, audioTrack: null };
-        let isFrontCamera = true;
-        let isSpeakerOn = true;
-
-        function checkPartner() {
-            if (partnerUID) {
-                database.ref('users/' + partnerUID.trim()).on('value', snap => {
-                    if (snap.exists()) document.getElementById('vName').innerText = snap.val().username;
-                });
-            }
-        }
 
         async function initCall() {
-            checkPartner();
+            if (!myUID || !partnerUID) {
+                document.getElementById('vStatus').innerText = "Error: ID Missing";
+                return;
+            }
 
             try {
-                // Kunna Camera da Mic
                 localTracks.audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
                 localTracks.videoTrack = await AgoraRTC.createCameraVideoTrack();
 
-                // Nuna hotonka
                 await localTracks.videoTrack.play("local-player");
-                document.getElementById('vStatus').innerText = "Connecting...";
+                document.getElementById('vStatus').innerText = "Joining Channel...";
 
-                if (partnerUID) {
-                    const channelName = myUID < partnerUID ? myUID + "_" + partnerUID : partnerUID + "_" + myUID;
-                    await client.join(APP_ID, channelName, null, null);
-                    await client.publish([localTracks.audioTrack, localTracks.videoTrack]);
-                    document.getElementById('vStatus').innerText = "Ringing...";
-                }
+                // FORCE MATCH: Tabbatar channel name ya zama daya 100%
+                const uids = [String(myUID).trim(), String(partnerUID).trim()].sort();
+                const channelName = uids[0] + "_" + uids[1];
+
+                await client.join(APP_ID, channelName, null, null);
+                await client.publish([localTracks.audioTrack, localTracks.videoTrack]);
+                document.getElementById('vStatus').innerText = "Ringing...";
 
                 client.on("user-published", async (user, mediaType) => {
                     await client.subscribe(user, mediaType);
-                    document.getElementById('vStatus').innerText = "Live";
                     if (mediaType === "video") {
+                        document.getElementById('vStatus').innerText = "Live";
                         document.getElementById('remote-player').innerHTML = ""; 
                         user.videoTrack.play("remote-player");
                     }
                     if (mediaType === "audio") user.audioTrack.play();
                 });
 
-            } catch (err) {
-                console.warn("Camera check:", err);
-                if (!localTracks.videoTrack) {
-                    document.getElementById('vStatus').innerText = "Check Permissions!";
-                } else {
-                    document.getElementById('vStatus').innerText = "Connecting...";
-                }
-            }
-        }
-
-        async function switchCamera() {
-            if (!localTracks.videoTrack) return;
-            const devices = await AgoraRTC.getCameras();
-            if (devices.length > 1) {
-                isFrontCamera = !isFrontCamera;
-                const newCameraId = isFrontCamera ? devices[0].deviceId : devices[1].deviceId;
-                await localTracks.videoTrack.setDevice(newCameraId);
-            }
-        }
-
-        function toggleSpeaker() {
-            isSpeakerOn = !isSpeakerOn;
-            const icon = document.getElementById('speakerIcon');
-            const btn = document.getElementById('speakerBtn');
-            icon.className = isSpeakerOn ? "fas fa-volume-high" : "fas fa-volume-low";
-            btn.classList.toggle('active-red', !isSpeakerOn);
-            if(client.remoteUsers.length > 0) {
-                client.remoteUsers.forEach(user => {
-                    if(user.audioTrack) user.audioTrack.setVolume(isSpeakerOn ? 100 : 25);
+                client.on("user-left", () => {
+                    document.getElementById('vStatus').innerText = "Call Ended";
+                    setTimeout(() => endCall(), 1500);
                 });
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('vStatus').innerText = "Connection Failed";
             }
         }
 
@@ -192,22 +144,21 @@
             const isEnabled = localTracks.videoTrack.enabled;
             await localTracks.videoTrack.setEnabled(!isEnabled);
             document.getElementById('camIcon').className = !isEnabled ? "fas fa-video" : "fas fa-video-slash";
-            document.getElementById('camBtn').classList.toggle('active-red', isEnabled);
+            document.getElementById('camBtn').classList.toggle('muted-active', isEnabled);
         }
 
         async function toggleAudio() {
             const isEnabled = localTracks.audioTrack.enabled;
             await localTracks.audioTrack.setEnabled(!isEnabled);
             document.getElementById('micIcon').className = !isEnabled ? "fas fa-microphone" : "fas fa-microphone-slash";
-            document.getElementById('micBtn').classList.toggle('active-red', isEnabled);
+            document.getElementById('micBtn').classList.toggle('muted-active', isEnabled);
         }
 
         async function endCall() {
             if(localTracks.videoTrack) { localTracks.videoTrack.stop(); localTracks.videoTrack.close(); }
             if(localTracks.audioTrack) { localTracks.audioTrack.stop(); localTracks.audioTrack.close(); }
             await client.leave();
-            database.ref('calls/' + myUID).remove();
-            window.location.href = "Chatting.html?uid=" + partnerUID;
+            window.history.back();
         }
 
         window.onload = initCall;
