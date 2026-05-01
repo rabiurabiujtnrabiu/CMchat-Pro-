@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Calls - CMchat Pro</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { 
+            --bg-dark: #0b141a;
+            --header-dark: #202c33;
+            --primary: #00a884;
+            --text-main: #e9edef;
+            --text-dim: #8696a0;
+            --danger: #ef4444;
+            --card-bg: #111b21;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-dark); color: var(--text-main); overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+
+        /* --- HEADER & TABS --- */
+        header { background: var(--header-dark); padding: 15px 15px 0 15px; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .tabs { display: flex; }
+        .tab { flex: 1; text-align: center; padding: 15px; color: var(--text-dim); font-weight: 600; cursor: pointer; transition: 0.3s; position: relative; font-size: 14px; }
+        .tab.active { color: var(--primary); }
+        .tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--primary); border-radius: 3px 3px 0 0; }
+
+        /* --- SIDEBAR ENGINE --- */
+        #sidePanel { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #111b21; z-index: 5000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 5px 0 25px rgba(0,0,0,0.7); padding: 25px; }
+        .side-item { padding: 16px; border-bottom: 1px solid var(--glass); display: flex; align-items: center; gap: 18px; cursor: pointer; color: var(--text-main); transition: 0.2s; }
+        .side-item:active { background: var(--glass); }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 4000; backdrop-filter: blur(4px); }
+
+        /* --- CONTENT AREA --- */
+        .content-area { flex: 1; overflow-y: auto; padding: 15px; scroll-behavior: smooth; }
+        .user-item { display: flex; align-items: center; gap: 15px; padding: 14px; background: var(--card-bg); border-radius: 15px; margin-bottom: 10px; cursor: pointer; border: 1px solid var(--glass); transition: 0.3s; }
+        .user-item:active { transform: scale(0.98); background: #182229; }
+        .user-avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid var(--glass); }
+        .user-info { flex: 1; }
+        .user-info b { display: block; font-size: 16px; margin-bottom: 3px; }
+        .user-info span { font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 5px; }
+
+        /* --- BOTTOM SHEET MODAL --- */
+        #actionSheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: #202c33; z-index: 6000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 30px 30px 0 0; padding: 30px 20px; text-align: center; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); }
+        .sheet-bar { width: 40px; height: 4px; background: var(--glass); border-radius: 10px; margin: -15px auto 20px auto; }
+        .sheet-actions { display: flex; justify-content: space-around; margin-top: 25px; }
+        .action-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+        .action-circle { width: 65px; height: 65px; border-radius: 50%; background: #2a3942; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: 0.2s; }
+        .action-circle:active { transform: scale(0.9); background: var(--primary); }
+        .action-circle i { color: var(--primary); }
+        .action-circle:active i { color: white; }
+        .action-label { font-size: 12px; color: var(--text-dim); font-weight: 500; }
+
+        .call-btn-group { display: flex; gap: 15px; color: var(--primary); font-size: 20px; }
+        .missed { color: var(--danger); }
+        .outgoing { color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+    <div id="sidePanel">
+        <div style="display:flex; align-items:center; gap:15px; margin-bottom:30px;">
+            <div style="width:45px; height:45px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; font-size:20px;"><i class="fas fa-shield-alt"></i></div>
+            <h3>Settings</h3>
+        </div>
+        <div class="side-item"><i class="fas fa-bell"></i> Notifications</div>
+        <div class="side-item" onclick="alert('Manage blocked users here')"><i class="fas fa-user-slash"></i> Blocked Users</div>
+        <div class="side-item"><i class="fas fa-lock"></i> Privacy & Security</div>
+        <div class="side-item" style="color: var(--danger); margin-top: 20px;" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </div>
+    </div>
+
+    <header>
+        <div class="header-top">
+            <i class="fas fa-bars" onclick="toggleSidebar()" style="font-size: 22px; cursor: pointer;"></i>
+            <h2 style="font-size: 22px; font-weight: 700; letter-spacing: 0.5px;">Calls</h2>
+            <i class="fas fa-search" style="font-size: 20px; color: var(--text-dim);"></i>
+        </div>
+        <div class="tabs">
+            <div class="tab active" id="tabCalls" onclick="switchTab('calls')">FRIENDS</div>
+            <div class="tab" id="tabHistory" onclick="switchTab('history')">HISTORY</div>
+        </div>
+    </header>
+
+    <div class="content-area" id="listArea">
+        </div>
+
+    <div id="actionSheet">
+        <div class="sheet-bar"></div>
+        <div class="sheet-header">
+            <img src="" id="sheetAvatar" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--primary); padding: 3px;">
+            <h3 id="sheetName" style="margin-top: 12px; font-size: 22px;">User Name</h3>
+            <p style="color:var(--text-dim); font-size: 13px;">Mutual Connection</p>
+        </div>
+        <div class="sheet-actions">
+            <div onclick="goToChat()" class="action-wrap">
+                <div class="action-circle"><i class="fas fa-comment-dots"></i></div>
+                <p class="action-label">Message</p>
+            </div>
+            <div onclick="makeCall('video')" class="action-wrap">
+                <div class="action-circle"><i class="fas fa-video"></i></div>
+                <p class="action-label">Video Call</p>
+            </div>
+            <div onclick="makeCall('voice')" class="action-wrap">
+                <div class="action-circle"><i class="fas fa-phone-alt"></i></div>
+                <p class="action-label">Voice Call</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = { databaseURL: "https://cmchat-pro-default-rtdb.firebaseio.com" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const myUID = localStorage.getItem('user_uid');
+        let currentPartner = null;
+
+        // --- 1. TAB ENGINE ---
+        function switchTab(type) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            const listArea = document.getElementById('listArea');
+            listArea.innerHTML = "";
+
+            if(type === 'calls') {
+                document.getElementById('tabCalls').classList.add('active');
+                loadOnlyFriends();
+            } else {
+                document.getElementById('tabHistory').classList.add('active');
+                loadCallHistory();
+            }
+        }
+
+        // --- 2. LOAD ONLY FRIENDS (LIVE LOGIC) ---
+        function loadOnlyFriends() {
+            const listArea = document.getElementById('listArea');
+            listArea.innerHTML = `<div style="text-align:center; padding:50px; color:gray;"><i class="fas fa-spinner fa-spin"></i><br>Finding friends...</div>`;
+
+            database.ref('friends/' + myUID).on('value', snap => {
+                if (!snap.exists()) {
+                    listArea.innerHTML = `<div style="text-align:center; padding:50px; color:var(--text-dim);"><i class="fas fa-user-friends" style="font-size:40px; opacity:0.3;"></i><p>No friends found yet.</p></div>`;
+                    return;
+                }
+
+                listArea.innerHTML = ""; 
+
+                snap.forEach(child => {
+                    const friendUID = child.key;
+                    const status = child.val();
+
+                    if (status === 'accepted') {
+                        database.ref('users/' + friendUID).on('value', uSnap => {
+                            const user = uSnap.val();
+                            if (user) {
+                                const old = document.getElementById('f_' + friendUID);
+                                if(old) old.remove();
+
+                                const html = `
+                                    <div class="user-item" id="f_${friendUID}" onclick="openActionSheet('${friendUID}', '${user.username}', '${user.profilePhoto || ''}')">
+                                        <img src="${user.profilePhoto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="user-avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                                        <div class="user-info">
+                                            <b>${user.username}</b>
+                                            <span><i class="fas fa-circle" style="color:var(--primary); font-size:7px;"></i> Online Friend</span>
+                                        </div>
+                                        <div class="call-btn-group">
+                                            <i class="fas fa-phone-alt"></i>
+                                            <i class="fas fa-video"></i>
+                                        </div>
+                                    </div>`;
+                                listArea.insertAdjacentHTML('beforeend', html);
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        // --- 3. CALL HISTORY ENGINE ---
+        function loadCallHistory() {
+            const listArea = document.getElementById('listArea');
+            database.ref('callHistory/' + myUID).orderByChild('timestamp').limitToLast(20).on('value', snap => {
+                listArea.innerHTML = "";
+                if(!snap.exists()) {
+                    listArea.innerHTML = `<div style="text-align:center; padding:50px; color:var(--text-dim);"><p>No call history yet.</p></div>`;
+                    return;
+                }
+                let items = [];
+                snap.forEach(child => { items.unshift(child.val()); });
+
+                items.forEach(h => {
+                    const icon = h.type === 'video' ? 'fa-video' : 'fa-phone-alt';
+                    const statusClass = h.status === 'missed' ? 'missed' : 'outgoing';
+                    const timeLabel = h.time || new Date(h.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                    
+                    listArea.innerHTML += `
+                        <div class="user-item">
+                            <img src="${h.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="user-avatar">
+                            <div class="user-info">
+                                <b>${h.name}</b>
+                                <span class="${statusClass}"><i class="fas ${icon}" style="font-size:10px;"></i> ${h.status} • ${timeLabel}</span>
+                            </div>
+                            <i class="fas fa-info-circle" style="color:var(--text-dim);"></i>
+                        </div>`;
+                });
+            });
+        }
+
+        // --- 4. UI CONTROLS ---
+        function openActionSheet(uid, name, avatar) {
+            currentPartner = { uid, name, avatar };
+            document.getElementById('sheetName').innerText = name;
+            document.getElementById('sheetAvatar').src = avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+            document.getElementById('actionSheet').style.bottom = '0';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function closeAll() {
+            document.getElementById('actionSheet').style.bottom = '-100%';
+            document.getElementById('sidePanel').style.left = '-280px';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidePanel').style.left = '0';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        // --- 5. NAVIGATION ---
+        function goToChat() {
+            if(!currentPartner) return;
+            window.location.href = `Chatting.html?uid=${currentPartner.uid}`;
+        }
+
+        function makeCall(type) {
+            if(!currentPartner) return;
+            const page = type === 'video' ? 'video-call.html' : 'voice-call.html';
+            database.ref('callHistory/' + myUID).push({
+                name: currentPartner.name,
+                avatar: currentPartner.avatar,
+                type: type,
+                status: 'outgoing',
+                timestamp: Date.now()
+            });
+            window.location.href = `${page}?uid=${currentPartner.uid}&name=${encodeURIComponent(currentPartner.name)}`;
+        }
+
+        function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+
+        window.onload = () => switchTab('calls');
+    </script>
+</body>
+</html>
