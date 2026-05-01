@@ -7,7 +7,6 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
         :root { 
@@ -30,7 +29,6 @@
             flex-direction: column;
         }
 
-        /* Header Style */
         .header { 
             display: flex; 
             justify-content: space-between; 
@@ -49,7 +47,7 @@
             color: white; border: none; padding: 10px 24px; border-radius: 100px; 
             font-weight: 700; font-size: 15px; cursor: pointer; 
             box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: 0.3s;
         }
 
         .post-btn:disabled { 
@@ -71,23 +69,31 @@
         }
 
         #mediaPreview { 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 12px; margin-top: 20px; 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px; 
+            margin-top: 20px; 
         }
 
         .preview-item { 
-            position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 1/1;
+            position: relative; 
+            border-radius: 16px; 
+            overflow: hidden; 
+            aspect-ratio: 1/1;
             border: 1px solid rgba(255,255,255,0.1);
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: var(--card);
+            animation: popIn 0.3s ease-out;
         }
 
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .preview-item img, .preview-item video { width: 100%; height: 100%; object-fit: cover; }
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .preview-item img, .preview-item video { width: 100%; height: 100%; object-fit: cover; display: block; }
 
         .bottom-tools { 
             background: rgba(22, 27, 42, 0.9);
             backdrop-filter: blur(15px);
-            padding: 12px 24px; display: flex; gap: 25px; 
+            padding: 12px 24px; 
+            display: flex; 
+            gap: 25px; 
             border-top: 1px solid rgba(255,255,255,0.05);
             padding-bottom: env(safe-area-inset-bottom, 20px);
         }
@@ -96,6 +102,7 @@
             display: flex; align-items: center; justify-content: center;
             width: 45px; height: 45px; border-radius: 14px;
             background: rgba(255,255,255,0.03); color: var(--primary); font-size: 20px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -103,31 +110,36 @@
 
     <div class="header">
         <i class="fas fa-xmark close-icon" onclick="window.parent.closePostEngine()"></i>
-        <b style="font-size: 18px; letter-spacing: -0.5px;">Elite Post</b>
+        <b style="font-size: 18px;">Elite Post</b>
         <button class="post-btn" id="submitBtn" disabled onclick="processUpload()">Post</button>
     </div>
 
     <div class="content">
         <div class="user-meta">
             <div class="avatar-placeholder" id="userInitial">C</div>
-            <span style="font-weight: 600; font-size: 15px; color: var(--text-dim);">Everyone can reply</span>
+            <span style="font-weight: 600; font-size: 15px; color: var(--text-dim);">Post to Everyone</span>
         </div>
         
-        <textarea id="postText" placeholder="What's happening, Commander?" oninput="checkInput()"></textarea>
+        <textarea id="postText" placeholder="What's on your mind, Commander?" oninput="checkInput()"></textarea>
         
         <div id="mediaPreview"></div>
     </div>
 
     <div class="bottom-tools">
-        <label class="tool-btn"><i class="fa-regular fa-image"></i><input type="file" hidden accept="image/*" multiple onchange="handleFiles(this, 'image')"></label>
-        <label class="tool-btn"><i class="fa-regular fa-circle-play" style="color: #10b981;"></i><input type="file" hidden accept="video/*" onchange="handleFiles(this, 'video')"></label>
+        <label class="tool-btn">
+            <i class="fa-regular fa-image"></i>
+            <input type="file" id="imageInput" hidden accept="image/*" multiple onchange="handleFiles(this, 'image')">
+        </label>
+        <label class="tool-btn">
+            <i class="fa-regular fa-circle-play" style="color: #10b981;"></i>
+            <input type="file" id="videoInput" hidden accept="video/*" onchange="handleFiles(this, 'video')">
+        </label>
         <div class="tool-btn"><i class="fa-solid fa-location-dot" style="color: #ef4444;"></i></div>
     </div>
 
     <script>
         let selectedFiles = [];
 
-        // Avatar Initial
         const uname = localStorage.getItem('username') || "C";
         document.getElementById('userInitial').innerText = uname.charAt(0).toUpperCase();
 
@@ -138,34 +150,42 @@
 
         function handleFiles(input, type) {
             const files = Array.from(input.files);
+            
             files.forEach(file => {
+                // Tabbatar an samu ainihin file din
                 const objectUrl = URL.createObjectURL(file);
-                // Muna adana file din da kansa (blob) domin mu tura wa Dashboard
                 selectedFiles.push({ file: file, type: type });
+
                 const div = document.createElement('div');
                 div.className = 'preview-item';
-                div.innerHTML = type === 'image' ? `<img src="${objectUrl}">` : `<video src="${objectUrl}" muted autoplay loop></video>`;
+                
+                if (type === 'image') {
+                    div.innerHTML = `<img src="${objectUrl}" alt="preview">`;
+                } else {
+                    div.innerHTML = `<video src="${objectUrl}" muted autoplay loop></video>`;
+                }
+                
                 document.getElementById('mediaPreview').appendChild(div);
             });
+            
             checkInput();
+            // Reset input so same file can be selected again if needed
+            input.value = '';
         }
 
         function processUpload() {
             const text = document.getElementById('postText').value.trim();
             const username = localStorage.getItem('username') || "Commander CM";
             
-            // --- MATAKI NA MUSAMMAN ---
-            // Muna kiran "Global Engine" dake cikin Dashboard.html
+            // Tura aikin zuwa ga Dashboard.html
             if (window.parent && window.parent.startGlobalUpload) {
-                // Tura dukkan aikin zuwa ga Uba (Dashboard)
-                window.parent.startGlobalUpload(text, username, [...selectedFiles]);
-            } else {
-                alert("Error: Global Engine not found in Dashboard.");
-            }
-
-            // Rufe shafin posting nan take kamar Facebook
-            if (window.parent && window.parent.closePostEngine) {
+                // Muna tura "selectedFiles" baki daya
+                window.parent.startGlobalUpload(text, username, selectedFiles);
+                
+                // Rufe modal din nan take
                 window.parent.closePostEngine();
+            } else {
+                alert("Critical Error: Global Engine not connected. Please refresh Dashboard.");
             }
         }
     </script>
