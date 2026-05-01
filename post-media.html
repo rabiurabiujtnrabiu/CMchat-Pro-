@@ -3,128 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Elite Post Engine | CMchat Pro</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Elite Post Engine</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
-        :root { 
-            --primary: #007AFF; 
-            --accent: #30D5C8;
-            --bg: #0b0f1a; 
-            --card: #161b2a; 
-            --text-main: #ffffff;
-            --text-dim: #94a3b8;
-        }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        
-        body { 
-            background: var(--bg); 
-            color: var(--text-main); 
-            height: 100vh; 
-            overflow: hidden; 
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 18px 24px; 
-            align-items: center; 
-            background: rgba(11, 15, 26, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            z-index: 100;
-        }
-
-        .close-icon { font-size: 22px; color: var(--text-dim); cursor: pointer; }
-
-        .post-btn { 
-            background: linear-gradient(135deg, var(--primary), #0051ff);
-            color: white; border: none; padding: 10px 24px; border-radius: 100px; 
-            font-weight: 700; font-size: 15px; cursor: pointer; 
-            box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
-            transition: 0.3s;
-        }
-
-        .post-btn:disabled { 
-            background: #2e3648; color: #64748b; box-shadow: none; opacity: 0.5; 
-        }
-
-        .content { flex: 1; padding: 24px; overflow-y: auto; scrollbar-width: none; }
-
-        .user-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-        .avatar-placeholder { 
-            width: 42px; height: 42px; border-radius: 50%; 
-            background: linear-gradient(45deg, var(--primary), var(--accent)); 
-            display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; 
-        }
-
-        textarea { 
-            width: 100%; background: transparent; border: none; color: var(--text-main); 
-            font-size: 20px; font-weight: 500; outline: none; resize: none; min-height: 120px; line-height: 1.5; 
-        }
-
-        #mediaPreview { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 12px; 
-            margin-top: 20px; 
-        }
-
-        .preview-item { 
-            position: relative; 
-            border-radius: 16px; 
-            overflow: hidden; 
-            aspect-ratio: 1/1;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: var(--card);
-            animation: popIn 0.3s ease-out;
-        }
-
-        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .preview-item img, .preview-item video { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-        .bottom-tools { 
-            background: rgba(22, 27, 42, 0.9);
-            backdrop-filter: blur(15px);
-            padding: 12px 24px; 
-            display: flex; 
-            gap: 25px; 
-            border-top: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: env(safe-area-inset-bottom, 20px);
-        }
-
-        .tool-btn {
-            display: flex; align-items: center; justify-content: center;
-            width: 45px; height: 45px; border-radius: 14px;
-            background: rgba(255,255,255,0.03); color: var(--primary); font-size: 20px;
-            cursor: pointer;
-        }
+        :root { --primary: #007AFF; --bg: #0b0f1a; --card: #161b2a; --text: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .header { display: flex; justify-content: space-between; padding: 15px 20px; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .post-btn { background: var(--primary); color: white; border: none; padding: 8px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+        .post-btn:disabled { opacity: 0.4; }
+        .content { flex: 1; padding: 20px; overflow-y: auto; }
+        textarea { width: 100%; background: transparent; border: none; color: #fff; font-size: 18px; outline: none; resize: none; min-height: 80px; }
+        #mediaPreview { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        .preview-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1/1; background: #1c2237; border: 1px solid rgba(255,255,255,0.1); }
+        .preview-item img, .preview-item video { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; }
+        .remove-media { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.8); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; z-index: 20; }
+        .bottom-tools { background: var(--card); padding: 15px 20px; display: flex; gap: 20px; padding-bottom: env(safe-area-inset-bottom, 20px); }
+        .tool-btn { font-size: 24px; color: var(--primary); cursor: pointer; }
     </style>
 </head>
 <body>
-
     <div class="header">
-        <i class="fas fa-xmark close-icon" onclick="window.parent.closePostEngine()"></i>
-        <b style="font-size: 18px;">Elite Post</b>
+        <i class="fas fa-times" onclick="window.parent.closePostEngine()"></i>
+        <b>Elite Post</b>
         <button class="post-btn" id="submitBtn" disabled onclick="processUpload()">Post</button>
     </div>
-
     <div class="content">
-        <div class="user-meta">
-            <div class="avatar-placeholder" id="userInitial">C</div>
-            <span style="font-weight: 600; font-size: 15px; color: var(--text-dim);">Post to Everyone</span>
-        </div>
-        
-        <textarea id="postText" placeholder="What's on your mind, Commander?" oninput="checkInput()"></textarea>
-        
+        <textarea id="postText" placeholder="Me kake tunani?"></textarea>
         <div id="mediaPreview"></div>
     </div>
-
     <div class="bottom-tools">
         <label class="tool-btn">
             <i class="fa-regular fa-image"></i>
@@ -134,60 +41,49 @@
             <i class="fa-regular fa-circle-play" style="color: #10b981;"></i>
             <input type="file" id="videoInput" hidden accept="video/*" onchange="handleFiles(this, 'video')">
         </label>
-        <div class="tool-btn"><i class="fa-solid fa-location-dot" style="color: #ef4444;"></i></div>
     </div>
-
     <script>
         let selectedFiles = [];
-
-        const uname = localStorage.getItem('username') || "C";
-        document.getElementById('userInitial').innerText = uname.charAt(0).toUpperCase();
-
         function checkInput() {
             const text = document.getElementById('postText').value.trim();
             document.getElementById('submitBtn').disabled = !(text || selectedFiles.length > 0);
         }
-
         function handleFiles(input, type) {
             const files = Array.from(input.files);
-            
             files.forEach(file => {
-                // Tabbatar an samu ainihin file din
-                const objectUrl = URL.createObjectURL(file);
-                selectedFiles.push({ file: file, type: type });
-
-                const div = document.createElement('div');
-                div.className = 'preview-item';
-                
-                if (type === 'image') {
-                    div.innerHTML = `<img src="${objectUrl}" alt="preview">`;
-                } else {
-                    div.innerHTML = `<video src="${objectUrl}" muted autoplay loop></video>`;
-                }
-                
-                document.getElementById('mediaPreview').appendChild(div);
+                const fileId = Math.random().toString(36).substr(2, 9);
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const dataUrl = e.target.result;
+                    selectedFiles.push({ id: fileId, file: file, type: type });
+                    const div = document.createElement('div');
+                    div.className = 'preview-item';
+                    div.id = `media-${fileId}`;
+                    div.innerHTML = type === 'image' 
+                        ? `<div class="remove-media" onclick="removeMedia('${fileId}')">✕</div><img src="${dataUrl}">`
+                        : `<div class="remove-media" onclick="removeMedia('${fileId}')">✕</div><video src="${dataUrl}" muted autoplay loop playsinline></video>`;
+                    document.getElementById('mediaPreview').appendChild(div);
+                    checkInput();
+                };
+                reader.readAsDataURL(file);
             });
-            
-            checkInput();
-            // Reset input so same file can be selected again if needed
-            input.value = '';
+            input.value = ''; 
         }
-
+        function removeMedia(id) {
+            selectedFiles = selectedFiles.filter(f => f.id !== id);
+            const el = document.getElementById(`media-${id}`);
+            if(el) el.remove();
+            checkInput();
+        }
         function processUpload() {
             const text = document.getElementById('postText').value.trim();
-            const username = localStorage.getItem('username') || "Commander CM";
-            
-            // Tura aikin zuwa ga Dashboard.html
+            const username = localStorage.getItem('username') || "User";
             if (window.parent && window.parent.startGlobalUpload) {
-                // Muna tura "selectedFiles" baki daya
                 window.parent.startGlobalUpload(text, username, selectedFiles);
-                
-                // Rufe modal din nan take
                 window.parent.closePostEngine();
-            } else {
-                alert("Critical Error: Global Engine not connected. Please refresh Dashboard.");
             }
         }
+        document.getElementById('postText').addEventListener('input', checkInput);
     </script>
 </body>
 </html>
