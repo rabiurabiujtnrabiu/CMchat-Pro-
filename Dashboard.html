@@ -265,13 +265,10 @@
 
         function scrollToTop() { window.scrollTo({top: 0, behavior: 'smooth'}); }
 
-        function openPostEngine() {
-            const modal = document.getElementById('engineModal');
-            const frame = document.getElementById('engineFrame');
-            frame.src = 'post-media.html';
-            modal.style.display = 'block';
-        }
-
+         function openPostEngine() {
+    // Maimakon kiran Iframe, sai mu bude sabon Overlay dinmu
+    openPostEditor(); 
+}
         function closePostEngine() {
             document.getElementById('engineModal').style.display = 'none';
             document.getElementById('engineFrame').src = '';
@@ -464,16 +461,20 @@ function submitElitePost() {
     </div>
     
     <div style="flex:1; padding:20px; overflow-y:auto;">
-        <textarea id="postText" placeholder="Menene ra'ayinka?" oninput="validatePost()" style="width:100%; background:transparent; border:none; color:white; font-size:18px; outline:none; min-height:100px; resize:none;"></textarea>
+        <textarea id="postText" 
+          placeholder="Share your elite update..." 
+          oninput="validatePost()" 
+          style="width:100%; background:transparent; border:none; color:white; font-size:18px; outline:none; min-height:100px; resize:none;">
+  </textarea>
         <div id="previewContainer" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:15px;"></div>
     </div>
 
     <div style="background:#161b2a; padding:15px 20px; display:flex; gap:25px; border-top:1px solid #222;">
         <label>
-            <i class="fa-regular fa-image" style="font-size:24px; color:#007AFF; cursor:pointer;"></i>
+            <i class="fa-regular fa-image" style="font-size:24px; color:#007AFF; cursor:pointer;" onclick="document.getElementById('mediaInput').click()"></i>
             <input type="file" id="mediaInput" hidden accept="image/*" multiple onchange="handleEliteFiles(this)">
         </label>
-        <i class="fa-regular fa-circle-play" style="font-size:24px; color:#10b981;"></i>
+        <i class="fa-regular fa-circle-play" style="font-size:24px; color:#10b981; cursor:pointer;" onclick="document.getElementById('mediaInput').click()"></i>
     </div>
  </div>
 </body>
