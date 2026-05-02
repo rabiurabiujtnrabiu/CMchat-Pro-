@@ -406,48 +406,47 @@ function closePostEditor() {
     eliteFiles = [];
 }
 
- function handleEliteFiles(input) {
+  function handleEliteFiles(input) {
+    if (!input.files || input.files.length === 0) return;
+    
     const files = Array.from(input.files);
     const container = document.getElementById('previewContainer');
 
     files.forEach(file => {
         const reader = new FileReader();
-        const fileType = file.type; // Karatun nau'in file (hoto ko bidiyo)
 
         reader.onload = function(e) {
-            const fileId = Math.random().toString(36).substr(2, 9);
-            
-            // Adana shi a array dinmu
-            eliteFiles.push({ id: fileId, file: file, data: e.target.result });
+            const fileId = "file_" + Math.random().toString(36).substr(2, 9);
+            const fileData = e.target.result;
+            const isVideo = file.type.startsWith('video/');
 
+            // Adana a array
+            eliteFiles.push({ id: fileId, file: file, data: fileData });
+
+            // Samar da Div na Preview
             const div = document.createElement('div');
-            div.id = `box-${fileId}`;
-            div.style.cssText = "position:relative; aspect-ratio:1/1; border-radius:8px; overflow:hidden; border:1px solid #333; background:#000;";
+            div.id = fileId;
+            div.style.cssText = "position:relative; width:100%; aspect-ratio:1/1; border-radius:10px; overflow:hidden; background:#000; border:1px solid #333;";
 
-            // ANAN NE GYARAN YAKE: Duba idan bidiyo ne ko hoto
-            let mediaHtml = "";
-            if (fileType.startsWith('video/')) {
-                mediaHtml = `<video src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;" muted autoplay loop></video>`;
-            } else {
-                mediaHtml = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;">`;
-            }
+            let mediaTag = isVideo 
+                ? `<video src="${fileData}" style="width:100%; height:100%; object-fit:cover;" autoplay muted loop playsinline></video>` 
+                : `<img src="${fileData}" style="width:100%; height:100%; object-fit:cover;">`;
 
             div.innerHTML = `
-                <div onclick="removeEliteFile('${fileId}')" style="position:absolute; top:4px; right:4px; background:rgba(0,0,0,0.7); color:white; border-radius:50%; width:20px; height:20px; text-align:center; font-size:12px; cursor:pointer; line-height:20px; z-index:10;">✕</div>
-                ${mediaHtml}
+                <div onclick="removeEliteFile('${fileId}')" style="position:absolute; top:5px; right:5px; background:red; color:white; border-radius:50%; width:20px; height:20px; text-align:center; line-height:20px; cursor:pointer; z-index:100;">✕</div>
+                ${mediaTag}
             `;
-            
+
             container.appendChild(div);
+            console.log("Preview added for: " + fileId); // Domin debugging
         };
+
+        reader.onerror = function() {
+            alert("An samu matsala wajen karanta file!");
+        };
+
         reader.readAsDataURL(file);
     });
-}
-
-// Kar ka manta ka saka wannan a kasan function din na sama
-function removeEliteFile(id) {
-    eliteFiles = eliteFiles.filter(f => f.id !== id);
-    const element = document.getElementById(`box-${id}`);
-    if (element) element.remove();
 }
 function submitElitePost() {
     const text = document.getElementById('postText').value.trim();
