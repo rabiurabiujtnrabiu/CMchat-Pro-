@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CMchat PRO - Elite Dashboard</title>
+    <title>CMchat PRO | Elite Dashboard</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -14,494 +14,233 @@
     <style>
         :root {
             --primary: #0062ff;
-            --primary-gradient: linear-gradient(135deg, #0062ff, #00d2ff);
-            --bg-main: #f8fafc;
-            --white: #ffffff;
-            --shadow: 0 4px 15px rgba(0,0,0,0.05);
+            --accent: #10b981;
+            --dark-bg: #0f172a;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-main); padding-bottom: 110px; overflow-x: hidden; scroll-behavior: smooth; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: #f8fafc; color: var(--text-main); padding-bottom: 90px; }
 
-        /* --- MODERN PROGRESS BAR (GYARA NA MUSAMMAN) --- */
-        #uploadBarContainer {
+        /* Progress Bar */
+        #uploadStatus {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%;
-            height: 5px; background: rgba(0, 0, 0, 0.1);
-            z-index: 100000;
+            height: 4px; background: rgba(0,0,0,0.1);
+            z-index: 10000;
         }
-        #uploadProgress {
-            height: 100%; width: 0%;
-            background: var(--primary);
-            box-shadow: 0 0 12px var(--primary);
-            transition: width 0.4s ease;
-        }
+        #progressBar { height: 100%; width: 0%; background: var(--primary); transition: 0.3s; box-shadow: 0 0 10px var(--primary); }
 
-        /* --- MODERN HEADER FIX --- */
-        .fb-header { background: var(--white); padding: 12px 15px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
-        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .logo { color: var(--primary); font-size: 21px; font-weight: 800; flex: 1; margin-left: 10px; }
-        .header-icons { display: flex; gap: 8px; align-items: center; }
-        .icon-circle { background: #f1f5f9; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #334155; text-decoration: none; position: relative; }
-        
-        .badge-dot { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; background: #ff3b30; border-radius: 50%; border: 2px solid #fff; }
-        .balance-badge { background: #ecfdf5; color: #10b981; padding: 6px 10px; border-radius: 10px; font-size: 12px; font-weight: 800; border: 1px solid #d1fae5; cursor: pointer; white-space: nowrap; }
+        /* Header */
+        header { background: #fff; padding: 15px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 15px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; color: var(--primary); font-size: 20px; letter-spacing: -0.5px; }
+        .wallet-badge { background: #ecfdf5; color: var(--accent); padding: 6px 12px; border-radius: 12px; font-weight: 800; font-size: 13px; border: 1px solid #d1fae5; }
 
-        .post-input-container { display: flex; align-items: center; gap: 10px; padding: 10px 0; background: var(--white); }
-        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #e2e8f0; flex-shrink: 0; border: 2px solid white; box-shadow: var(--shadow); background-size: cover; background-position: center; }
-        .fake-input { background: #f1f5f9; flex-grow: 1; padding: 12px 15px; border-radius: 20px; color: #64748b; font-size: 14px; font-weight: 500; cursor: pointer; }
+        /* Post Input Trigger */
+        .post-trigger { background: #fff; margin: 15px; padding: 15px; border-radius: 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; }
+        .avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: #e2e8f0; object-fit: cover; }
+        .fake-input { flex: 1; color: #94a3b8; font-size: 14px; font-weight: 500; }
 
-        .quick-actions { background: var(--white); display: flex; justify-content: space-around; padding: 15px 0; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
-        .action-btn { text-align: center; color: #475569; font-size: 10px; font-weight: 700; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .action-btn i { font-size: 18px; margin-bottom: 2px; }
+        /* Feed Section */
+        .feed { padding: 0 15px; }
+        .post-card { background: #fff; border-radius: 24px; padding: 18px; margin-bottom: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.02); border: 1px solid #f1f5f9; }
+        .post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .post-user-info h4 { font-size: 14px; font-weight: 700; color: #1e293b; }
+        .post-user-info span { font-size: 11px; color: #94a3b8; }
+        .post-content { font-size: 14px; line-height: 1.6; color: #334155; }
+        .post-media { width: 100%; border-radius: 16px; margin-top: 12px; object-fit: cover; max-height: 400px; }
 
-        .stories-wrapper { padding: 15px; display: flex; gap: 15px; overflow-x: auto; scrollbar-width: none; background: white; margin-bottom: 10px; }
-        .stories-wrapper::-webkit-scrollbar { display: none; }
-        .story-item { flex-shrink: 0; width: 70px; text-align: center; }
-        .story-ring { width: 68px; height: 68px; border-radius: 50%; padding: 2.5px; background: var(--primary-gradient); margin-bottom: 5px; cursor: pointer; }
-        .story-img { width: 100%; height: 100%; border-radius: 50%; border: 2.5px solid white; background-size: cover; background-position: center; background-color: #f1f5f9; }
-        .story-name { font-size: 10px; font-weight: 600; color: #64748b; display: block; overflow: hidden; text-overflow: ellipsis; }
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #1e293b; padding: 15px; border-radius: 24px; display: flex; justify-content: space-around; box-shadow: 0 15px 35px rgba(0,0,0,0.2); z-index: 5000; }
+        .nav-link { color: #64748b; font-size: 20px; transition: 0.3s; }
+        .nav-link.active { color: #38bdf8; }
 
-        .card { background: var(--white); border-radius: 20px; padding: 18px; margin-bottom: 12px; box-shadow: var(--shadow); }
-        .post-media { width: 100%; border-radius: 12px; margin-top: 12px; max-height: 450px; object-fit: cover; cursor: pointer; display: block; outline: none; -webkit-tap-highlight-color: transparent; }
-        
-        .post-footer { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
-        .post-action { display: flex; align-items: center; gap: 5px; color: #64748b; font-size: 13px; font-weight: 600; cursor: pointer; }
+        /* Post Overlay (The Engine) */
+        #postOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: none; flex-direction: column; }
+        .overlay-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; }
+        .post-btn { background: var(--primary); color: #fff; border: none; padding: 8px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+        .post-btn:disabled { opacity: 0.5; }
+        .editor-body { flex: 1; padding: 20px; }
+        #editorText { width: 100%; border: none; font-size: 18px; outline: none; resize: none; min-height: 150px; }
+        #previewGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .preview-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; }
+        .preview-item img, .preview-item video { width: 100%; height: 100%; object-fit: cover; }
+        .remove-preview { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.5); color: #fff; border: none; border-radius: 50%; width: 25px; height: 25px; }
 
-        .bottom-nav { position: fixed; bottom: 20px; left: 15px; right: 15px; background: #1e293b; display: flex; justify-content: space-around; padding: 12px 0; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 2000; }
-        .nav-item { color: #94a3b8; font-size: 18px; text-decoration: none; display: flex; flex-direction: column; align-items: center; }
-        .nav-item.active { color: #38bdf8; }
-        #scrollTopBtn { position: fixed; bottom: 85px; right: 20px; width: 45px; height: 45px; background: var(--primary); color: #fff; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 5px 15px rgba(0,98,255,0.4); z-index: 2500; cursor: pointer; border: none; }
-
-        #engineModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; }
-        #engineFrame { width: 100%; height: 100%; border: none; }
-
-        @keyframes skeleton-loading { 0% { background-color: #f1f5f9; } 100% { background-color: #e2e8f0; } }
-        .skeleton { animation: skeleton-loading 1s linear infinite alternate; border-radius: 10px; }
+        .editor-footer { padding: 20px; border-top: 1px solid #f1f5f9; display: flex; gap: 20px; }
+        .footer-icon { font-size: 24px; color: var(--primary); cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="uploadBarContainer"><div id="uploadProgress"></div></div>
+    <div id="uploadStatus"><div id="progressBar"></div></div>
 
-    <button id="scrollTopBtn" onclick="scrollToTop()"><i class="fas fa-chevron-up"></i></button>
-
-    <div id="engineModal">
-        <iframe id="engineFrame" src=""></iframe>
-    </div>
-
-    <header class="fb-header">
-        <div class="header-top">
-            <div class="icon-circle" onclick="location.href='Settings.html'"><i class="fas fa-bars"></i></div>
-            <div class="logo">CMchat PRO</div>
-            <div class="header-icons">
-                <a href="Shopping.html" class="icon-circle"><i class="fas fa-shopping-bag"></i></a>
-                <a href="Friends.html" class="icon-circle"><i class="fas fa-search"></i></a>
-                
-                <a href="Calls.html" class="icon-circle">
-                    <i class="fas fa-phone-alt"></i>
-                    <span class="badge-dot" style="background: #10b981;"></span> 
-                </a>
-
-                <div id="userBalance" class="balance-badge" onclick="location.href='Wallet.html'">₦0.00</div>
-            </div>
-        </div>
-        <div class="post-input-container">
-            <div class="user-avatar" id="headerAvatar"></div>
-            <div class="fake-input" onclick="openPostEditor()">Share your elite update?</div>
-            
-            <div onclick="openPostEditor()" style="cursor:pointer; padding: 0 5px;">
-                <i class="fas fa-image" style="color: #10b981; font-size: 22px;"></i>
-            </div>
-        </div>
+    <header>
+        <div class="logo">CMchat PRO</div>
+        <div class="wallet-badge" onclick="location.href='Wallet.html'">₦0.00</div>
     </header>
 
-    <div class="quick-actions">
-        <a href="Chatting.html" class="action-btn"><i class="fas fa-comment-dots" style="color: #0062ff;"></i><span>Chatting</span></a>
-        <a href="Group.html" class="action-btn"><i class="fas fa-users" style="color: #10b981;"></i><span>Group</span></a>
-        <a href="Friends.html" class="action-btn"><i class="fas fa-user-plus" style="color: #0062ff;"></i><span>Friends</span></a>
-        <a href="Settings.html" class="action-btn"><i class="fas fa-cog" style="color: #64748b;"></i><span>Settings</span></a>
+    <div class="post-trigger" onclick="openEditor()">
+        <div class="avatar-circle"></div>
+        <div class="fake-input">Share your elite update, Hamza...</div>
+        <i class="fas fa-image" style="color: var(--accent);"></i>
     </div>
 
-    <div class="stories-wrapper" id="storiesContainer">
-        <div class="story-item">
-            <a href="create_story.html" style="text-decoration: none;">
-                <div class="story-ring" style="background: #e2e8f0;"><div style="background:#f1f5f9;border-radius:50%;width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-plus" style="color:var(--primary)"></i></div></div>
-                <span class="story-name">Add Story</span>
-            </a>
+    <div class="feed" id="mainFeed">
         </div>
-    </div>
 
-    <div class="container" id="feedContainer">
-        <div id="initialLoader" style="padding: 15px;">
-            <div class="card skeleton" style="height: 200px; margin-bottom: 12px; opacity: 0.5;"></div>
-            <div class="card skeleton" style="height: 200px; opacity: 0.5;"></div>
+    <div id="postOverlay">
+        <div class="overlay-header">
+            <i class="fas fa-times" onclick="closeEditor()" style="font-size: 20px; color: #64748b;"></i>
+            <h3 style="font-size: 16px;">Create Post</h3>
+            <button class="post-btn" id="finalPostBtn" onclick="startEliteUpload()">Post</button>
+        </div>
+        <div class="editor-body">
+            <textarea id="editorText" placeholder="What's happening?"></textarea>
+            <div id="previewGrid"></div>
+        </div>
+        <div class="editor-footer">
+            <label for="mediaInput"><i class="fas fa-image footer-icon"></i></label>
+            <input type="file" id="mediaInput" hidden multiple accept="image/*,video/*" onchange="handleFiles(this)">
+            <i class="fas fa-video footer-icon" style="color: #f43f5e;"></i>
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item active"><i class="fas fa-home"></i></a>
-        <a href="academy.html" class="nav-item"><i class="fas fa-graduation-cap"></i></a>
-        <a href="CM-ARENA.html" class="nav-item"><i class="fas fa-trophy"></i></a>
-        <a href="Wallet.html" class="nav-item"><i class="fas fa-wallet"></i></a>
-        <a href="Profile.html" class="nav-item"><i class="fas fa-user-circle"></i></a>
+        <a href="#" class="nav-link active"><i class="fas fa-home"></i></a>
+        <a href="Academy.html" class="nav-link"><i class="fas fa-graduation-cap"></i></a>
+        <a href="Arena.html" class="nav-link"><i class="fas fa-trophy"></i></a>
+        <a href="Profile.html" class="nav-link"><i class="fas fa-user-circle"></i></a>
     </nav>
 
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", projectId: "cmchat-pro" };
+        // 1. CONFIGURATION
+        const firebaseConfig = { 
+            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", 
+            projectId: "cmchat-pro" 
+        };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- GLOBAL FUNCTIONS FOR POST ENGINE ---
-        window.showUploadProgress = function(p) {
-            const container = document.getElementById('uploadBarContainer');
-            const progress = document.getElementById('uploadProgress');
-            if(container && progress) {
-                container.style.display = 'block';
-                progress.style.width = p + '%';
-            }
-        };
+        const CLOUD_NAME = "deb2lheey";
+        const UPLOAD_PRESET = "cmchat_preset";
 
-        window.updateUploadProgress = function(p) {
-            const progress = document.getElementById('uploadProgress');
-            if(progress) progress.style.width = p + '%';
-        };
+        let selectedFiles = [];
 
-        window.hideUploadProgress = function() {
-            const container = document.getElementById('uploadBarContainer');
-            if(container) container.style.display = 'none';
-        };
-
-        // --- GLOBAL BACKGROUND UPLOAD ENGINE (FACEBOOK STYLE) ---
-       window.startGlobalUpload = function(text, username, filesToUpload) {
-    const CLOUD_NAME = "dyfyhzp3o"; 
-    const UPLOAD_PRESET = "cmchat_pro";
-    const uploadedMedia = [];
-    let currentFileIndex = 0;
-
-    const uploadNext = () => {
-        if (currentFileIndex >= filesToUpload.length) {
-            saveToFirebase(text, username, uploadedMedia);
-            return;
+        // 2. UI LOGIC
+        function openEditor() { document.getElementById('postOverlay').style.display = 'flex'; }
+        function closeEditor() { 
+            document.getElementById('postOverlay').style.display = 'none';
+            document.getElementById('editorText').value = '';
+            document.getElementById('previewGrid').innerHTML = '';
+            selectedFiles = [];
         }
 
-        const item = filesToUpload[currentFileIndex];
-        const formData = new FormData();
-        formData.append('file', item.file);
-        formData.append('upload_preset', UPLOAD_PRESET);
+        function handleFiles(input) {
+            const files = Array.from(input.files);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const id = Math.random().toString(36).substr(2, 9);
+                    selectedFiles.push({ id, file });
+                    
+                    const div = document.createElement('div');
+                    div.className = 'preview-item';
+                    div.id = id;
+                    const mediaTag = file.type.startsWith('video/') 
+                        ? `<video src="${e.target.result}" muted autoplay loop></video>`
+                        : `<img src="${e.target.result}">`;
+                    
+                    div.innerHTML = `${mediaTag}<button class="remove-preview" onclick="removeFile('${id}')">×</button>`;
+                    document.getElementById('previewGrid').appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
 
-        const xhr = new XMLHttpRequest();
-        
-        // Rarrabe URL: Video zuwa video/upload, Hoto zuwa image/upload
-        let resourceType = (item.type === 'video') ? 'video' : 'image';
-        const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resourceType}/upload`;
-        
-        xhr.open('POST', url, true);
+        function removeFile(id) {
+            selectedFiles = selectedFiles.filter(f => f.id !== id);
+            document.getElementById(id).remove();
+        }
 
-        xhr.upload.onprogress = (e) => {
-            if (e.lengthComputable) {
-                const percent = Math.round((e.loaded / e.total) * 100);
-                window.updateUploadProgress(percent);
+        // 3. UPLOAD ENGINE
+        async function startEliteUpload() {
+            const text = document.getElementById('editorText').value;
+            const btn = document.getElementById('finalPostBtn');
+            if(!text && selectedFiles.length === 0) return;
+
+            btn.disabled = true;
+            document.getElementById('uploadStatus').style.display = 'block';
+            
+            const mediaResults = [];
+            
+            for(let i=0; i < selectedFiles.length; i++) {
+                const item = selectedFiles[i];
+                const formData = new FormData();
+                formData.append('file', item.file);
+                formData.append('upload_preset', UPLOAD_PRESET);
+
+                let type = item.file.type.startsWith('video/') ? 'video' : 'image';
+                
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${type}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                mediaResults.push({ url: data.secure_url, type: type });
+                
+                document.getElementById('progressBar').style.width = ((i+1)/selectedFiles.length * 100) + '%';
             }
-        };
 
-        xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                const data = JSON.parse(xhr.responseText);
-                uploadedMedia.push({ url: data.secure_url, type: item.type });
-                currentFileIndex++;
-                uploadNext();
-            } else {
-                alert("Upload failed! Check Cloudinary settings.");
-                window.hideUploadProgress();
-            }
-        };
-
-        xhr.onerror = () => {
-            alert("Network error occurred.");
-            window.hideUploadProgress();
-        };
-        
-        window.showUploadProgress(5); 
-        xhr.send(formData);
-    };
-
-    async function saveToFirebase(txt, user, media) {
-        try {
             await db.collection('posts').add({
-                text: txt,
-                username: user,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                likes: 0,
-                comments: 0,
-                media: media
-            });
-            window.hideUploadProgress();
-            location.reload(); 
-        } catch (e) {
-            console.error("Firebase Error:", e);
-            window.hideUploadProgress();
-        }
-    }
-
-    uploadNext();
-};
-        const myUID = localStorage.getItem('user_uid');
-        if(myUID) {
-            db.collection('wallets').doc(myUID).onSnapshot(doc => {
-                if(doc.exists) {
-                    const balance = doc.data().balance || 0;
-                    document.getElementById('userBalance').innerText = '₦' + balance.toLocaleString();
-                }
+                username: "Hamza Rabiu",
+                text: text,
+                media: mediaResults,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            db.collection('users').doc(myUID).onSnapshot(doc => {
-                if(doc.exists && doc.data().profilePhoto) {
-                    document.getElementById('headerAvatar').style.backgroundImage = `url('${doc.data().profilePhoto}')`;
-                }
-            });
+            closeEditor();
+            document.getElementById('uploadStatus').style.display = 'none';
+            document.getElementById('progressBar').style.width = '0%';
+            btn.disabled = false;
         }
 
-        function scrollToTop() { window.scrollTo({top: 0, behavior: 'smooth'}); }
-
-         function openPostEngine() {
-    // Maimakon kiran Iframe, sai mu bude sabon Overlay dinmu
-    openPostEditor(); 
-}
-        function closePostEngine() {
-            document.getElementById('engineModal').style.display = 'none';
-            document.getElementById('engineFrame').src = '';
-        }
-
-        function checkOptimisticPost() {
-            const data = localStorage.getItem('recent_optimistic_post');
-            if (data) {
-                const p = JSON.parse(data);
-                const feed = document.getElementById('feedContainer');
-                let mediaHtml = '';
-                if (p.media && p.media.length > 0) {
-                    const m = p.media[0];
-                    mediaHtml = m.type === 'image' 
-                        ? `<img src="${m.url}" class="post-media" style="filter: brightness(0.8)">` 
-                        : `<video src="${m.url}" class="post-media" muted autoplay loop></video>`;
-                }
-                const optHtml = `<div class="card" id="optPost" style="border-left:4px solid var(--primary);"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="display:flex;align-items:center;gap:12px"><div style="width:40px;height:40px;border-radius:50%;background:var(--primary-gradient);color:white;display:flex;align-items:center;justify-content:center;font-weight:800">${p.username[0]}</div><div><h4 style="font-size:14px;font-weight:700">${p.username}</h4><p style="font-size:11px;color:var(--primary)">Uploading...</p></div></div><i class="fas fa-circle-notch fa-spin" style="color:var(--primary)"></i></div><p style="font-size:14px;color:#334155;line-height:1.6">${p.text}</p>${mediaHtml}</div>`;
-                const loader = document.getElementById('initialLoader');
-                if(loader) loader.remove();
-                feed.insertAdjacentHTML('afterbegin', optHtml);
-            }
-        }
-
-        let allStories = [];
-        const expiry24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
-        db.collection('stories').where('timestamp', '>', expiry24h).orderBy('timestamp', 'desc').onSnapshot(snap => {
-            const container = document.getElementById('storiesContainer');
-            const addBtn = container.firstElementChild;
-            container.innerHTML = ''; 
-            container.appendChild(addBtn);
-            allStories = []; 
-            let storyIndex = 0;
-            snap.forEach(doc => {
-                const s = doc.data();
-                allStories.push(s);
-                container.innerHTML += `<div class="story-item" onclick="openStoryPage(${storyIndex})"><div class="story-ring"><div class="story-img" style="background-image:url('${s.imageUrl}')"></div></div><span class="story-name">${s.owner || 'Elite'}</span></div>`;
-                storyIndex++;
-            });
-        });
-
-        function openStoryPage(index) {
-            localStorage.setItem('all_stories', JSON.stringify(allStories));
-            localStorage.setItem('start_index', index);
-            window.location.href = 'view-story.html';
-        }
-
-        const expiry48h = new Date(Date.now() - 48 * 60 * 60 * 1000);
-        db.collection('posts').where('timestamp', '>', expiry48h).orderBy('timestamp', 'desc').onSnapshot(snap => {
-            const feed = document.getElementById('feedContainer');
-            const loader = document.getElementById('initialLoader');
-            if(loader) loader.remove();
-            const optPost = document.getElementById('optPost');
+        // 4. FEED ENGINE
+        db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snap => {
+            const feed = document.getElementById('mainFeed');
             feed.innerHTML = '';
-            if(optPost) feed.appendChild(optPost);
-
             snap.forEach(doc => {
                 const p = doc.data();
-                if (localStorage.getItem('recent_optimistic_post')) {
-                    const localP = JSON.parse(localStorage.getItem('recent_optimistic_post'));
-                    if (p.text === localP.text && p.username === localP.username) {
-                        localStorage.removeItem('recent_optimistic_post');
-                        if(optPost) optPost.remove();
-                    }
-                }
-                const time = p.timestamp ? new Date(p.timestamp.toDate()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'Now';
+                const time = p.timestamp ? new Date(p.timestamp.toDate()).toLocaleTimeString() : 'Just now';
                 
                 let mediaHtml = '';
-                if (p.media && p.media.length > 0) {
-                    const m = p.media[0];
-                    if (m.type === 'image') {
-                        mediaHtml = `<img src="${m.url}" class="post-media" loading="lazy" onclick='openFullPost(${JSON.stringify({url: m.url, author: p.username, caption: p.text, type: "image"}).replace(/'/g, "\\'")})'>`;
-                    } else if (m.type === 'video') {
-                        mediaHtml = `
-                            <video class="post-media" muted autoplay loop playsinline preload="metadata" onclick='openFullVideo(${JSON.stringify({url: m.url, author: p.username, caption: p.text}).replace(/'/g, "\\'")})'>
-                                <source src="${m.url}" type="video/mp4">
-                            </video>`;
-                    }
+                if(p.media && p.media.length > 0) {
+                    p.media.forEach(m => {
+                        if(m.type === 'video') {
+                            mediaHtml += `<video src="${m.url}" class="post-media" controls></video>`;
+                        } else {
+                            mediaHtml += `<img src="${m.url}" class="post-media">`;
+                        }
+                    });
                 }
 
-              feed.innerHTML += `
-                    <div class="card">
-                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-                            <div style="width:40px;height:40px;border-radius:50%;background:var(--primary-gradient);color:white;display:flex;align-items:center;justify-content:center;font-weight:800">${p.username ? p.username[0].toUpperCase() : 'C'}</div>
-                            <div><h4 style="font-size:14px;font-weight:700">${p.username || 'Elite Member'}</h4><p style="font-size:11px;color:#94a3b8">${time}</p></div>
+                feed.innerHTML += `
+                    <div class="post-card">
+                        <div class="post-header">
+                            <div class="avatar-circle" style="background:#0062ff; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold;">${p.username[0]}</div>
+                            <div class="post-user-info">
+                                <h4>${p.username}</h4>
+                                <span>${time}</span>
+                            </div>
                         </div>
-                        <p style="font-size:14px;color:#334155;line-height:1.6">${p.text || ''}</p>
+                        <div class="post-content">${p.text}</div>
                         ${mediaHtml}
-                        <div class="post-footer">
-                            <div class="post-action"><i class="far fa-heart"></i> Like</div>
-                            <div class="post-action"><i class="far fa-comment"></i> Comment</div>
-                            <div class="post-action"><i class="far fa-share-square"></i> Share</div>
-                        </div>
-                    </div>`;
+                    </div>
+                `;
             });
-            observeVideos();
         });
-
-        const videoObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                const v = entry.target;
-                if (!entry.isIntersecting) { v.pause(); } 
-                else { v.play().catch(e => {}); }
-            });
-        }, { threshold: 0.5 });
-
-        function observeVideos() {
-            document.querySelectorAll('video').forEach(v => videoObserver.observe(v));
-        }
-
-        function openFullPost(data) {
-            localStorage.setItem('current_view_post', JSON.stringify(data));
-            window.location.href = 'view-post.html';
-        }
-
-        function openFullVideo(data) {
-            localStorage.setItem('current_video_view', JSON.stringify(data));
-            window.location.href = 'view-video.html';
-        }
-
-        checkOptimisticPost();
-        window.onscroll = function() {
-            document.getElementById("scrollTopBtn").style.display = (window.pageYOffset > 500) ? "flex" : "none";
-        };
-        let eliteFiles = [];
-
-function openPostEditor() { 
-    document.getElementById('postOverlay').style.display = 'flex'; 
-}
-
-function closePostEditor() { 
-    document.getElementById('postOverlay').style.display = 'none';
-    document.getElementById('postText').value = '';
-    document.getElementById('previewContainer').innerHTML = '';
-    eliteFiles = [];
-}
-
-  function handleEliteFiles(input) {
-    if (!input.files || input.files.length === 0) return;
-    
-    const files = Array.from(input.files);
-    const container = document.getElementById('previewContainer');
-
-    files.forEach(file => {
-        const reader = new FileReader();
-
-        reader.onload = function(e) {
-            const fileId = "file_" + Math.random().toString(36).substr(2, 9);
-            const fileData = e.target.result;
-            const isVideo = file.type.startsWith('video/');
-
-            // Adana a array
-            eliteFiles.push({ id: fileId, file: file, data: fileData });
-
-            // Samar da Div na Preview
-            const div = document.createElement('div');
-            div.id = fileId;
-            div.style.cssText = "position:relative; width:100%; aspect-ratio:1/1; border-radius:10px; overflow:hidden; background:#000; border:1px solid #333;";
-
-            let mediaTag = isVideo 
-                ? `<video src="${fileData}" style="width:100%; height:100%; object-fit:cover;" autoplay muted loop playsinline></video>` 
-                : `<img src="${fileData}" style="width:100%; height:100%; object-fit:cover;">`;
-
-            div.innerHTML = `
-                <div onclick="removeEliteFile('${fileId}')" style="position:absolute; top:5px; right:5px; background:red; color:white; border-radius:50%; width:20px; height:20px; text-align:center; line-height:20px; cursor:pointer; z-index:100;">✕</div>
-                ${mediaTag}
-            `;
-
-            container.appendChild(div);
-            console.log("Preview added for: " + fileId); // Domin debugging
-        };
-
-        reader.onerror = function() {
-            alert("An samu matsala wajen karanta file!");
-        };
-
-        reader.readAsDataURL(file);
-    });
-}
-function submitElitePost() {
-    const text = document.getElementById('postText').value.trim();
-    const btn = document.getElementById('mainPostBtn');
-    
-    if (!text && eliteFiles.length === 0) {
-        alert("Don Allah rubuta wani abu ko ka zaɓi hoto!");
-        return;
-    }
-
-    // Nuna cewa ana aiki
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Posting...';
-
-    // Kira babban function na loda hoto (Cloudinary/Database)
-    if (typeof startGlobalUpload === "function") {
-        const username = localStorage.getItem('username') || "Elite User";
-        startGlobalUpload(text, username, eliteFiles);
-        
-        // Rufe shafin bayan nasara
-        setTimeout(() => {
-            closePostEditor();
-            btn.innerHTML = 'Post';
-            btn.disabled = false;
-        }, 2000);
-    } else {
-        alert("Ba a haɗa function ɗin tura hoto (startGlobalUpload) ba tukuna.");
-        btn.disabled = false;
-        btn.innerHTML = 'Post';
-    }
-}
     </script>
-    <div id="postOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#0b0f1a; z-index:99999; display:none; flex-direction:column;">
-    <div style="display:flex; justify-content:space-between; padding:15px; align-items:center; border-bottom:1px solid #222;">
-        <i class="fas fa-times" onclick="closePostEditor()" style="color:#888; font-size:22px; cursor:pointer;"></i>
-        <b style="color:white;">Elite Post</b>
-        <button id="mainPostBtn" onclick="submitElitePost()" style="background:#007AFF; color:white; border:none; padding:6px 18px; border-radius:15px; font-weight:bold; opacity:0.5;" disabled>Post</button>
-    </div>
-    
-    <div style="flex:1; padding:20px; overflow-y:auto;">
-        <textarea id="postText" 
-          placeholder="Share your elite update..." 
-          oninput="validatePost()" 
-          style="width:100%; background:transparent; border:none; color:white; font-size:18px; outline:none; min-height:100px; resize:none;">
-  </textarea>
-        <div id="previewContainer" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:15px;"></div>
-    </div>
-
-    <div style="background:#161b2a; padding:15px 20px; display:flex; gap:25px; border-top:1px solid #222;">
-        <label>
-            <i class="fa-regular fa-image" style="font-size:24px; color:#007AFF; cursor:pointer;" onclick="document.getElementById('mediaInput').click()"></i>
-            <input type="file" id="mediaInput" hidden accept="image/*,video/*" multiple onchange="handleEliteFiles(this)">
-        </label>
-        <i class="fa-regular fa-circle-play" style="font-size:24px; color:#10b981; cursor:pointer;" onclick="document.getElementById('mediaInput').click()"></i>
-    </div>
- </div>
 </body>
 </html>
