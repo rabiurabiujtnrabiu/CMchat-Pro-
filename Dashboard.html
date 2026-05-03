@@ -15,61 +15,59 @@
         :root {
             --primary: #0062ff;
             --accent: #10b981;
-            --dark-bg: #0f172a;
+            --dark-bg: #1e293b;
             --card-bg: #ffffff;
             --text-main: #1e293b;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background-color: #f8fafc; color: var(--text-main); padding-bottom: 90px; }
+        body { background-color: #f8fafc; color: var(--text-main); padding-bottom: 100px; overflow-x: hidden; }
 
-        /* Progress Bar */
-        #uploadStatus {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%;
-            height: 4px; background: rgba(0,0,0,0.1);
-            z-index: 10000;
-        }
+        /* Upload Status Bar */
+        #uploadStatus { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 4px; background: rgba(0,0,0,0.1); z-index: 10000; }
         #progressBar { height: 100%; width: 0%; background: var(--primary); transition: 0.3s; box-shadow: 0 0 10px var(--primary); }
 
-        /* Header */
+        /* Modern Header */
         header { background: #fff; padding: 15px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 15px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-weight: 800; color: var(--primary); font-size: 20px; letter-spacing: -0.5px; }
-        .wallet-badge { background: #ecfdf5; color: var(--accent); padding: 6px 12px; border-radius: 12px; font-weight: 800; font-size: 13px; border: 1px solid #d1fae5; }
+        .logo { font-weight: 800; color: var(--primary); font-size: 20px; }
+        .wallet-badge { background: #ecfdf5; color: var(--accent); padding: 6px 12px; border-radius: 12px; font-weight: 800; font-size: 13px; border: 1px solid #d1fae5; cursor: pointer; }
 
-        /* Post Input Trigger */
+        /* Post Input Area */
         .post-trigger { background: #fff; margin: 15px; padding: 15px; border-radius: 20px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; }
-        .avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: #e2e8f0; object-fit: cover; }
+        .avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; }
         .fake-input { flex: 1; color: #94a3b8; font-size: 14px; font-weight: 500; }
 
-        /* Feed Section */
+        /* Editing Tools */
+        .edit-tools { display: none; gap: 10px; padding: 12px; overflow-x: auto; background: #f8fafc; border-radius: 15px; margin: 10px 0; border: 1px solid #e2e8f0; }
+        .filter-btn { padding: 7px 14px; background: white; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+        .filter-btn:hover { background: var(--primary); color: white; }
+
+        /* Feed Posts */
         .feed { padding: 0 15px; }
         .post-card { background: #fff; border-radius: 24px; padding: 18px; margin-bottom: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.02); border: 1px solid #f1f5f9; }
         .post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-        .post-user-info h4 { font-size: 14px; font-weight: 700; color: #1e293b; }
+        .post-user-info h4 { font-size: 14px; font-weight: 700; }
         .post-user-info span { font-size: 11px; color: #94a3b8; }
-        .post-content { font-size: 14px; line-height: 1.6; color: #334155; }
-        .post-media { width: 100%; border-radius: 16px; margin-top: 12px; object-fit: cover; max-height: 400px; }
+        .post-content { font-size: 14px; line-height: 1.6; color: #334155; margin-bottom: 10px; }
+        .post-media { width: 100%; border-radius: 16px; margin-top: 10px; object-fit: cover; max-height: 450px; display: block; }
 
-        /* Bottom Nav */
+        /* Bottom Navbar */
         .bottom-nav { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #1e293b; padding: 15px; border-radius: 24px; display: flex; justify-content: space-around; box-shadow: 0 15px 35px rgba(0,0,0,0.2); z-index: 5000; }
-        .nav-link { color: #64748b; font-size: 20px; transition: 0.3s; }
+        .nav-link { color: #64748b; font-size: 20px; }
         .nav-link.active { color: #38bdf8; }
 
-        /* Post Overlay (The Engine) */
+        /* Post Editor Overlay */
         #postOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: none; flex-direction: column; }
         .overlay-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; }
-        .post-btn { background: var(--primary); color: #fff; border: none; padding: 8px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; }
-        .post-btn:disabled { opacity: 0.5; }
-        .editor-body { flex: 1; padding: 20px; }
-        #editorText { width: 100%; border: none; font-size: 18px; outline: none; resize: none; min-height: 150px; }
-        #previewGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
-        .preview-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; }
+        .post-btn { background: var(--primary); color: #fff; border: none; padding: 8px 22px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+        .editor-body { flex: 1; padding: 20px; overflow-y: auto; }
+        #editorText { width: 100%; border: none; font-size: 18px; outline: none; resize: none; min-height: 120px; }
+        #previewGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px; }
+        .preview-item { position: relative; border-radius: 15px; overflow: hidden; aspect-ratio: 1; background: #000; }
         .preview-item img, .preview-item video { width: 100%; height: 100%; object-fit: cover; }
-        .remove-preview { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.5); color: #fff; border: none; border-radius: 50%; width: 25px; height: 25px; }
-
-        .editor-footer { padding: 20px; border-top: 1px solid #f1f5f9; display: flex; gap: 20px; }
+        .remove-preview { position: absolute; top: 5px; right: 5px; background: rgba(220, 38, 38, 0.8); color: #fff; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; z-index: 10; }
+        
+        .editor-footer { padding: 15px 20px; border-top: 1px solid #f1f5f9; display: flex; gap: 25px; }
         .footer-icon { font-size: 24px; color: var(--primary); cursor: pointer; }
     </style>
 </head>
@@ -83,75 +81,99 @@
     </header>
 
     <div class="post-trigger" onclick="openEditor()">
-        <div class="avatar-circle"></div>
+        <div class="avatar-circle">H</div>
         <div class="fake-input">Share your elite update, Hamza...</div>
-        <i class="fas fa-image" style="color: var(--accent);"></i>
+        <i class="fas fa-images" style="color: var(--accent); font-size: 20px;"></i>
     </div>
 
-    <div class="feed" id="mainFeed">
-        </div>
+    <div class="feed" id="mainFeed"></div>
 
     <div id="postOverlay">
         <div class="overlay-header">
-            <i class="fas fa-times" onclick="closeEditor()" style="font-size: 20px; color: #64748b;"></i>
-            <h3 style="font-size: 16px;">Create Post</h3>
+            <i class="fas fa-arrow-left" onclick="closeEditor()" style="cursor:pointer;"></i>
+            <h3 style="font-size: 16px;">Create Elite Post</h3>
             <button class="post-btn" id="finalPostBtn" onclick="startEliteUpload()">Post</button>
         </div>
         <div class="editor-body">
-            <textarea id="editorText" placeholder="What's happening?"></textarea>
+            <textarea id="editorText" placeholder="What's on your mind?"></textarea>
+            
+            <div id="editTools" class="edit-tools">
+                <button class="filter-btn" onclick="applyFilter('none')">Original</button>
+                <button class="filter-btn" onclick="applyFilter('grayscale(100%)')">B&W</button>
+                <button class="filter-btn" onclick="applyFilter('brightness(1.3)')">Bright</button>
+                <button class="filter-btn" onclick="applyFilter('sepia(0.6)')">Vintage</button>
+                <button class="filter-btn" onclick="applyFilter('contrast(1.5)')">Contrast</button>
+            </div>
+
             <div id="previewGrid"></div>
         </div>
         <div class="editor-footer">
-            <label for="mediaInput"><i class="fas fa-image footer-icon"></i></label>
-            <input type="file" id="mediaInput" hidden multiple accept="image/*,video/*" onchange="handleFiles(this)">
-            <i class="fas fa-video footer-icon" style="color: #f43f5e;"></i>
+            <i class="fas fa-camera footer-icon" onclick="openMediaPicker('image')"></i>
+            <i class="fas fa-video footer-icon" style="color: #f43f5e;" onclick="openMediaPicker('video')"></i>
+            
+            <input type="file" id="mediaInput" hidden multiple onchange="handleFiles(this)">
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <a href="#" class="nav-link active"><i class="fas fa-home"></i></a>
+        <a href="Dashboard.html" class="nav-link active"><i class="fas fa-home"></i></a>
         <a href="Academy.html" class="nav-link"><i class="fas fa-graduation-cap"></i></a>
         <a href="Arena.html" class="nav-link"><i class="fas fa-trophy"></i></a>
         <a href="Profile.html" class="nav-link"><i class="fas fa-user-circle"></i></a>
     </nav>
 
     <script>
-        // 1. CONFIGURATION
-        const firebaseConfig = { 
-            apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", 
-            projectId: "cmchat-pro" 
-        };
+        const firebaseConfig = { apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", projectId: "cmchat-pro" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         const CLOUD_NAME = "deb2lheey";
         const UPLOAD_PRESET = "cmchat_preset";
-
+        
         let selectedFiles = [];
+        let currentFilter = "none";
 
-        // 2. UI LOGIC
         function openEditor() { document.getElementById('postOverlay').style.display = 'flex'; }
         function closeEditor() { 
             document.getElementById('postOverlay').style.display = 'none';
             document.getElementById('editorText').value = '';
             document.getElementById('previewGrid').innerHTML = '';
+            document.getElementById('editTools').style.display = 'none';
             selectedFiles = [];
+        }
+
+        // --- GYARA: Wannan function din zai tilasta wayar ta nuna Videos ---
+        function openMediaPicker(type) {
+            const input = document.getElementById('mediaInput');
+            if (type === 'video') {
+                input.accept = "video/*"; 
+            } else {
+                input.accept = "image/*";
+            }
+            input.click();
+        }
+
+        function applyFilter(filterStyle) {
+            currentFilter = filterStyle;
+            const items = document.querySelectorAll('#previewGrid img, #previewGrid video');
+            items.forEach(item => item.style.filter = filterStyle);
         }
 
         function handleFiles(input) {
             const files = Array.from(input.files);
+            if(files.length > 0) document.getElementById('editTools').style.display = 'flex';
+            
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const id = Math.random().toString(36).substr(2, 9);
                     selectedFiles.push({ id, file });
-                    
                     const div = document.createElement('div');
-                    div.className = 'preview-item';
-                    div.id = id;
-                    const mediaTag = file.type.startsWith('video/') 
-                        ? `<video src="${e.target.result}" muted autoplay loop></video>`
-                        : `<img src="${e.target.result}">`;
+                    div.className = 'preview-item'; div.id = id;
+                    
+                    let mediaTag = file.type.startsWith('video/') 
+                        ? `<video src="${e.target.result}" muted autoplay loop playsinline style="filter:${currentFilter}"></video>`
+                        : `<img src="${e.target.result}" style="filter:${currentFilter}">`;
                     
                     div.innerHTML = `${mediaTag}<button class="remove-preview" onclick="removeFile('${id}')">×</button>`;
                     document.getElementById('previewGrid').appendChild(div);
@@ -165,80 +187,68 @@
             document.getElementById(id).remove();
         }
 
-        // 3. UPLOAD ENGINE
         async function startEliteUpload() {
             const text = document.getElementById('editorText').value;
             const btn = document.getElementById('finalPostBtn');
             if(!text && selectedFiles.length === 0) return;
 
-            btn.disabled = true;
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             document.getElementById('uploadStatus').style.display = 'block';
             
             const mediaResults = [];
-            
-            for(let i=0; i < selectedFiles.length; i++) {
-                const item = selectedFiles[i];
-                const formData = new FormData();
-                formData.append('file', item.file);
-                formData.append('upload_preset', UPLOAD_PRESET);
+            try {
+                for(let i=0; i < selectedFiles.length; i++) {
+                    const item = selectedFiles[i];
+                    const formData = new FormData();
+                    formData.append('file', item.file);
+                    formData.append('upload_preset', UPLOAD_PRESET);
 
-                let type = item.file.type.startsWith('video/') ? 'video' : 'image';
-                
-                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${type}/upload`, {
-                    method: 'POST',
-                    body: formData
+                    let type = item.file.type.startsWith('video/') ? 'video' : 'image';
+                    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${type}/upload`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    mediaResults.push({ url: data.secure_url, type: type, filter: currentFilter });
+                    document.getElementById('progressBar').style.width = ((i+1)/selectedFiles.length * 100) + '%';
+                }
+
+                await db.collection('posts').add({
+                    username: localStorage.getItem('username') || "Hamza Rabiu",
+                    text: text,
+                    media: mediaResults,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                const data = await res.json();
-                mediaResults.push({ url: data.secure_url, type: type });
-                
-                document.getElementById('progressBar').style.width = ((i+1)/selectedFiles.length * 100) + '%';
-            }
-
-            await db.collection('posts').add({
-                username: "Hamza Rabiu",
-                text: text,
-                media: mediaResults,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
-
-            closeEditor();
+                closeEditor();
+                location.reload();
+            } catch (err) { alert("Upload Failed!"); }
             document.getElementById('uploadStatus').style.display = 'none';
-            document.getElementById('progressBar').style.width = '0%';
             btn.disabled = false;
         }
 
-        // 4. FEED ENGINE
         db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snap => {
             const feed = document.getElementById('mainFeed');
             feed.innerHTML = '';
             snap.forEach(doc => {
                 const p = doc.data();
-                const time = p.timestamp ? new Date(p.timestamp.toDate()).toLocaleTimeString() : 'Just now';
-                
+                const time = p.timestamp ? new Date(p.timestamp.toDate()).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'Just now';
                 let mediaHtml = '';
-                if(p.media && p.media.length > 0) {
+                if(p.media) {
                     p.media.forEach(m => {
-                        if(m.type === 'video') {
-                            mediaHtml += `<video src="${m.url}" class="post-media" controls></video>`;
-                        } else {
-                            mediaHtml += `<img src="${m.url}" class="post-media">`;
-                        }
+                        const style = `style="filter: ${m.filter || 'none'}"`;
+                        mediaHtml += m.type === 'video' 
+                            ? `<video src="${m.url}" class="post-media" controls playsinline ${style}></video>`
+                            : `<img src="${m.url}" class="post-media" ${style}>`;
                     });
                 }
-
                 feed.innerHTML += `
                     <div class="post-card">
                         <div class="post-header">
-                            <div class="avatar-circle" style="background:#0062ff; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold;">${p.username[0]}</div>
-                            <div class="post-user-info">
-                                <h4>${p.username}</h4>
-                                <span>${time}</span>
-                            </div>
+                            <div class="avatar-circle">${p.username ? p.username[0] : 'H'}</div>
+                            <div class="post-user-info"><h4>${p.username || 'Elite'}</h4><span>${time}</span></div>
                         </div>
-                        <div class="post-content">${p.text}</div>
-                        ${mediaHtml}
-                    </div>
-                `;
+                        <div class="post-content">${p.text || ''}</div>${mediaHtml}
+                    </div>`;
             });
         });
     </script>
