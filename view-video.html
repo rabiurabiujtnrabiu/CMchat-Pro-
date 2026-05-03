@@ -1,210 +1,106 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ha">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Elite Watch | CMchat Pro</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMchat PRO - Professional UI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
     <style>
-        :root { --fb-blue: #0062ff; --glass: rgba(0, 0, 0, 0.6); }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        
-        body { background: #000; height: 100vh; overflow: hidden; }
-
-        /* --- VERTICAL SCROLL CONTAINER --- */
-        #videoFeed {
-            height: 100vh;
-            overflow-y: scroll;
-            scroll-snap-type: y mandatory;
-            scrollbar-width: none;
-            scroll-behavior: smooth;
-        }
-        #videoFeed::-webkit-scrollbar { display: none; }
-
-        .reel-container {
-            height: 100vh;
-            width: 100vw;
-            scroll-snap-align: start;
-            position: relative;
-            background: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        video { width: 100%; height: 100%; object-fit: contain; }
-
-        /* --- FACEBOOK STYLE UI OVERLAYS --- */
-        .video-info {
-            position: absolute; bottom: 0; left: 0; width: 100%;
-            padding: 80px 20px 30px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.85));
-            pointer-events: none; z-index: 10;
-        }
-        .video-info * { pointer-events: auto; }
-
-        .author-box { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .author-img { width: 38px; height: 38px; border-radius: 50%; background: #2e3339; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; }
-        .author-name { font-weight: 700; font-size: 15px; color: white; }
-        .follow-btn { background: var(--fb-blue); color: #fff; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; }
-
-        .description { font-size: 14px; color: #f1f1f1; margin-bottom: 15px; max-width: 85%; line-height: 1.4; }
-
-        /* --- SIDE ACTIONS (FB STYLE) --- */
-        .side-bar {
-            position: absolute; right: 12px; bottom: 100px;
-            display: flex; flex-direction: column; gap: 20px;
-            align-items: center; z-index: 20;
-        }
-        .btn-action { text-align: center; color: white; cursor: pointer; }
-        .btn-action i { font-size: 28px; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5)); }
-        .btn-action span { display: block; font-size: 12px; font-weight: 600; margin-top: 5px; }
-        .liked i { color: #ff3b30; }
-
-        .top-nav {
-            position: fixed; top: 0; width: 100%; padding: 40px 20px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: linear-gradient(rgba(0,0,0,0.6), transparent); z-index: 100;
-        }
-        .back-btn { color: white; font-size: 22px; text-decoration: none; }
-
-        .fb-ad-box {
-            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
-            padding: 10px; border-radius: 10px; border-left: 4px solid #febd00;
-            display: flex; align-items: center; gap: 10px; margin-top: 5px;
-        }
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .active-tab { color: #1877f2; border-bottom: 3px solid #1877f2; }
+        .story-card { width: 110px; height: 180px; border-radius: 12px; position: relative; overflow: hidden; }
     </style>
 </head>
 <body>
 
-    <div class="top-nav">
-        <a href="javascript:history.back()" class="back-btn"><i class="fas fa-chevron-left"></i></a>
-        <i class="fas fa-search" style="color: white; font-size: 20px;"></i>
+    <header class="bg-white p-3 flex justify-between items-center shadow-sm sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <button class="bg-gray-100 p-2 rounded-full"><i class="fa-solid fa-bars text-gray-700"></i></button>
+            <h1 class="text-blue-600 font-bold text-xl leading-tight">CMchat<br>PRO</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <button class="bg-gray-100 p-2 rounded-full"><i class="fa-solid fa-cart-shopping text-gray-700"></i></button>
+            <button class="bg-gray-100 p-2 rounded-full"><i class="fa-solid fa-magnifying-glass text-gray-700"></i></button>
+            <button class="bg-gray-100 p-2 rounded-full"><i class="fa-brands fa-facebook-messenger text-gray-700"></i></button>
+            <div class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold border border-blue-100">
+                ₦0.00
+            </div>
+        </div>
+    </header>
+
+    <div class="bg-white mt-2 p-4 flex items-center gap-3">
+        <div class="w-10 h-10 bg-gray-200 rounded-full"></div>
+        <div class="flex-1">
+            <input type="text" placeholder="What's on your mind, CM...?" class="w-full bg-gray-100 rounded-full py-2 px-4 outline-none border-none">
+        </div>
+        <i class="fa-regular fa-image text-green-500 text-2xl"></i>
     </div>
 
-    <div id="videoFeed">
+    <nav class="bg-white border-t border-gray-100 flex justify-around items-center pt-2">
+        <div class="flex flex-col items-center pb-2 active-tab w-1/4">
+            <i class="fa-solid fa-comment-dots text-xl"></i>
+            <span class="text-xs font-semibold">Chatting</span>
         </div>
+        <div class="flex flex-col items-center pb-2 text-gray-500 w-1/4">
+            <i class="fa-solid fa-users-viewfinder text-xl"></i>
+            <span class="text-xs font-semibold">Group</span>
+        </div>
+        <div class="flex flex-col items-center pb-2 text-gray-500 w-1/4">
+            <i class="fa-solid fa-user-plus text-xl"></i>
+            <span class="text-xs font-semibold">Friends</span>
+        </div>
+        <div class="flex flex-col items-center pb-2 text-gray-500 w-1/4">
+            <i class="fa-solid fa-gear text-xl"></i>
+            <span class="text-xs font-semibold">Settings</span>
+        </div>
+    </nav>
 
-    <script>
-        // FIREBASE CONFIG
-        const firebaseConfig = { apiKey: "AIzaSyCnhd2Wo5KCeE33A50WPMbVBxkoqEzkwvY", projectId: "cmchat-pro" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+    <div class="flex gap-2 p-4 overflow-x-auto bg-white mt-2 no-scrollbar">
+        <div class="story-card bg-gray-100 border border-gray-200 flex flex-col justify-end items-center">
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-10 bg-blue-600 rounded-full p-2 border-4 border-white text-white">
+                <i class="fa-solid fa-plus"></i>
+            </div>
+            <div class="bg-white w-full py-2 text-center text-[10px] font-bold">Create Story</div>
+        </div>
+        
+        <div class="story-card bg-gray-400">
+            <img src="https://via.placeholder.com/110x180" class="w-full h-full object-cover">
+            <span class="absolute bottom-2 left-2 text-white text-[10px] font-bold">Anonymous</span>
+        </div>
+        <div class="story-card bg-gray-400">
+            <img src="https://via.placeholder.com/110x180" class="w-full h-full object-cover">
+            <span class="absolute bottom-2 left-2 text-white text-[10px] font-bold">Anonymous</span>
+        </div>
+    </div>
 
-        // 1. LOAD LIVE FEED FROM FIREBASE
-        async function loadLiveFeed() {
-            const feedContainer = document.getElementById('videoFeed');
-            const clickedVideo = JSON.parse(localStorage.getItem('current_video_view'));
+    <div class="bg-white m-3 p-3 rounded-lg shadow-sm border border-gray-100">
+        <div class="flex justify-between items-center mb-1">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-bullhorn text-orange-500"></i>
+                <span class="font-bold text-sm">CM Market</span>
+            </div>
+            <span class="bg-gray-100 text-gray-500 text-[10px] px-2 py-0.5 rounded">Sponsored</span>
+        </div>
+        <p class="text-sm text-gray-700">Buy Cheap Data And Airtime Instantly On CM Market!</p>
+    </div>
 
-            // Load All Video Posts
-            db.collection('posts').orderBy('timestamp', 'desc').onSnapshot(snap => {
-                feedContainer.innerHTML = '';
-                
-                // Put the clicked video first for zero delay
-                if (clickedVideo) {
-                    addVideoToFeed(clickedVideo, true);
-                }
+    <div class="bg-white mt-2 p-4">
+        <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">C</div>
+            <div>
+                <h4 class="font-bold text-sm">Commander CM</h4>
+                <div class="flex items-center gap-1 text-gray-500 text-[10px]">
+                    <span>11:32 PM</span> • <i class="fa-solid fa-earth-africa"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-200 h-64 rounded-xl relative overflow-hidden">
+             <button class="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center">
+                <i class="fa-solid fa-xmark text-xs"></i>
+             </button>
+        </div>
+    </div>
 
-                snap.forEach(doc => {
-                    const p = doc.data();
-                    const postId = doc.id;
-                    if (p.media && p.media[0].type === 'video') {
-                        // Skip if it's the already added clicked video
-                        if (clickedVideo && p.media[0].url === clickedVideo.url) return;
-                        addVideoToFeed({...p, id: postId}, false);
-                    }
-                });
-                setupObserver();
-            });
-        }
-
-        function addVideoToFeed(p, isInitial) {
-            const feedContainer = document.getElementById('videoFeed');
-            const url = isInitial ? p.url : p.media[0].url;
-            const user = isInitial ? (p.author || p.username) : p.username;
-            const text = isInitial ? p.caption : (p.text || '');
-            const likes = p.likes || 0;
-            const comments = p.comments || 0;
-            const postId = p.id || 'temp';
-
-            const reelHTML = `
-                <div class="reel-container" data-id="${postId}">
-                    <video class="v-player" loop playsinline preload="${isInitial ? 'auto' : 'metadata'}">
-                        <source src="${url}" type="video/mp4">
-                    </video>
-
-                    <div class="side-bar">
-                        <div class="btn-action" onclick="liveLike('${postId}', this)">
-                            <i class="fas fa-thumbs-up"></i>
-                            <span class="l-count">${likes}</span>
-                        </div>
-                        <div class="btn-action">
-                            <i class="fas fa-comment"></i>
-                            <span>${comments}</span>
-                        </div>
-                        <div class="btn-action" onclick="shareVideo('${url}')">
-                            <i class="fas fa-share"></i>
-                            <span>Share</span>
-                        </div>
-                    </div>
-
-                    <div class="video-info">
-                        <div class="author-box">
-                            <div class="author-img">${user[0].toUpperCase()}</div>
-                            <span class="author-name">${user}</span>
-                            <span class="follow-btn">Follow</span>
-                        </div>
-                        <p class="description">${text}</p>
-                        <div class="fb-ad-box">
-                            <span style="background:#febd00; color:#000; font-size:10px; padding:2px 5px; border-radius:4px; font-weight:900;">AD</span>
-                            <div style="flex:1"><p style="font-size:12px; font-weight:700; color:white;">Elite Hosting - High Speed Servers</p></div>
-                        </div>
-                    </div>
-                </div>`;
-            feedContainer.insertAdjacentHTML('beforeend', reelHTML);
-        }
-
-        // 2. LIVE LIKE SYSTEM (Firestore Sync)
-        function liveLike(postId, element) {
-            if (postId === 'temp') return;
-            const postRef = db.collection('posts').doc(postId);
-            
-            element.classList.toggle('liked');
-            const increment = element.classList.contains('liked') ? 1 : -1;
-
-            postRef.update({
-                likes: firebase.firestore.FieldValue.increment(increment)
-            });
-        }
-
-        // 3. SMART AUTOPLAY ENGINE
-        function setupObserver() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    const video = entry.target.querySelector('video');
-                    if (entry.isIntersecting) {
-                        video.play().catch(() => {});
-                    } else {
-                        video.pause();
-                    }
-                });
-            }, { threshold: 0.8 });
-
-            document.querySelectorAll('.reel-container').forEach(reel => observer.observe(reel));
-        }
-
-        function shareVideo(url) {
-            if (navigator.share) navigator.share({ url: url });
-        }
-
-        // Run Engine
-        loadLiveFeed();
-    </script>
 </body>
 </html>
