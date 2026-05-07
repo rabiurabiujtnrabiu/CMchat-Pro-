@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Purchase Data | Elite Arena Pro</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --primary: #1A237E;
+            --accent: #9C27B0;
+            --bg: #F8FAFC;
+            --white: #ffffff;
+            --text: #1e293b;
+        }
+
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 30px; }
+
+        header { padding: 20px; display: flex; align-items: center; gap: 15px; background: var(--white); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #f1f5f9; }
+        .back-btn { font-size: 20px; color: var(--primary); cursor: pointer; }
+        header h1 { font-size: 18px; font-weight: 800; margin: 0; color: var(--primary); }
+
+        .balance-badge { background: var(--white); margin: 20px; padding: 20px; border-radius: 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
+        .balance-badge b { font-size: 18px; color: var(--primary); font-weight: 800; }
+
+        .form-container { background: var(--white); margin: 0 20px; padding: 25px; border-radius: 32px; box-shadow: 0 10px 25px rgba(0,0,0,0.02); }
+        .label { font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 15px; display: block; letter-spacing: 0.5px; }
+
+        /* NETWORK SELECTOR */
+        .network-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 25px; }
+        .network-card { background: #f8fafc; border: 2px solid #f1f5f9; border-radius: 18px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: 0.3s; }
+        .network-card.active { border-color: var(--primary); background: #fff; box-shadow: 0 8px 15px rgba(26,35,126,0.1); }
+        .logo-circle { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: 800; }
+        .mtn { background: #FFD600; color: black; } .glo { background: #4CAF50; } .airtel { background: #F44336; } .mobile9 { background: #004D40; }
+
+        /* CATEGORY SELECTOR */
+        .category-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px; scrollbar-width: none; }
+        .cat-btn { white-space: nowrap; padding: 12px 20px; border-radius: 15px; background: #f1f5f9; color: var(--text); font-size: 12px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; }
+        .cat-btn.active { background: var(--accent); color: white; box-shadow: 0 5px 12px rgba(156,39,176,0.3); }
+
+        /* INPUTS */
+        .input-box { width: 100%; padding: 16px; border-radius: 18px; border: 2px solid #f1f5f9; background: #f8fafc; outline: none; font-weight: 700; margin-bottom: 20px; }
+        .input-box:focus { border-color: var(--primary); background: white; }
+
+        /* LOADER */
+        #researching { display: none; text-align: center; padding: 20px; }
+        .pulse-logo { width: 50px; height: 50px; border-radius: 50%; border: 3px solid var(--primary); margin: 0 auto; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.7; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(0.9); opacity: 0.7; } }
+
+        .btn-proceed { width: 100%; padding: 18px; border-radius: 20px; border: none; background: var(--primary); color: white; font-weight: 800; font-size: 15px; cursor: pointer; box-shadow: 0 10px 20px rgba(26,35,126,0.2); margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="back-btn" onclick="history.back()"><i class="fas fa-arrow-left"></i></div>
+        <h1>Buy Cheap Data</h1>
+    </header>
+
+    <div class="balance-badge">
+        <span style="font-size: 11px; font-weight: 800; color: #64748b;">AVAILABLE BALANCE</span>
+        <b id="walletAmt">₦0.00</b>
+    </div>
+
+    <div class="form-container">
+        <span class="label">Select Network</span>
+        <div class="network-grid">
+            <div class="network-card" id="net_mtn" onclick="changeNetwork('mtn')">
+                <div class="logo-circle mtn">MTN</div><span style="font-size:10px; font-weight:700;">MTN</span>
+            </div>
+            <div class="network-card" id="net_airtel" onclick="changeNetwork('airtel')">
+                <div class="logo-circle airtel">AIR</div><span style="font-size:10px; font-weight:700;">Airtel</span>
+            </div>
+            <div class="network-card" id="net_glo" onclick="changeNetwork('glo')">
+                <div class="logo-circle glo">GLO</div><span style="font-size:10px; font-weight:700;">Glo</span>
+            </div>
+            <div class="network-card" id="net_9mobile" onclick="changeNetwork('etisalat')">
+                <div class="logo-circle mobile9">9M</div><span style="font-size:10px; font-weight:700;">9mobile</span>
+            </div>
+        </div>
+
+        <div id="categoryArea" style="display: none;">
+            <span class="label">Data Type</span>
+            <div class="category-scroll" id="catList"></div>
+        </div>
+
+        <div id="researching">
+            <div class="pulse-logo"></div>
+            <p style="font-size:10px; font-weight:800; color:var(--primary); margin-top:10px;">RESEARCHING PLANS...</p>
+        </div>
+
+        <div id="planArea" style="display: none;">
+            <span class="label">Select Plan</span>
+            <select class="input-box" id="planSelect" onchange="updateBtn()"></select>
+
+            <span class="label">Phone Number</span>
+            <input type="number" class="input-box" id="phoneNumber" placeholder="0814421xxxx">
+
+            <button class="btn-proceed" onclick="confirmOrder()" id="proceedBtn">PROCEED</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const config = { databaseURL: "https://cm-nexus-sub-default-rtdb.firebaseio.com" };
+        firebase.initializeApp(config);
+        const db = firebase.database();
+        const username = localStorage.getItem('username') || "Elite_User";
+        const GSUBZ_KEY = "ap_83c2ee17ca19e2c34e29a0f17cd5bd89";
+
+        let userBal = 0;
+        let currentNet = "";
+        let currentService = "";
+
+        // SYNC BALANCE
+        db.ref('users/'+username+'/wallet').on('value', s => {
+            userBal = parseFloat(s.val()) || 0;
+            document.getElementById('walletAmt').innerText = "₦" + userBal.toLocaleString();
+        });
+
+        // NETWORK CONFIG
+        const netMap = {
+            "mtn": ["mtn_sme", "mtn_gifting", "mtn_cg_lite"],
+            "airtel": ["airtel_cg", "airtel_sme"],
+            "glo": ["glo_data", "glo_sme"],
+            "etisalat": ["etisalat_data"]
+        };
+
+        function changeNetwork(net) {
+            currentNet = net;
+            document.querySelectorAll('.network-card').forEach(c => c.classList.remove('active'));
+            document.getElementById('net_'+(net==='etisalat'?'9mobile':net)).classList.add('active');
+            
+            const cats = netMap[net];
+            let html = "";
+            cats.forEach(c => {
+                html += `<button class="cat-btn" id="btn_${c}" onclick="loadPlans('${c}')">${c.replace('_',' ').toUpperCase()}</button>`;
+            });
+            document.getElementById('catList').innerHTML = html;
+            document.getElementById('categoryArea').style.display = "block";
+            document.getElementById('planArea').style.display = "none";
+        }
+
+        async function loadPlans(service) {
+            currentService = service;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn_'+service).classList.add('active');
+
+            document.getElementById('planArea').style.display = "none";
+            document.getElementById('researching').style.display = "block";
+
+            try {
+                const res = await fetch(`https://api.gsubz.com/api/plans?service=${service}`);
+                const data = await res.json();
+                
+                let opt = `<option value="">-- Choose Plan --</option>`;
+                data.plans.forEach(p => {
+                    // Saita farashinmu (₦450 per 1GB logic misali)
+                    let ourPrice = (parseFloat(p.price) / (service.includes('sme') ? 0.6 : 0.8)).toFixed(0); 
+                    if(p.displayName.includes('1GB')) ourPrice = 450;
+                    
+                    opt += `<option value="${p.value}" data-price="${ourPrice}" data-size="${p.displayName}">${p.displayName} (₦${ourPrice})</option>`;
+                });
+                
+                document.getElementById('planSelect').innerHTML = opt;
+                document.getElementById('researching').style.display = "none";
+                document.getElementById('planArea').style.display = "block";
+            } catch(e) {
+                Swal.fire('Error', 'Connection failed. Try again.', 'error');
+            }
+        }
+
+        function updateBtn() {
+            const sel = document.getElementById('planSelect');
+            const p = sel.options[sel.selectedIndex].getAttribute('data-price');
+            document.getElementById('proceedBtn').innerText = p ? `PAY ₦${p}` : "PROCEED";
+        }
+
+        function confirmOrder() {
+            const sel = document.getElementById('planSelect');
+            const planId = sel.value;
+            const price = parseFloat(sel.options[sel.selectedIndex].getAttribute('data-price'));
+            const size = sel.options[sel.selectedIndex].getAttribute('data-size');
+            const phone = document.getElementById('phoneNumber').value;
+
+            if(!planId || phone.length < 10) return Swal.fire('Error', 'Fill all details', 'warning');
+            if(userBal < price) return Swal.fire('Insufficient Funds', 'Top up your wallet', 'error');
+
+            Swal.fire({
+                title: 'Confirm Purchase',
+                text: `Send ${size} to ${phone} for ₦${price}?`,
+                showCancelButton: true,
+                confirmButtonColor: '#1A237E'
+            }).then(r => { if(r.isConfirmed) executeOrder(planId, phone, price, size); });
+        }
+
+        async function executeOrder(id, ph, pr, sz) {
+            Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            db.ref('users/'+username).transaction(u => {
+                if(u && u.wallet >= pr) { u.wallet -= pr; return u; }
+            }).then(async tx => {
+                if(tx.committed) {
+                    let fd = new FormData();
+                    fd.append('serviceID', currentService);
+                    fd.append('plan', id);
+                    fd.append('api', GSUBZ_KEY);
+                    fd.append('phone', ph);
+                    fd.append('requestID', "EP-"+Date.now());
+
+                    const res = await fetch('https://gsubz.com/api/pay/', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + GSUBZ_KEY },
+                        body: fd
+                    });
+                    const d = await res.json();
+
+                    if(d.code == 200 && d.status === "TRANSACTION_SUCCESSFUL") {
+                        Swal.fire('Success', 'Data sent successfully!', 'success');
+                        grantRewards(sz);
+                    } else {
+                        db.ref('users/'+username+'/wallet').set(userBal);
+                        Swal.fire('Failed', d.description || 'Provider Error', 'error');
+                    }
+                }
+            });
+        }
+
+        function grantRewards(sz) {
+            if(!sz.includes('GB')) return;
+            db.ref('users/'+username).once('value', sn => {
+                const u = sn.val();
+                const p = parseInt(u.pending_xp) || 0;
+                db.ref('users/'+username).update({ pending_xp: p + 50 });
+
+                const up = u.referred_by;
+                if(up && up !== 'none') {
+                    db.ref('users/'+up+'/pending_xp').transaction(xp => (xp || 0) + 20);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
