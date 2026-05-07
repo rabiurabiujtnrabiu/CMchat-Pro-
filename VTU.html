@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Purchase Data |Buy Cheap Data</title>
+    <title>Purchase Data | Elite Arena Pro</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,6 +16,7 @@
             --bg: #F4F7FE;
             --white: #ffffff;
             --text-main: #1e293b;
+            --text-dim: #64748b;
         }
 
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -26,18 +27,13 @@
             background: var(--white); border-bottom: 1px solid rgba(0,0,0,0.05);
             position: sticky; top: 0; z-index: 1000;
         }
-        header h1 { font-size: 18px; font-weight: 800; margin: 0; color: var(--primary); }
+        header h1 { font-size: 18px; font-weight: 800; margin: 0; color: var(--primary); letter-spacing: -0.5px; }
 
-        /* CM LOGO PULSE AREA */
-        #researchingArea { display: none; text-align: center; padding: 20px; }
-        .logo-box { width: 90px; height: 90px; margin: 0 auto 10px; animation: cm-pulse 1.5s infinite ease-in-out; }
-        @keyframes cm-pulse {
-            0% { transform: scale(0.9); filter: drop-shadow(0 0 5px var(--accent)); }
-            50% { transform: scale(1.05); filter: drop-shadow(0 0 15px var(--accent)); }
-            100% { transform: scale(0.9); filter: drop-shadow(0 0 5px var(--accent)); }
+        .balance-badge {
+            background: var(--white); margin: 15px; padding: 15px 20px; 
+            border-radius: 20px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
         }
-
-        .balance-badge { background: var(--white); margin: 15px; padding: 15px 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
         .balance-badge b { font-size: 16px; color: var(--primary); font-weight: 800; }
 
         .form-container { background: var(--white); margin: 0 15px; padding: 25px 20px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.02); }
@@ -47,6 +43,14 @@
         .network-btn { background: #f8fafc; border: 2px solid #f1f5f9; border-radius: 15px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; transition: 0.3s; }
         .network-btn.selected { border-color: var(--primary); background: #fff; box-shadow: 0 5px 15px rgba(26,35,126,0.1); }
         .logo-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 9px; font-weight: 800; }
+
+        #researchingArea { display: none; text-align: center; padding: 20px; }
+        .logo-box { width: 90px; height: 90px; margin: 0 auto 10px; animation: cm-pulse 1.5s infinite ease-in-out; }
+        @keyframes cm-pulse {
+            0% { transform: scale(0.9); filter: drop-shadow(0 0 5px var(--accent)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 15px var(--accent)); }
+            100% { transform: scale(0.9); filter: drop-shadow(0 0 5px var(--accent)); }
+        }
 
         .service-tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
         .tab-btn { white-space: nowrap; padding: 10px 15px; border-radius: 10px; background: #f1f5f9; border: none; font-size: 10px; font-weight: 800; color: var(--primary); cursor: pointer; }
@@ -60,11 +64,11 @@
 
     <header>
         <i class="fas fa-arrow-left" style="color:var(--primary); cursor:pointer" onclick="history.back()"></i>
-        <h1 style="margin-left:15px">Buy Cheap Data</h1>
+        <h1 style="margin-left:15px">Elite Arena Pro</h1>
     </header>
 
     <div class="balance-badge">
-        <span style="font-size: 10px; font-weight: 800; color: #64748b;">AVAILABLE BALANCE</span>
+        <span style="font-size: 10px; font-weight: 800; color: var(--text-dim);">AVAILABLE BALANCE</span>
         <b id="walletBal">₦0.00</b>
     </div>
 
@@ -116,7 +120,9 @@
         firebase.initializeApp(config);
         const db = firebase.database();
         const username = localStorage.getItem('username') || "Elite_User";
-        const GSUBZ_KEY = "ap_8fe29a8969a042bf6538b658112965fb";
+        
+        // --- NEW API KEY UPDATED HERE ---
+        const GSUBZ_KEY = "Ap_8fe29a8969a042bf6538b658112965fb";
 
         let walletBal = 0; let activeService = "";
 
@@ -148,7 +154,7 @@
             document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
             document.getElementById('t_'+service).classList.add('active');
             document.getElementById('researchingArea').style.display = "block";
-            document.getElementById('planSelect').innerHTML = `<option value="">-- Loading Plans... --</option>`;
+            document.getElementById('planSelect').innerHTML = `<option value="">-- Loading... --</option>`;
 
             try {
                 const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://api.gsubz.com/api/plans?service='+service)}`);
@@ -164,7 +170,7 @@
                 document.getElementById('researchingArea').style.display = "none";
             } catch(e) {
                 document.getElementById('researchingArea').style.display = "none";
-                Swal.fire('Error', 'Connection Failed. Check your internet.', 'error');
+                Swal.fire('Error', 'API connection failed. Check your internet.', 'error');
             }
         }
 
@@ -181,18 +187,18 @@
             const size = sel.options[sel.selectedIndex].getAttribute('data-size');
             const phone = document.getElementById('phoneNo').value;
 
-            if(!planId || phone.length < 10) return Swal.fire('Incomplete', 'Please check phone number and data plan.', 'warning');
-            if(walletBal < price) return Swal.fire('Low Balance', 'Fund your wallet to buy this data.', 'error');
+            if(!planId || phone.length < 10) return Swal.fire('Incomplete', 'Please enter phone number and select a plan.', 'warning');
+            if(walletBal < price) return Swal.fire('Low Balance', 'Fund your wallet to continue.', 'error');
 
             Swal.fire({
                 title: 'Confirm Purchase',
-                text: `Send ${size} to ${phone}?`,
+                text: `Send ${size} to ${phone} for ₦${price}?`,
                 icon: 'question', showCancelButton: true, confirmButtonColor: '#1A237E', confirmButtonText: 'Yes, Buy Now'
             }).then(r => { if(r.isConfirmed) executePurchase(planId, phone, price, size); });
         }
 
         async function executePurchase(id, ph, pr, sz) {
-            Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'Processing Order...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
             db.ref('users/'+username).transaction(user => {
                 if(user && user.wallet >= pr) { user.wallet -= pr; return user; }
             }).then(async tx => {
@@ -206,14 +212,14 @@
                         const response = await fetch('https://gsubz.com/api/pay/', { method: 'POST', headers: { 'Authorization': 'Bearer ' + GSUBZ_KEY }, body: fd });
                         const resData = await response.json();
                         if(resData.code == 200 || resData.status === "TRANSACTION_SUCCESSFUL") {
-                            Swal.fire('Success!', `Data sent to ${ph}`, 'success'); grantRewards(sz);
+                            Swal.fire('Success!', `Plan ${sz} sent to ${ph}`, 'success'); grantRewards(sz);
                         } else {
                             db.ref('users/'+username+'/wallet').transaction(w => (w || 0) + pr);
-                            Swal.fire('Error', resData.description || 'Provider declined request.', 'error');
+                            Swal.fire('Declined', resData.description || 'Provider error.', 'error');
                         }
                     } catch(e) {
                         db.ref('users/'+username+'/wallet').transaction(w => (w || 0) + pr);
-                        Swal.fire('Failed', 'API Gateway Timeout.', 'error');
+                        Swal.fire('Error', 'API Connection Timeout.', 'error');
                     }
                 }
             });
